@@ -6,7 +6,8 @@ Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traver
 
 ## Lancer le jeu
 
-- **Le plus simple** : ouvrir `dist/pas-touche.html` (un seul fichier, tout est dedans).
+- **Jouer en ligne** : https://darinemadgeek.github.io/pas-touche/
+- **Hors ligne** : ouvrir `dist/pas-touche.html` (un seul fichier, tout est dedans).
 - **Pendant le développement** : `node tools/serve.js`, puis ouvrir http://localhost:8765.
 - `index.html` s'ouvre aussi directement par double-clic.
 
