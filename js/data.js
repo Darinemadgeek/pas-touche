@@ -31,12 +31,12 @@
       ],
     },
     camera: {
-      name: 'Caméra', unlock: 2, cost: 50, color: '#4fb6e8', support: true,
-      desc: 'Repère les voleurs invisibles et démasque les faux touristes. Les voleurs filmés prennent plus de dégâts.',
+      name: 'Caméra', unlock: 2, cost: 40, color: '#4fb6e8', support: true, electric: true,
+      desc: 'Repère les voleurs invisibles et démasque les faux touristes. Les voleurs filmés prennent +35 % de dégâts de toutes les défenses.',
       levels: [
-        { range: 150, mark: 0.2 },
-        { range: 180, mark: 0.3, cost: 50 },
-        { range: 215, mark: 0.4, cost: 90 },
+        { range: 180, mark: 0.35 },
+        { range: 205, mark: 0.45, cost: 50 },
+        { range: 235, mark: 0.6, cost: 90 },
       ],
     },
     chien: {
@@ -59,7 +59,7 @@
       ],
     },
     laser: {
-      name: 'Laser', unlock: 4, cost: 150, color: '#ff3d5a', beam: true,
+      name: 'Laser', unlock: 4, cost: 150, color: '#ff3d5a', beam: true, electric: true,
       desc: 'Rayon continu à longue portée. Fait fondre les voleurs les plus coriaces.',
       levels: [
         { dps: 38, range: 190 },
@@ -104,7 +104,7 @@
     },
     hackeuse: {
       name: 'La Hackeuse', hp: 75, speed: 56, reward: 15, loot: 1, size: 1, emp: true,
-      desc: 'Coupe le courant des défenses proches pendant quelques secondes.',
+      desc: 'Coupe le courant des Caméras et des Lasers proches pendant quelques secondes.',
     },
     faussaire: {
       name: 'Le Faux Touriste', hp: 85, speed: 58, reward: 14, loot: 1, size: 1, disguise: true,

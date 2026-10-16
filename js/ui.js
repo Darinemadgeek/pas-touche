@@ -247,7 +247,7 @@
     var tips = [];
     var types = enemiesOf(lv);
     if (types.some(function (t) { return PT.ENEMIES[t].camo || PT.ENEMIES[t].disguise; })) tips.push('Les Ombres et les Faux Touristes ne peuvent être visés que s’ils sont filmés : posez des Caméras le long du chemin.');
-    if (types.indexOf('hackeuse') >= 0) tips.push('Les Hackeuses coupent les défenses proches : gardez quelques défenses en retrait du chemin.');
+    if (types.indexOf('hackeuse') >= 0) tips.push('Les Hackeuses coupent le courant des Caméras et des Lasers proches : misez aussi sur les Gardiens et les Bouledogues.');
     if (types.indexOf('acrobate') >= 0) tips.push('Les Acrobates ignorent la glu : comptez sur les Gardiens, les Filets et les Lasers.');
     if (types.indexOf('chevalier') >= 0) tips.push('Les petits coups rebondissent sur les Chevaliers : améliorez vos défenses, ou misez sur le Laser et le Canon qui traversent l’armure.');
     if (types.indexOf('illusionniste') >= 0) tips.push('Les reflets de l’Illusionniste gaspillent vos tirs : une Caméra les fait éclater dès qu’ils passent à portée.');

@@ -23,7 +23,7 @@
       paths: [
         [[-60, 400], [280, 400], [280, 200], [680, 200], [680, 540], [1000, 540], [1000, 340], [1140, 340]],
       ],
-      spots: [[180, 300], [390, 300], [570, 300], [580, 440], [840, 440], [840, 640], [1100, 455], [880, 250], [170, 510]],
+      spots: [[180, 328], [390, 272], [570, 272], [608, 440], [840, 468], [840, 612], [1072, 455], [902, 267], [170, 482]],
       deco: [
         { t: 'plante', x: 50, y: 140 }, { t: 'plante', x: 1235, y: 660 }, { t: 'banc', x: 1120, y: 640 },
         { t: 'statue', x: 420, y: 630 }, { t: 'colonne', x: 60, y: 640 }, { t: 'colonne', x: 1230, y: 150 },
@@ -53,11 +53,11 @@
       blurb: 'Les Ombres arrivent : invisibles, elles passent sous le nez de vos gardiens. Posez des Caméras pour les repérer.',
       theme: { floor: 'stone', floorA: '#e2c48a', floorB: '#d3b273', wall: '#a8742f', wallDark: '#5e3f1a', trim: '#3fa7a0', carpet: '#2f6f8f', night: false },
       treasure: { kind: 'masque', name: 'Le Masque de Toutankhamouille' },
-      startCoins: 260, lives: 20, hpMul: 1.12,
+      startCoins: 260, lives: 20, hpMul: 2.2,
       paths: [
         [[-60, 180], [1000, 180], [1000, 380], [260, 380], [260, 590], [1060, 590]],
       ],
-      spots: [[350, 280], [560, 280], [770, 280], [1150, 280], [420, 485], [640, 485], [860, 485], [130, 485], [500, 680], [800, 680], [1160, 470]],
+      spots: [[350, 252], [560, 252], [770, 252], [1122, 280], [420, 457], [640, 457], [860, 457], [158, 485], [500, 662], [800, 662], [1142, 492]],
       deco: [
         { t: 'sarcophage', x: 60, y: 650 }, { t: 'obelisque', x: 1220, y: 140 }, { t: 'plante', x: 1235, y: 660 },
         { t: 'statue', x: 140, y: 290 }, { t: 'vitrine', x: 1225, y: 375 }, { t: 'obelisque', x: 1240, y: 560 },
@@ -88,12 +88,12 @@
       blurb: 'Deux entrées ! Les Costauds encaissent tout et les Acrobates sautent par-dessus la glu. Le Lance-Filet arrive en renfort.',
       theme: { floor: 'marble', floorA: '#e9e4d6', floorB: '#cfc8b4', wall: '#3f6b4a', wallDark: '#223d2a', trim: '#e0a33a', carpet: '#7c3a8f', night: false },
       treasure: { kind: 'oeuf', name: 'L’Œuf de Diplodocus' },
-      startCoins: 270, lives: 20, hpMul: 1.75,
+      startCoins: 270, lives: 20, hpMul: 3.0,
       paths: [
         [[-60, 180], [420, 180], [420, 380], [780, 380], [780, 560], [1000, 560], [1000, 300], [1160, 300]],
         [[-60, 600], [420, 600], [420, 380], [780, 380], [780, 560], [1000, 560], [1000, 300], [1160, 300]],
       ],
-      spots: [[300, 280], [300, 490], [540, 280], [540, 490], [660, 280], [670, 480], [890, 450], [890, 660], [1100, 420], [900, 240], [150, 690], [150, 290]],
+      spots: [[300, 252], [300, 518], [540, 308], [540, 462], [660, 308], [670, 452], [862, 450], [890, 632], [1072, 420], [924, 254], [150, 672], [150, 262]],
       deco: [
         { t: 'dino', x: 640, y: 690 }, { t: 'fossile', x: 1210, y: 640 }, { t: 'plante', x: 1235, y: 140 },
         { t: 'colonne', x: 40, y: 390 }, { t: 'vitrine', x: 1150, y: 560 }, { t: 'plante', x: 760, y: 130 },
@@ -126,11 +126,11 @@
       blurb: 'Variante « portes ouvertes » : de vrais touristes visitent le musée (et paient !). Des Faux Touristes se cachent parmi eux, et les Hackeuses coupent le courant.',
       theme: { floor: 'gallery', floorA: '#5b6378', floorB: '#525a6e', wall: '#262b45', wallDark: '#14172a', trim: '#f04f8a', carpet: '#232733', night: true },
       treasure: { kind: 'tableau', name: 'Le Carré Pas Très Blanc' },
-      startCoins: 320, lives: 20, hpMul: 2.0,
+      startCoins: 320, lives: 20, hpMul: 4.0,
       paths: [
         [[-60, 360], [200, 360], [200, 160], [520, 160], [520, 560], [840, 560], [840, 160], [1100, 160], [1100, 480], [1180, 480]],
       ],
-      spots: [[100, 240], [100, 480], [300, 260], [420, 260], [420, 460], [680, 460], [600, 660], [760, 660], [940, 260], [1000, 380], [1200, 300], [1040, 600]],
+      spots: [[128, 240], [100, 452], [272, 260], [420, 232], [448, 460], [680, 488], [600, 632], [760, 632], [912, 260], [1028, 380], [1172, 300], [1053, 575]],
       deco: [
         { t: 'sculpture', x: 680, y: 290 }, { t: 'mobile', x: 300, y: 600 }, { t: 'plante', x: 1235, y: 665 },
         { t: 'banc', x: 940, y: 670 }, { t: 'sculpture', x: 1210, y: 140 }, { t: 'mobile', x: 680, y: 130 },
@@ -164,12 +164,12 @@
       blurb: 'NIVEAU CASSE : pas de hordes ce soir, mais des équipes de professionnels. Chaque équipe a son plan, lisez les briefings ! Le Gentleman viendra en personne.',
       theme: { floor: 'royal', floorA: '#8e2b3d', floorB: '#7a2233', wall: '#2c1a4a', wallDark: '#170c2b', trim: '#f2c14e', carpet: '#1f3f8f', night: false },
       treasure: { kind: 'couronne', name: 'La Couronne du Roi Dagobert' },
-      startCoins: 450, lives: 20, hpMul: 1.5,
+      startCoins: 450, lives: 20, hpMul: 1.75,
       paths: [
         [[-60, 520], [300, 520], [300, 300], [640, 300], [640, 520], [900, 520], [900, 360], [1120, 360]],
         [[560, -60], [560, 170], [900, 170], [900, 360], [1120, 360]],
       ],
-      spots: [[200, 420], [420, 410], [530, 410], [420, 200], [740, 260], [760, 420], [1020, 450], [1020, 260], [460, 620], [780, 620], [1190, 250]],
+      spots: [[200, 448], [420, 382], [530, 382], [420, 228], [740, 242], [760, 448], [1020, 432], [1020, 288], [436, 605], [780, 592], [1175, 274]],
       deco: [
         { t: 'armure', x: 60, y: 300 }, { t: 'armure', x: 1225, y: 470 }, { t: 'colonne', x: 120, y: 650 },
         { t: 'vitrine', x: 1100, y: 650 }, { t: 'plante', x: 300, y: 150 }, { t: 'armure', x: 960, y: 650 },
@@ -231,12 +231,12 @@
       blurb: 'Deux portes, une de chaque côté, et les Chevaliers débarquent en armure complète : les petits coups rebondissent. Améliorez vos défenses et gardez un Laser pour eux.',
       theme: { floor: 'dalles', floorA: '#a3a7ad', floorB: '#92979e', wall: '#3d4f6b', wallDark: '#1f2a3b', trim: '#d9a440', carpet: '#8f1d2c', night: false },
       treasure: { kind: 'epee', name: 'L’Épée Durandouille' },
-      startCoins: 380, lives: 20, hpMul: 2.68,
+      startCoins: 380, lives: 20, hpMul: 2.75,
       paths: [
         [[-60, 400], [140, 400], [140, 180], [380, 180], [380, 620], [640, 620], [640, 260]],
         [[1340, 400], [1140, 400], [1140, 180], [900, 180], [900, 620], [640, 620], [640, 260]],
       ],
-      spots: [[240, 280], [280, 520], [480, 520], [540, 380], [540, 220], [1040, 280], [1000, 520], [800, 520], [740, 380], [740, 220], [50, 260], [1230, 260], [640, 700]],
+      spots: [[212, 280], [308, 520], [452, 520], [568, 380], [566, 230], [1068, 280], [972, 520], [828, 520], [712, 380], [714, 230], [68, 260], [1212, 260], [640, 692]],
       deco: [
         { t: 'armure', x: 40, y: 150 }, { t: 'armure', x: 1240, y: 150 }, { t: 'trophee', x: 420, y: 120 }, { t: 'trophee', x: 860, y: 120 },
         { t: 'trophee', x: 640, y: 130 }, { t: 'brasero', x: 380, y: 700 }, { t: 'brasero', x: 900, y: 700 },
@@ -270,12 +270,12 @@
       blurb: 'Les voleurs entrent par la grande porte et descendent aussi par la verrière. Le Canon de Marine reprend du service : longue portée, gros dégâts de zone, et il perce les armures.',
       theme: { floor: 'pont', floorA: '#9c7b55', floorB: '#8f6f4b', wall: '#2a4d72', wallDark: '#14273d', trim: '#e3c06a', carpet: '#1d5f8a', night: false },
       treasure: { kind: 'coffre', name: 'Le Coffre de Barbe-à-Papa' },
-      startCoins: 420, lives: 20, hpMul: 2.52,
+      startCoins: 420, lives: 20, hpMul: 3.25,
       paths: [
         [[-60, 190], [240, 190], [240, 470], [480, 470], [480, 250], [760, 250], [760, 560], [1060, 560], [1060, 330], [1170, 330]],
         [[620, -60], [620, 250], [760, 250], [760, 560], [1060, 560], [1060, 330], [1170, 330]],
       ],
-      spots: [[140, 300], [340, 380], [380, 280], [360, 570], [535, 160], [580, 350], [660, 470], [700, 640], [850, 210], [860, 460], [960, 330], [910, 660], [1160, 450]],
+      spots: [[168, 300], [340, 398], [408, 280], [360, 542], [548, 160], [552, 350], [688, 470], [717, 618], [826, 221], [832, 460], [988, 330], [910, 632], [1132, 450]],
       deco: [
         { t: 'maquette', x: 40, y: 120 }, { t: 'ancre', x: 60, y: 700 }, { t: 'maquette', x: 240, y: 670 },
         { t: 'gouvernail', x: 1230, y: 610 }, { t: 'maquette', x: 1070, y: 690 }, { t: 'ancre', x: 1230, y: 150 },
@@ -309,11 +309,11 @@
       blurb: 'Une seule porte, à droite, et un très long couloir de miroirs. L’Illusionniste sème des reflets qui gaspillent vos tirs : une Caméra les fait éclater.',
       theme: { floor: 'versailles', floorA: '#c98f52', floorB: '#b77f45', wall: '#b89a5e', wallDark: '#3e2f1c', trim: '#f2c14e', carpet: '#2c4a9a', night: false },
       treasure: { kind: 'perruque', name: 'La Perruque du Roi-Soleil' },
-      startCoins: 450, lives: 20, hpMul: 3.52,
+      startCoins: 450, lives: 20, hpMul: 5.0,
       paths: [
         [[1340, 580], [1080, 580], [1080, 200], [800, 200], [800, 520], [520, 520], [520, 200], [240, 200], [240, 560], [150, 560]],
       ],
-      spots: [[980, 300], [900, 440], [700, 420], [620, 300], [420, 300], [340, 440], [660, 620], [1180, 300], [1180, 480], [140, 330], [140, 450], [240, 660], [1000, 660]],
+      spots: [[1008, 300], [872, 440], [728, 420], [592, 300], [448, 300], [312, 440], [660, 592], [1152, 300], [1180, 508], [168, 330], [168, 450], [240, 632], [1020, 640]],
       deco: [
         { t: 'oranger', x: 50, y: 130 }, { t: 'oranger', x: 1235, y: 130 }, { t: 'miroir', x: 940, y: 130 }, { t: 'miroir', x: 380, y: 130 },
         { t: 'candelabre', x: 520, y: 680 }, { t: 'candelabre', x: 800, y: 680 }, { t: 'oranger', x: 55, y: 690 }, { t: 'statue', x: 1225, y: 690 },
@@ -347,12 +347,12 @@
       blurb: 'Variante « panne de courant » : vos défenses ne voient les voleurs que sous les lampes de secours, ou grâce aux Caméras. Nouveau : le Verrouillage bloque les voleurs chargés devant la sortie.',
       theme: { floor: 'beton', floorA: '#8c9095', floorB: '#81858a', wall: '#4a5560', wallDark: '#22282f', trim: '#e8b923', carpet: '#b8283a', night: true },
       treasure: { kind: 'joconde', name: 'La Vraie Joconde' },
-      startCoins: 480, lives: 20, hpMul: 2.9,
+      startCoins: 480, lives: 20, hpMul: 3.95,
       paths: [
         [[-60, 300], [220, 300], [220, 600], [520, 600], [520, 220], [820, 220], [820, 560], [1100, 560], [1100, 300], [1170, 300]],
         [[370, 780], [370, 600], [520, 600], [520, 220], [820, 220], [820, 560], [1100, 560], [1100, 300], [1170, 300]],
       ],
-      spots: [[100, 200], [120, 400], [120, 600], [320, 500], [420, 360], [620, 320], [720, 460], [670, 130], [920, 460], [1000, 330], [960, 660], [1200, 440], [470, 700]],
+      spots: [[100, 200], [120, 372], [148, 600], [292, 500], [448, 360], [592, 320], [748, 460], [670, 148], [892, 460], [1028, 330], [960, 632], [1172, 440], [470, 672]],
       deco: [
         { t: 'lampe', x: 160, y: 240 }, { t: 'lampe', x: 450, y: 530 }, { t: 'lampe', x: 760, y: 280 }, { t: 'lampe', x: 1040, y: 500 },
         { t: 'caisses', x: 40, y: 700 }, { t: 'caisses', x: 1230, y: 140 }, { t: 'bache', x: 1230, y: 680 }, { t: 'caisses', x: 820, y: 685 },
@@ -386,13 +386,13 @@
       blurb: 'NIVEAU CASSE : trois entrées (la grande porte, la verrière et les égouts) et neuf équipes de spécialistes. Lisez chaque plan intercepté. Le Gentleman joue sa dernière carte.',
       theme: { floor: 'acier', floorA: '#6f7a86', floorB: '#66717d', wall: '#2f3b4a', wallDark: '#161e28', trim: '#d4a72c', carpet: '#8f1d2c', night: false },
       treasure: { kind: 'lingots', name: 'Les Lingots de la Nation' },
-      startCoins: 520, lives: 20, hpMul: 2.62,
+      startCoins: 520, lives: 20, hpMul: 3.5,
       paths: [
         [[-60, 380], [180, 380], [180, 170], [440, 170], [440, 600], [720, 600], [720, 300], [980, 300], [980, 560], [1150, 560]],
         [[850, -60], [850, 300], [980, 300], [980, 560], [1150, 560]],
         [[310, 780], [310, 600], [720, 600], [720, 300], [980, 300], [980, 560], [1150, 560]],
       ],
-      spots: [[80, 270], [80, 480], [280, 270], [340, 500], [210, 680], [540, 230], [620, 380], [540, 500], [760, 200], [940, 200], [820, 400], [880, 520], [1080, 420], [1060, 660]],
+      spots: [[108, 270], [80, 452], [252, 270], [368, 500], [238, 680], [512, 230], [648, 380], [512, 500], [778, 200], [922, 200], [792, 400], [908, 520], [1052, 420], [1060, 632]],
       deco: [
         { t: 'coffret', x: 40, y: 690 }, { t: 'coffret', x: 1235, y: 690 }, { t: 'sacs', x: 420, y: 690 }, { t: 'sacs', x: 790, y: 690 },
         { t: 'colonne', x: 40, y: 130 }, { t: 'colonne', x: 1240, y: 130 },

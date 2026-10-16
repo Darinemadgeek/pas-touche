@@ -345,7 +345,7 @@
         var hitAny = false;
         for (var i = 0; i < this.towers.length; i++) {
           var t = this.towers[i];
-          if (dist2(t.x, t.y, e.x, e.y) < 130 * 130) { t.disabledT = 3; hitAny = true; }
+          if (PT.TOWERS[t.type].electric && dist2(t.x, t.y, e.x, e.y) < 130 * 130) { t.disabledT = 3; hitAny = true; }
         }
         if (hitAny) { this.emit('emp', { x: e.x, y: e.y }); e.empCD = 6; } else e.empCD = 0.4;
       }

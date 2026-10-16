@@ -24,7 +24,7 @@ function validate(level) {
   var issues = [];
   level.spots.forEach(function (s, i) {
     var d = pathDist(level, s[0], s[1]);
-    if (d < 78) issues.push('socle ' + i + ' trop près du chemin (' + d.toFixed(0) + ')');
+    if (d < 66) issues.push('socle ' + i + ' trop près du chemin (' + d.toFixed(0) + ')');
     if (s[1] < 130 || s[1] > 700 || s[0] < 40 || s[0] > 1240) issues.push('socle ' + i + ' hors zone');
     level.spots.forEach(function (o, j) { if (j > i && Math.hypot(s[0] - o[0], s[1] - o[1]) < 84) issues.push('socles ' + i + '/' + j + ' trop proches'); });
   });

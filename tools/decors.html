@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propositions de décor</title>
+<style>
+  body { margin: 0; background: #2b2420; color: #fff6e6; font-family: "Arial Black", Impact, sans-serif; }
+  h1 { font-size: 22px; margin: 14px 16px 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 14px; padding: 10px 16px 20px; }
+  figure { margin: 0; background: #3a312b; border-radius: 10px; padding: 8px; }
+  canvas { width: 100%; height: auto; display: block; border-radius: 6px; }
+  figcaption { font: 600 14px/1.35 system-ui, sans-serif; padding: 8px 4px 2px; color: #e9dcc6; }
+  figcaption b { font-family: "Arial Black", Impact, sans-serif; font-size: 17px; color: #ffd447; display: block; }
+</style>
+</head>
+<body>
+<h1>Pas Touche ! : papier découpé, version musée</h1>
+<div class="grid" id="grid"></div>
+<!-- Planche de développement : la même scène (mur, sol, tapis, socles, voleurs) dans plusieurs styles de décor. -->
+<script src="../js/data.js"></script>
+<script src="../js/art.js"></script>
+<script>
+(function () {
+  var A = PT.Art, INK = A.INK, TAU = Math.PI * 2;
+  var SW = 640, SH = 360, WALLH = 82, PW = 64;
+  var PATH = [[-40, 170], [400, 170], [400, 290], [700, 290]];
+
+  // Tracé polygonal légèrement tremblé, comme découpé aux ciseaux
+  var BOIL = 0; // variante de tremblement du trait (0, 1 ou 2)
+  function wobble(c, pts, amp, seed) {
+    var r = A.rng(seed + BOIL * 977);
+    c.beginPath();
+    pts.forEach(function (p, i) { var x = p[0] + (r() - 0.5) * amp, y = p[1] + (r() - 0.5) * amp; if (i) c.lineTo(x, y); else c.moveTo(x, y); });
+    c.closePath();
+  }
+  function wobRect(c, x, y, w, h, amp, seed) {
+    var pts = [], n = Math.max(2, Math.round(w / 40)), m = Math.max(2, Math.round(h / 40)), i;
+    for (i = 0; i <= n; i++) pts.push([x + w * i / n, y]);
+    for (i = 1; i <= m; i++) pts.push([x + w, y + h * i / m]);
+    for (i = n - 1; i >= 0; i--) pts.push([x + w * i / n, y + h]);
+    for (i = m - 1; i > 0; i--) pts.push([x, y + h * i / m]);
+    wobble(c, pts, amp, seed);
+  }
+  function grain(c, alpha, seed) {
+    var r = A.rng(seed);
+    for (var i = 0; i < 2600; i++) {
+      c.fillStyle = (r() < 0.5 ? 'rgba(0,0,0,' : 'rgba(255,255,255,') + alpha * r() + ')';
+      c.fillRect(r() * SW, r() * SH, 1 + r() * 2, 1 + r() * 2);
+    }
+  }
+  function strokePath(c, w, col) {
+    c.beginPath(); PATH.forEach(function (p, i) { if (i) c.lineTo(p[0], p[1]); else c.moveTo(p[0], p[1]); });
+    c.lineJoin = 'round'; c.lineCap = 'butt'; c.lineWidth = w; c.strokeStyle = col; c.stroke();
+  }
+  function pointAt(d) {
+    for (var i = 0; i < PATH.length - 1; i++) {
+      var a = PATH[i], b = PATH[i + 1], l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (d <= l) return { x: a[0] + (b[0] - a[0]) * d / l, y: a[1] + (b[1] - a[1]) * d / l, face: b[0] >= a[0] ? 1 : -1 };
+      d -= l;
+    }
+    var e = PATH[PATH.length - 1]; return { x: e[0], y: e[1], face: 1 };
+  }
+  function spot(c, x, y, t, i) {
+    c.save(); c.translate(x, y);
+    ell(c, 0, 7, 34, 13, 'rgba(20,10,5,0.25)');
+    A.ell(c, 0, 5, 31, 12); A.fs(c, '#e0a63a', 2.6); c.fillStyle = '#e0a63a'; c.fillRect(-31, 0, 62, 5);
+    A.ell(c, 0, 0, 31, 12); A.fs(c, '#ffe9a8', 2.6);
+    var by = -30 - ((Math.floor(t * 2.5 + i) & 1) ? 4 : 0);
+    A.circ(c, 0, by, 12.5); A.fs(c, '#3fae46', 2.6);
+    c.lineWidth = 4.2; c.strokeStyle = '#fff'; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(-6, by); c.lineTo(6, by); c.moveTo(0, by - 6); c.lineTo(0, by + 6); c.stroke();
+    c.restore();
+  }
+  function ell(c, x, y, rx, ry, fill) { A.ell(c, x, y, rx, ry); c.fillStyle = fill; c.fill(); }
+  function posts(c, col, rope) {
+    var pts = [[60, 125], [150, 125], [240, 125], [330, 125], [60, 215], [150, 215], [240, 215], [330, 215], [470, 245], [560, 245], [470, 335], [560, 335]];
+    c.lineWidth = 3; c.strokeStyle = rope;
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i], q = pts[i + 1];
+      if (q && q[1] === p[1] && q[0] - p[0] < 100) { c.beginPath(); c.moveTo(p[0], p[1] - 18); c.quadraticCurveTo((p[0] + q[0]) / 2, p[1] - 10, q[0], q[1] - 18); c.stroke(); }
+    }
+    pts.forEach(function (p) { A.rr(c, p[0] - 2, p[1] - 20, 4, 20, 2); A.fs(c, col, 1.8); A.circ(c, p[0], p[1] - 21, 3.4); A.fs(c, col, 1.8); });
+  }
+
+  /* ---------- Pièces de musée en papier découpé ---------- */
+  function paper(c, fill, lw) { c.fillStyle = fill; c.fill(); if (lw !== 0) A.fs(c, null, lw || 2); }
+  // Cadre doré à moulures, avec ses quatre rosaces d'angle
+  function goldFrame(c, x, y, w, h, seed, inner) {
+    wobRect(c, x - 7, y - 7, w + 14, h + 14, 2.4, seed); paper(c, '#e8b53a');
+    wobRect(c, x - 3, y - 3, w + 6, h + 6, 1.6, seed + 1); paper(c, '#b9822a', 1.4);
+    wobRect(c, x, y, w, h, 1.2, seed + 2); paper(c, inner || '#fff6e0', 1.4);
+    [[x - 4, y - 4], [x + w + 4, y - 4], [x - 4, y + h + 4], [x + w + 4, y + h + 4]].forEach(function (p) { A.circ(c, p[0], p[1], 3.4); paper(c, '#ffd96a', 1.2); });
+  }
+  function plaque(c, x, y) { wobRect(c, x - 13, y, 26, 7, 1, x); paper(c, '#d9b45a', 1.2); A.line(c, x - 8, y + 3.5, x + 8, y + 3.5, 'rgba(60,40,10,0.5)', 1); }
+  function pictureLight(c, x, y, on) {
+    if (on) { c.fillStyle = 'rgba(255,240,170,0.28)'; c.beginPath(); c.moveTo(x - 6, y + 4); c.lineTo(x + 6, y + 4); c.lineTo(x + 30, y + 52); c.lineTo(x - 30, y + 52); c.closePath(); c.fill(); }
+    A.line(c, x, y - 6, x, y, INK, 1.6);
+    wobble(c, [[x - 9, y], [x + 9, y], [x + 7, y + 5], [x - 7, y + 5]], 1, x); paper(c, '#c9952e', 1.4);
+  }
+  // Buste en marbre sur colonne : ses yeux peints suivent les voleurs
+  function bust(c, x, y, near) {
+    wobRect(c, x - 13, y - 34, 26, 34, 1.6, x + 3); paper(c, '#e9e4da');
+    A.line(c, x - 6, y - 30, x - 6, y - 4, 'rgba(0,0,0,0.12)', 2); A.line(c, x + 4, y - 30, x + 4, y - 4, 'rgba(0,0,0,0.12)', 2);
+    wobRect(c, x - 17, y - 40, 34, 7, 1, x + 4); paper(c, '#f6f2ea', 1.6);
+    wobble(c, [[x - 15, y - 41], [x - 10, y - 52], [x + 10, y - 52], [x + 15, y - 41]], 1.4, x + 5); paper(c, '#f6f2ea', 1.6);
+    A.ell(c, x, y - 64, 11, 13); paper(c, '#f6f2ea', 1.6);
+    c.fillStyle = '#ddd6c8'; for (var k = 0; k < 5; k++) { A.circ(c, x - 9 + k * 4.5, y - 76 + (k % 2) * 2, 3.4); c.fill(); }
+    var dx = near.x - x, dy = near.y - (y - 66), dl = Math.hypot(dx, dy) || 1;
+    A.circ(c, x - 4 + dx / dl * 1.4, y - 66 + dy / dl * 1.2, 1.4); A.circ(c, x + 4 + dx / dl * 1.4, y - 66 + dy / dl * 1.2, 1.4); c.fillStyle = INK; c.fill();
+    A.line(c, x - 2, y - 59, x + 3, y - 59, INK, 1.2);
+  }
+  function vase(c, x, y, col) {
+    wobRect(c, x - 14, y - 26, 28, 26, 1.4, x + 7); paper(c, '#5b4a3a');
+    wobble(c, [[x - 6, y - 58], [x + 6, y - 58], [x + 5, y - 52], [x + 13, y - 44], [x + 10, y - 30], [x - 10, y - 30], [x - 13, y - 44], [x - 5, y - 52]], 1.4, x + 8); paper(c, col);
+    c.fillStyle = INK; c.fillRect(x - 11, y - 44, 22, 3);
+    for (var k = 0; k < 4; k++) { c.fillRect(x - 9 + k * 5, y - 40, 2.4, 6); }
+  }
+  function column(c, x, top, bot) {
+    wobRect(c, x - 13, top + 10, 26, bot - top - 18, 1.6, x + 11); paper(c, '#f1ead8');
+    for (var k = -1; k <= 1; k++) A.line(c, x + k * 6, top + 14, x + k * 6, bot - 12, 'rgba(0,0,0,0.13)', 2.2);
+    wobRect(c, x - 18, top, 36, 10, 1.2, x + 12); paper(c, '#f8f2e2', 1.6);
+    A.circ(c, x - 15, top + 7, 4); paper(c, '#f8f2e2', 1.2); A.circ(c, x + 15, top + 7, 4); paper(c, '#f8f2e2', 1.2);
+    wobRect(c, x - 17, bot - 8, 34, 8, 1.2, x + 13); paper(c, '#f8f2e2', 1.6);
+  }
+  function torch(c, x, y, st) {
+    wobble(c, [[x - 5, y], [x + 5, y], [x + 3, y + 12], [x - 3, y + 12]], 1, x); paper(c, '#8a6a3a', 1.4);
+    var f = [[0, -14, 6], [2, -16, 5], [-2, -13, 6.5]][st % 3];
+    c.fillStyle = 'rgba(255,200,90,0.25)'; A.circ(c, x, y - 6, 22); c.fill();
+    wobble(c, [[x - 6, y], [x + f[0] - 2, y - 8], [x + f[0], y + f[1]], [x + f[0] + 3, y - 7], [x + 6, y]], 1, x + st); paper(c, '#ff9f1c', 1.2);
+    A.ell(c, x + f[0] * 0.5, y - 4, 2.6, 4); c.fillStyle = '#fff1a6'; c.fill();
+  }
+  function meander(c, y, col) {
+    c.fillStyle = col; c.fillRect(0, y, SW, 12);
+    c.strokeStyle = '#fff3d6'; c.lineWidth = 1.8; c.beginPath();
+    for (var x = 0; x < SW; x += 16) { c.moveTo(x + 2, y + 10); c.lineTo(x + 2, y + 2); c.lineTo(x + 12, y + 2); c.lineTo(x + 12, y + 8); c.lineTo(x + 7, y + 8); c.lineTo(x + 7, y + 5); }
+    c.stroke(); A.line(c, 0, y, SW, y, INK, 1.4); A.line(c, 0, y + 12, SW, y + 12, INK, 1.4);
+  }
+  function velvetCarpet(c, main, edge) {
+    strokePath(c, PW + 6, INK); strokePath(c, PW + 2, edge); strokePath(c, PW - 8, main);
+  }
+
+  /* ---------- Les décors ---------- */
+  var STYLES = [
+    {
+      name: 'A1. Galerie de peinture',
+      desc: 'Mur en velours rouge, boiseries, grands cadres dorés avec leurs lampes et leurs plaques, parquet en chevrons, buste en marbre. La Joconde du musée vous suit des yeux, tout comme le buste.',
+      anim: function (c, t, near) {
+        var st = Math.floor(t * 4);
+        // Lampes de tableaux : l'une grésille de temps en temps
+        pictureLight(c, 110, 4, true); pictureLight(c, 320, 4, st % 7 !== 3); pictureLight(c, 530, 4, true);
+        // La « Joconde » : ses yeux suivent le voleur le plus proche
+        var dx = near.x - 110, dy = near.y - 36, dl = Math.hypot(dx, dy) || 1;
+        A.circ(c, 106 + dx / dl * 1.2, 33 + dy / dl, 1.3); A.circ(c, 114 + dx / dl * 1.2, 33 + dy / dl, 1.3); c.fillStyle = INK; c.fill();
+        // Soleil du paysage dont les rayons tournent par crans
+        c.save(); c.translate(334, 26); c.rotate((st % 4) * Math.PI / 8);
+        for (var r = 0; r < 8; r++) { c.rotate(Math.PI / 4); A.line(c, 8, 0, 11, 0, '#f5a623', 2); }
+        c.restore();
+        // Buste sur sa colonne
+        bust(c, 70, 340, near);
+        // Palmier en pot qui se balance en deux poses
+        c.save(); c.translate(610, 128); c.rotate(st % 2 ? 0.07 : -0.05);
+        [[-0.9, '#3f8f3a'], [-0.3, '#4fa846'], [0.35, '#3f8f3a'], [0.95, '#4fa846']].forEach(function (lf, i) {
+          c.save(); c.rotate(lf[0]); wobble(c, [[0, 0], [-6, -22], [0, -40], [6, -22]], 1.4, 50 + i); paper(c, lf[1], 1.4); c.restore();
+        });
+        c.restore();
+        wobRect(c, 598, 124, 24, 20, 1.2, 77); paper(c, '#c0603a');
+      },
+      draw: function (c) {
+        // Parquet en chevrons découpé
+        c.fillStyle = '#b27c45'; c.fillRect(0, WALLH, SW, SH - WALLH);
+        var r = A.rng(5);
+        for (var y = WALLH; y < SH; y += 16) for (var x = -20; x < SW; x += 32) {
+          var o = ((y - WALLH) / 16) % 2 ? 16 : 0;
+          wobble(c, [[x + o, y], [x + o + 30, y], [x + o + 30, y + 15], [x + o, y + 15]], 1.2, x * 7 + y);
+          c.fillStyle = r() < 0.5 ? '#c08a50' : '#a8723e'; c.fill();
+        }
+        // Mur en velours rouge, corniche dorée, lambris en bois
+        c.fillStyle = '#9e2b37'; wobRect(c, -10, -10, SW + 20, WALLH + 10, 2, 2); c.fill();
+        c.fillStyle = 'rgba(0,0,0,0.08)'; for (var s = 0; s < SW; s += 22) c.fillRect(s, 0, 9, WALLH - 18);
+        c.fillStyle = '#e8b53a'; wobRect(c, -10, -6, SW + 20, 8, 1.4, 3); c.fill(); A.fs(c, null, 1.4);
+        c.fillStyle = '#6b3f24'; wobRect(c, -10, WALLH - 18, SW + 20, 20, 1.6, 4); c.fill(); A.fs(c, null, 1.8);
+        for (var p = 10; p < SW; p += 64) { wobRect(c, p, WALLH - 14, 52, 11, 1, p); paper(c, '#7d4a2b', 1.2); }
+        // Trois tableaux
+        goldFrame(c, 86, 12, 48, 50, 30, '#5d7a4a');
+        A.ell(c, 110, 54, 16, 14); paper(c, '#2b2b3a', 1.4);
+        A.ell(c, 110, 36, 9, 11); paper(c, '#f0c79a', 1.4);
+        c.fillStyle = '#3a2418'; c.beginPath(); c.arc(110, 33, 11, Math.PI * 1.05, Math.PI * 1.95); c.lineTo(119, 46); c.lineTo(101, 46); c.closePath(); c.fill();
+        A.ell(c, 110, 36, 7, 9); c.fillStyle = '#f0c79a'; c.fill();
+        A.circ(c, 106, 33, 2.2); A.circ(c, 114, 33, 2.2); c.fillStyle = '#fff'; c.fill();
+        c.beginPath(); c.moveTo(107, 40); c.quadraticCurveTo(110, 41.5, 113, 40); c.lineWidth = 1.1; c.strokeStyle = INK; c.stroke();
+        plaque(c, 110, 66);
+        goldFrame(c, 290, 14, 64, 44, 31, '#bfe3f2');
+        wobble(c, [[290, 58], [290, 44], [306, 34], [322, 46], [338, 36], [354, 46], [354, 58]], 1.4, 9); paper(c, '#6cbf3a', 1.2);
+        A.circ(c, 334, 26, 6); paper(c, '#f5c518', 1.2);
+        plaque(c, 322, 64);
+        goldFrame(c, 506, 14, 48, 44, 32, '#fff6e0');
+        wobRect(c, 512, 20, 16, 18, 1, 60); paper(c, '#e2405e', 1.2); A.circ(c, 540, 30, 7); paper(c, '#22a7c9', 1.2);
+        wobble(c, [[516, 52], [532, 40], [548, 52]], 1, 61); paper(c, '#f5c518', 1.2);
+        plaque(c, 530, 64);
+        A.line(c, 0, WALLH, SW, WALLH, INK, 2);
+        velvetCarpet(c, '#c62f3c', '#e8b53a');
+        posts(c, '#e8b53a', '#8e1f2c');
+        // Banc de musée
+        wobRect(c, 470, 112, 70, 9, 1.2, 90); paper(c, '#7d4a2b', 1.6);
+        wobRect(c, 476, 121, 6, 12, 1, 91); paper(c, '#5a3420', 1.4); wobRect(c, 528, 121, 6, 12, 1, 92); paper(c, '#5a3420', 1.4);
+        grain(c, 0.07, 3);
+      },
+    },
+    {
+      name: 'A2. Hall des antiquités',
+      desc: 'Pierre claire, colonnes grecques, frise à méandres, torches qui crépitent, dallage en marbre, amphores et sarcophage. Le sarcophage cligne des yeux, et la statue tourne la tête quand un voleur passe.',
+      anim: function (c, t, near) {
+        var st = Math.floor(t * 6);
+        torch(c, 230, 34, st); torch(c, 430, 34, st + 1);
+        // Statue dans sa niche : elle tourne la tête vers le voleur
+        var look = near.x < 330 ? -1 : 1;
+        c.save(); c.translate(330, 0);
+        A.ell(c, look * 1.5, 22, 7, 8); paper(c, '#f6f2ea', 1.4);
+        A.line(c, look * 4 - 1.5, 21, look * 4 + 1.5, 21, INK, 1.4);
+        c.restore();
+        // Sarcophage qui cligne des yeux, puis regarde
+        var blink = (Math.floor(t * 3) % 9) === 0;
+        if (blink) { A.line(c, 584, 108, 590, 108, INK, 1.6); A.line(c, 596, 108, 602, 108, INK, 1.6); }
+        else {
+          A.ell(c, 587, 108, 3.4, 2.4); A.ell(c, 599, 108, 3.4, 2.4); c.fillStyle = '#fff'; c.fill();
+          var dx = near.x > 593 ? 1 : -1;
+          A.circ(c, 587 + dx * 1.3, 108, 1.3); A.circ(c, 599 + dx * 1.3, 108, 1.3); c.fillStyle = INK; c.fill();
+        }
+      },
+      draw: function (c) {
+        // Dallage de marbre en deux tons
+        for (var y = WALLH; y < SH; y += 46) for (var x = 0; x < SW; x += 46) {
+          wobRect(c, x + 1, y + 1, 44, 44, 1.6, x * 3 + y);
+          c.fillStyle = ((x + y) / 46) % 2 ? '#e9e2d0' : '#cfc3a8'; c.fill();
+        }
+        c.strokeStyle = 'rgba(120,100,70,0.25)'; c.lineWidth = 1;
+        for (var v = 0; v < 14; v++) { var vx = (v * 97) % SW, vy = WALLH + 20 + (v * 53) % (SH - WALLH - 20); c.beginPath(); c.moveTo(vx, vy); c.lineTo(vx + 14, vy + 6); c.lineTo(vx + 22, vy + 3); c.stroke(); }
+        // Mur de pierre, frise grecque
+        c.fillStyle = '#e3cfa3'; wobRect(c, -10, -10, SW + 20, WALLH + 10, 2, 2); c.fill();
+        c.strokeStyle = 'rgba(120,90,50,0.22)'; c.lineWidth = 1.2;
+        for (var by = 14; by < WALLH; by += 16) for (var bx = (by / 16 % 2) * 20; bx < SW; bx += 40) c.strokeRect(bx, by, 40, 16);
+        meander(c, 0, '#3d6fa8');
+        // Niche et statue
+        c.fillStyle = '#c9b28a'; c.beginPath(); c.moveTo(310, WALLH - 4); c.lineTo(310, 26); c.arc(330, 26, 20, Math.PI, 0); c.lineTo(350, WALLH - 4); c.closePath(); c.fill(); A.fs(c, null, 1.6);
+        wobble(c, [[323, 30], [337, 30], [340, 52], [336, 72], [324, 72], [320, 52]], 1.2, 70); paper(c, '#f6f2ea', 1.4);
+        wobRect(c, 318, 72, 24, 8, 1, 71); paper(c, '#d8d0c0', 1.4);
+        // Colonnes
+        [40, 160, 500, 620].forEach(function (x) { column(c, x, 12, WALLH + 4); });
+        A.line(c, 0, WALLH, SW, WALLH, INK, 2);
+        velvetCarpet(c, '#2f4f9a', '#e8b53a');
+        posts(c, '#e8b53a', '#1f3470');
+        // Amphores et sarcophage
+        vase(c, 80, 340, '#d9733a'); vase(c, 470, 140, '#c25a2a');
+        wobble(c, [[580, 140], [575, 110], [580, 92], [593, 86], [606, 92], [611, 110], [606, 140]], 1.6, 80); paper(c, '#e8b53a', 1.8);
+        A.ell(c, 593, 106, 11, 12); paper(c, '#d9a35a', 1.4);
+        c.fillStyle = '#2f4f9a'; c.fillRect(582, 92, 22, 5); c.fillRect(584, 120, 18, 3); c.fillRect(584, 126, 18, 3);
+        grain(c, 0.06, 4);
+      },
+    },
+  ];
+
+  var scenes = STYLES.map(function (st, i) {
+    var fig = document.createElement('figure');
+    var cv = document.createElement('canvas'); cv.width = SW * 2; cv.height = SH * 2;
+    var cap = document.createElement('figcaption'); cap.innerHTML = '<b>' + st.name + '</b>' + st.desc;
+    fig.appendChild(cv); fig.appendChild(cap); document.getElementById('grid').appendChild(fig);
+    var bgs = [0, 1, 2].map(function (v) {
+      var bg = document.createElement('canvas'); bg.width = SW * 2; bg.height = SH * 2;
+      var b = bg.getContext('2d'); b.scale(2, 2); BOIL = v; st.draw(b); return bg;
+    });
+    return { cv: cv, c: cv.getContext('2d'), bgs: bgs, st: st };
+  });
+
+  var thieves = [['voleur', 0], ['costaud', 170], ['pickpocket', 340], ['touriste', 510], ['ombre', 680]];
+  function frame(ms) {
+    var t = ms / 1000;
+    scenes.forEach(function (s) {
+      var c = s.c; c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(s.bgs[Math.floor(t * 6) % 3], 0, 0); c.setTransform(2, 0, 0, 2, 0, 0);
+      var near = pointAt((t * 55) % 860); BOIL = Math.floor(t * 6) % 3;
+      s.st.anim(c, t, near);
+      // Mouche qui zigzague par à-coups
+      var ft = Math.floor(t * 8) / 8, fx = 330 + Math.cos(ft * 1.3) * 120 + Math.sin(ft * 3.1) * 20, fy = 120 + Math.sin(ft * 1.7) * 40;
+      A.circ(c, fx, fy, 2.2); c.fillStyle = INK; c.fill();
+      A.ell(c, fx - 2, fy - 3, 2.2, 1.4, Math.floor(t * 16) % 2 ? -0.5 : 0.5); c.fillStyle = 'rgba(255,255,255,0.8)'; c.fill();
+      var list = [];
+      thieves.forEach(function (th, i) {
+        var d = (t * 55 + th[1]) % 860, p = pointAt(d);
+        list.push({ y: p.y, f: function () { c.save(); c.translate(p.x, p.y); A.person(c, th[0], { phase: d * 0.11, face: p.face, moving: true, id: i, t: t, size: th[0] === 'costaud' ? 1.25 : 1 }); c.restore(); } });
+      });
+      list.push({ y: 110, f: function () { spot(c, 250, 110, t, 0); } });
+      list.push({ y: 245, f: function () { c.save(); c.translate(250, 245); A.tower(c, 'gardien', { level: 1, face: -1, time: t, fireT: 0 }); c.restore(); } });
+      list.push({ y: 240, f: function () { c.save(); c.translate(520, 225); A.tower(c, 'chien', { level: 0, face: -1, time: t, lungeT: 0 }); c.restore(); } });
+      list.push({ y: 350, f: function () { spot(c, 300, 350, t, 2); } });
+      list.sort(function (a, b) { return a.y - b.y; }).forEach(function (o) { o.f(); });
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

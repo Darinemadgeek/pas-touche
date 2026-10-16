@@ -56,7 +56,7 @@ Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traver
 
 1. Dans `js/levels.js`, copier un bloc de niveau et changer `id`, `name`, `theme`, `paths`, `spots`, `deco` et `waves`.
    - Le premier point d'un chemin est hors de la salle (porte, verrière ou égouts), le dernier est le trésor.
-   - Placez les socles à environ 100 px du tapis, près des virages : plus loin, le Gardien et le Bouledogue n'atteignent plus les voleurs.
+   - Placez les socles à environ 72 px du centre du tapis, près des virages : plus loin, le Gardien et le Bouledogue atteignent mal les voleurs.
    - Pour un niveau casse (prévu tous les 5 niveaux), mettre `type: 'casse'` et ajouter un `crew: { name, plan }` à chaque vague.
    - Variantes : `variant: 'visiteurs'` (portes ouvertes) ou `variant: 'panne'` (panne de courant : les décors `lampe` deviennent les seules zones éclairées, rayon `r` réglable, 150 par défaut).
 2. Pour qu'une nouvelle défense ou un nouveau pouvoir arrive avec cette salle, mettre son `unlock` à l'id de la salle dans `js/data.js`. L'écran de briefing affiche automatiquement les nouveautés.

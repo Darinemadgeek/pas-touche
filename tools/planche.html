@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Planche des personnages</title>
+<style>body { margin: 0; background: #e8dcc4; } canvas { display: block; }</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<!-- Planche de développement : tous les personnages et défenses, en grand et animés. -->
+<script src="../js/data.js"></script>
+<script src="../js/art.js"></script>
+<script>
+  var cv = document.getElementById('cv'), c = cv.getContext('2d');
+  var types = ['voleur', 'pickpocket', 'costaud', 'ombre', 'acrobate', 'hackeuse', 'touriste', 'faussaire', 'chevalier', 'illusionniste', 'gentleman'];
+  var towers = Object.keys(PT.TOWERS);
+  function frame(ms) {
+    var t = ms / 1000, W = innerWidth, H = innerHeight;
+    cv.width = W; cv.height = H;
+    c.fillStyle = '#e8dcc4'; c.fillRect(0, 0, W, H);
+    var s = Math.min(W / 1100, H / 560) * (+location.hash.slice(1) || 1.6);
+    types.forEach(function (ty, i) {
+      c.save(); c.translate(60 * s + (i % 6) * 110 * s, (i < 6 ? 120 : 250) * s); c.scale(s, s);
+      PT.Art.person(c, ty, { phase: t * 6 + i, face: 1, moving: true, id: i, t: t, carrying: i === 2 ? 1 : 0, revealed: ty === 'faussaire' });
+      c.restore();
+    });
+    towers.forEach(function (ty, i) {
+      c.save(); c.translate(60 * s + i * 90 * s, 400 * s); c.scale(s * 0.9, s * 0.9);
+      PT.Art.tower(c, ty, { level: i % 3, aim: -0.3, face: 1, time: t, fireT: 0 });
+      c.restore();
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+</script>
+</body>
+</html>
