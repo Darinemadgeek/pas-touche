@@ -12,7 +12,7 @@
   };
 
   /* ---------- Sauvegarde ---------- */
-  function freshSave() { return { stars: {}, upgrades: {}, music: true, sfx: true, story: false, seen: {}, talents: 2 }; }
+  function freshSave() { return { stars: {}, upgrades: {}, music: true, sfx: true, story: false, seen: {}, talents: 3, starScale: 5, fails: {} }; }
   function loadSave() {
     var s = null;
     try { s = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { s = null; }
@@ -33,12 +33,12 @@
   App.starsTotal = function () { var t = 0; for (var k in App.save.stars) t += App.save.stars[k]; return t; };
   App.starsSpent = function () {
     var t = 0;
-    PT.UPGRADES.forEach(function (u) { var r = App.save.upgrades[u.id] || 0; for (var i = 0; i < r; i++) t += u.costs[i]; });
+    PT.UPGRADES.forEach(function (u) { var r = Math.min(App.save.upgrades[u.id] || 0, u.costs.length); for (var i = 0; i < r; i++) t += u.costs[i]; });
     return t;
   };
   App.starsFree = function () { return App.starsTotal() - App.starsSpent(); };
   App.buyUpgrade = function (id) {
-    var u = PT.UPGRADES.filter(function (x) { return x.id === id; })[0];
+    var u = PT.upgradeById(id);
     var r = App.save.upgrades[id] || 0;
     if (!u || r >= u.costs.length || App.starsFree() < u.costs[r] || !PT.upgradeOpen(id, App.save.upgrades)) return false;
     App.save.upgrades[id] = r + 1;
@@ -91,11 +91,12 @@
     App.renderer.setLevel(lv);
   }
 
-  App.startLevel = function (idx) {
+  App.startLevel = function (idx, relax) {
     clearTimeout(App.resultTimer);
     var lv = PT.LEVELS[idx];
     App.levelIdx = idx;
-    App.game = new PT.Game(lv, { upgrades: App.save.upgrades });
+    App.relax = !!relax;
+    App.game = new PT.Game(lv, { upgrades: App.save.upgrades, relax: relax });
     App.renderer.setLevel(lv);
     App.scene = 'game';
     App.paused = false;
@@ -200,11 +201,12 @@
         UI.toast('Bonus +' + ev.value, 'Vague appelée en avance');
         break;
       case 'lock':
-        UI.toast('Portes verrouillées !', 'Personne ne sort pendant ' + PT.POWERS.verrou.dur + ' secondes');
+        UI.toast('Portes verrouillées !', 'Personne ne sort pendant ' + Math.round(g.lockT) + ' secondes');
         break;
       case 'win': {
         var old = App.save.stars[lv.id] || 0, stars = g.stars;
         App.save.stars[lv.id] = Math.max(old, stars);
+        if (App.save.fails) delete App.save.fails[lv.id];
         if (!old) UI.wing = null; // une nouvelle aile a pu s'ouvrir : on y retournera
         App.persist();
         UI.closeRadial(); UI.stopAim();
@@ -214,6 +216,9 @@
         break;
       }
       case 'lose':
+        App.save.fails = App.save.fails || {};
+        App.save.fails[lv.id] = (App.save.fails[lv.id] || 0) + 1;
+        App.persist();
         UI.closeRadial(); UI.stopAim();
         App.resultTimer = setTimeout(function () { UI.showLose({ level: lv, game: g }); }, 1400);
         break;
@@ -326,9 +331,15 @@
     booted = true;
     App.save = loadSave();
     // Sauvegarde d’une ancienne version : si les talents coûtent plus que les étoiles gagnées, on rembourse tout
-    if (App.save.talents !== 2 || App.starsSpent() > App.starsTotal()) {
+    // Passage à 5 étoiles par salle : on convertit les anciennes notes sur 3
+    if (App.save.starScale !== 5) {
+      var conv = { 1: 1, 2: 3, 3: 5 };
+      for (var sid in App.save.stars) App.save.stars[sid] = conv[App.save.stars[sid]] || App.save.stars[sid];
+      App.save.starScale = 5; App.persist();
+    }
+    if (App.save.talents !== 3 || App.starsSpent() > App.starsTotal()) {
       var had = Object.keys(App.save.upgrades).length > 0;
-      App.save.upgrades = {}; App.save.talents = 2; App.persist();
+      App.save.upgrades = {}; App.save.talents = 3; App.persist();
       if (had) setTimeout(function () { UI.toast('Nouvel Atelier !', 'Vos étoiles vous sont rendues'); }, 800);
     }
     Au.musicOn = App.save.music; Au.sfxOn = App.save.sfx;

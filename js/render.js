@@ -738,7 +738,11 @@
     if (game.lockT > 0) this.drawLocks(c, game, time);
 
     // Rayons laser
-    for (i = 0; i < game.towers.length; i++) { var t = game.towers[i]; if (t.beamOn && t.target) drawBeam(c, t, time); }
+    for (i = 0; i < game.towers.length; i++) {
+      var t = game.towers[i];
+      if (t.beamOn && t.target) drawBeam(c, t, time);
+      if (t.beamOn && t.target2) drawBeam(c, { x: t.x, y: t.y, aim: t.aim, target: t.target2 }, time + 0.5);
+    }
     // Projectiles
     for (i = 0; i < game.projectiles.length; i++) A.projectile(c, game.projectiles[i]);
     // Bustes qui tombent
@@ -901,6 +905,11 @@
     if (t.builtT < 0.3) { var k = 1 + Math.sin(t.builtT / 0.3 * Math.PI) * 0.18; c.scale(k, 1 / k); }
     if (ui && ui.selectedTower === t) { ell(c, 0, 6, 44, 18); c.fillStyle = 'rgba(255,212,71,0.45)'; c.fill(); }
     A.tower(c, t.type, { level: t.level, aim: t.aim, face: t.face, fireT: t.fireT, lungeT: t.lungeT, lx: t.lx, ly: t.ly, x: t.x, y: t.y, disabled: t.disabledT > 0, time: time + t.id, beamOn: t.beamOn });
+    if (t.spec && PT.SPECS[t.type]) {
+      var spc = PT.SPECS[t.type][t.spec];
+      A.line(c, -30, 4, -30, -26, A.INK, 2);
+      c.beginPath(); c.moveTo(-30, -26); c.lineTo(-16, -21); c.lineTo(-30, -16); c.closePath(); A.fs(c, spc.color, 1.6);
+    }
     if (t.type !== 'chef' && game.towerStats(t).chefBuff > 0) {
       A.starPath(c, 24, -16 - (Math.floor(time * 3 + t.id) % 2) * 2, 6, 2.6); A.fs(c, '#ffd447', 1.6);
     }

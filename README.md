@@ -26,11 +26,12 @@ Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traver
   10. Coffre-fort de la Banque de France : **2e niveau casse**, trois entrées (porte, verrière, égouts), neuf équipes et le Gentleman en finale.
 
   Les salles 11 à 50 (Galerie des Impressionnistes, Musée de l'Espace, Salle des Pharaons, Musée du Fromage… jusqu'au Coffre du Gentleman) sont construites par `js/levels-gen.js` à partir de 12 plans de salle et de 19 thèmes.
-- **10 défenses** à 3 niveaux : Gardien, Pot de Glu, Caméra, Bouledogue, Lance-Filet, Laser, Canon de Marine, Ventilateur (repousse les voleurs), Arroseur (mouille et ralentit), Chef de la Sécurité (renforce les défenses voisines).
+- **10 défenses** à 3 niveaux (le dernier au choix entre deux spécialisations) : Gardien, Pot de Glu, Caméra, Bouledogue, Lance-Filet, Laser, Canon de Marine, Ventilateur (repousse les voleurs), Arroseur (mouille et ralentit), Chef de la Sécurité (renforce les défenses voisines).
 - **7 synergies** : Filmé (Caméra), Patrouille (Gardiens groupés), Croc-en-filet (Bouledogue + Filet), Cible facile (Canon + Glu), Court-jus (Laser + Arroseur), Glissade (Ventilateur + Arroseur), Sous les ordres (Chef). Elles sont rappelées dans l'infobulle de chaque défense.
 - **4 pouvoirs** : Buste en marbre (zone ciblée), Alarme générale, Pause café, Verrouillage des portes.
 - **15 types de personnages** : 13 voleurs (dont le Patineur, la Taupe qui creuse sous le tapis, la Soigneuse et le Déménageur), le touriste innocent et le boss.
-- **Progression** : jusqu'à 3 étoiles par salle. Les étoiles se dépensent dans l'**arbre de talents de l'Atelier** (3 branches : Défenses, Pouvoirs, Économie, 17 talents). Les défenses et pouvoirs se débloquent au fil des salles, et le **Fichier des suspects** se remplit à chaque nouvelle rencontre.
+- **Progression** : jusqu'à 5 étoiles par salle (250 en tout). Les étoiles se dépensent dans l'**arbre de talents de l'Atelier** : 3 branches (Défenses, Pouvoirs, Économie), chacune avec un tronc commun puis deux voies, et au bout de chaque voie un choix « l'un OU l'autre ». L'arbre coûte plus que ce qu'on peut gagner : chaque joueur se construit son style (remboursement gratuit).
+- **Spécialisations** : au niveau 3, chaque défense se spécialise (Gardien Sergent ou Sifflet, Laser double ou fondant, Caméra thermique ou zoom…). Les défenses et pouvoirs se débloquent au fil des salles, et le **Fichier des suspects** se remplit à chaque nouvelle rencontre.
 - **Décor vivant** : le trait vibre comme dans un dessin animé en papier, les portraits et les armures suivent les voleurs des yeux, les torches crépitent, les plantes se balancent.
 - Musique et bruitages synthétisés en direct (Web Audio), sauvegarde locale, menus, pause, vitesse x2.
 

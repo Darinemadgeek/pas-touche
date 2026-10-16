@@ -1167,8 +1167,10 @@
     });
   };
   A.powerIcon = function (id) {
-    return A.icon('p-' + id, 64, 64, function (c) {
-      c.translate(32, 32);
+    return A.icon('p-' + id, 64, 64, function (c) { c.translate(32, 32); A.drawPower(c, id); });
+  };
+  A.drawPower = function (c, id) {
+    {
       if (id === 'buste') { c.translate(0, 22); c.scale(0.95, 0.95); A.bust(c); }
       else if (id === 'alarme') {
         c.beginPath(); c.arc(0, 2, 18, Math.PI, 0); c.lineTo(18, 12); c.lineTo(-18, 12); c.closePath(); fs(c, '#ff3b3b');
@@ -1188,6 +1190,145 @@
         for (var i = 0; i < 2; i++) { c.beginPath(); c.moveTo(-7 + i * 8, -14); c.quadraticCurveTo(-11 + i * 8, -20, -6 + i * 8, -26); c.stroke(); }
         ell(c, -3, 18, 20, 4); fs(c, '#e2dccf', 2);
       }
+    }
+  };
+
+  /* ---------- Icônes des talents de l'Atelier ---------- */
+  function towerMini(c, type, lv, sc) {
+    c.save(); c.translate(0, 24); c.scale(sc || 0.56, sc || 0.56);
+    A.tower(c, type, { level: lv || 0, aim: -0.4, face: 1, time: 0.3, fireT: 0 }); c.restore();
+  }
+  function head(c, type, x, y, sc) {
+    c.save(); c.translate(x, y); c.scale(sc, sc); A.person(c, type, { face: 1, moving: false, t: 0.2, rank: 2, id: 1 }); c.restore();
+  }
+  function coin(c, x, y, r) {
+    circ(c, x, y, r); fs(c, '#f7c948', 2); circ(c, x, y, r * 0.66); c.lineWidth = 1.4; c.strokeStyle = '#c99a1e'; c.stroke();
+    starPath(c, x, y + 0.5, r * 0.4, r * 0.17); c.fillStyle = '#c99a1e'; c.fill();
+  }
+  function bustAt(c, x, y, sc, col) {
+    c.save(); c.translate(x, y); c.scale(sc, sc); A.bust(c);
+    if (col) { c.globalCompositeOperation = 'source-atop'; c.fillStyle = col; c.fillRect(-30, -60, 60, 70); }
+    c.restore();
+  }
+  function plusBadge(c, x, y, col) {
+    circ(c, x, y, 7); fs(c, col || '#3fae46', 1.6);
+    line(c, x - 3.5, y, x + 3.5, y, '#fff', 2.4); line(c, x, y - 3.5, x, y + 3.5, '#fff', 2.4);
+  }
+  var TALENT_DRAW = {
+    formation: function (c) { head(c, 'garde', 0, 38, 0.95); plusBadge(c, 17, -16); },
+    glu: function (c) { towerMini(c, 'glu', 1, 0.6); plusBadge(c, 17, -16); },
+    patrouille: function (c) { head(c, 'garde', -10, 34, 0.62); head(c, 'garde', 11, 38, 0.62); },
+    machoires: function (c) {
+      towerMini(c, 'chien', 2, 0.62);
+      c.fillStyle = '#fff'; for (var k = 0; k < 4; k++) { c.beginPath(); c.moveTo(4 + k * 5, -18); c.lineTo(6.5 + k * 5, -11); c.lineTo(9 + k * 5, -18); c.closePath(); c.fill(); c.lineWidth = 1; c.strokeStyle = INK; c.stroke(); }
+    },
+    brigade: function (c) { head(c, 'garde', -14, 36, 0.5); head(c, 'garde', 14, 36, 0.5); head(c, 'garde', 0, 42, 0.56); },
+    perfo: function (c) {
+      c.beginPath(); c.moveTo(-14, -16); c.lineTo(14, -16); c.lineTo(14, 2); c.quadraticCurveTo(14, 16, 0, 22); c.quadraticCurveTo(-14, 16, -14, 2); c.closePath(); fs(c, '#c3cad4', 2);
+      c.beginPath(); c.moveTo(-3, -16); c.lineTo(2, -4); c.lineTo(-2, 4); c.lineTo(3, 22); c.lineWidth = 1.6; c.strokeStyle = INK; c.stroke();
+      c.save(); c.rotate(-0.6); rr(c, -24, -3, 30, 6, 3); fs(c, '#f2c230', 1.6); c.beginPath(); c.moveTo(6, -6); c.lineTo(14, 0); c.lineTo(6, 6); c.closePath(); fs(c, '#596273', 1.6); c.restore();
+    },
+    optique: function (c) {
+      circ(c, 0, 0, 20); fs(c, '#3a3f55', 2); circ(c, 0, 0, 14); fs(c, '#69c9ff', 2); circ(c, 0, 0, 7); fs(c, '#2b5f73', 1.6);
+      circ(c, -5, -5, 3.5); c.fillStyle = 'rgba(255,255,255,0.85)'; c.fill();
+    },
+    surchauffe: function (c) {
+      towerMini(c, 'laser', 1, 0.6);
+      c.beginPath(); c.moveTo(8, -6); c.quadraticCurveTo(22, -16, 14, -26); c.quadraticCurveTo(12, -18, 6, -18); c.quadraticCurveTo(10, -24, 4, -28); c.quadraticCurveTo(-2, -14, 8, -6); fs(c, '#ff9f1c', 1.6);
+    },
+    blindage: function (c) {
+      c.beginPath(); c.moveTo(-18, 14); c.quadraticCurveTo(-10, -2, 0, 6); c.quadraticCurveTo(10, 14, 16, -4); c.lineWidth = 5; c.strokeStyle = INK; c.stroke(); c.lineWidth = 2.6; c.strokeStyle = '#596273'; c.stroke();
+      c.beginPath(); c.moveTo(2, -20); c.lineTo(18, -20); c.lineTo(18, -8); c.quadraticCurveTo(18, 2, 10, 6); c.quadraticCurveTo(2, 2, 2, -8); c.closePath(); fs(c, '#3d6fd6', 2);
+      c.beginPath(); c.moveTo(11, -17); c.lineTo(7, -9); c.lineTo(11, -9); c.lineTo(8, -1); c.lineWidth = 1.6; c.strokeStyle = '#fff'; c.stroke();
+    },
+    synergie: function (c) {
+      c.lineWidth = 5; c.strokeStyle = INK; c.beginPath(); c.arc(-7, 2, 11, 0, TAU); c.stroke(); c.beginPath(); c.arc(7, 2, 11, 0, TAU); c.stroke();
+      c.lineWidth = 2.6; c.strokeStyle = '#f2c230'; c.beginPath(); c.arc(-7, 2, 11, 0, TAU); c.stroke(); c.strokeStyle = '#ffd96a'; c.beginPath(); c.arc(7, 2, 11, 0, TAU); c.stroke();
+      starPath(c, 0, -16, 7, 3); fs(c, '#ffd447', 1.4);
+    },
+    recharge: function (c) {
+      rr(c, -14, -22, 28, 5, 2); fs(c, '#8a5a34', 1.6); rr(c, -14, 17, 28, 5, 2); fs(c, '#8a5a34', 1.6);
+      c.beginPath(); c.moveTo(-11, -17); c.lineTo(11, -17); c.quadraticCurveTo(10, -4, 2, 0); c.quadraticCurveTo(10, 4, 11, 17); c.lineTo(-11, 17); c.quadraticCurveTo(-10, 4, -2, 0); c.quadraticCurveTo(-10, -4, -11, -17); c.closePath(); fs(c, '#dff6ff', 1.8);
+      c.beginPath(); c.moveTo(-6, 15); c.lineTo(6, 15); c.lineTo(0, 7); c.closePath(); c.fillStyle = '#f2c230'; c.fill();
+      c.beginPath(); c.moveTo(-7, -12); c.lineTo(7, -12); c.lineTo(0, -4); c.closePath(); c.fill();
+    },
+    granit: function (c) { bustAt(c, 0, 24, 0.95, 'rgba(90,90,100,0.35)'); plusBadge(c, 17, -16); },
+    chute: function (c) {
+      bustAt(c, 3, 26, 0.85);
+      [-16, -10].forEach(function (x, k) { line(c, x, -24 + k * 6, x, -6 + k * 6, 'rgba(42,28,22,0.6)', 2); });
+      line(c, 18, -22, 18, -8, 'rgba(42,28,22,0.6)', 2);
+    },
+    doublebuste: function (c) { bustAt(c, -10, 26, 0.68); bustAt(c, 11, 26, 0.68); },
+    assomme: function (c) {
+      bustAt(c, 0, 28, 0.8);
+      [[-14, -18], [0, -24], [14, -18]].forEach(function (p) { starPath(c, p[0], p[1], 5, 2.2); fs(c, '#ffd447', 1.2); });
+    },
+    sirene: function (c) { c.scale(0.82, 0.82); A.drawPower(c, 'alarme'); },
+    expresso: function (c) { c.scale(0.82, 0.82); A.drawPower(c, 'cafe'); },
+    serrures: function (c) { c.scale(0.82, 0.82); A.drawPower(c, 'verrou'); plusBadge(c, 20, -20); },
+    machine: function (c) {
+      rr(c, -16, -22, 32, 40, 4); fs(c, '#596273', 2);
+      rr(c, -12, -18, 24, 9, 2); fs(c, '#2b2f3a', 1.4); circ(c, 7, -13.5, 2); c.fillStyle = '#ff3b3b'; c.fill();
+      rr(c, -4, -6, 8, 6, 1); fs(c, '#2b2f3a', 1.4);
+      rr(c, -7, 4, 14, 11, 3); fs(c, '#fff', 1.6); ell(c, 0, 4, 7, 2); c.fillStyle = '#6b4226'; c.fill();
+    },
+    budget: function (c) { coin(c, -8, 10, 11); coin(c, 8, 8, 11); coin(c, 0, -6, 12); },
+    assurance: function (c) {
+      c.save(); c.translate(-4, 18);
+      c.beginPath(); c.moveTo(-6, -36); c.lineTo(6, -36); c.lineTo(5, -30); c.quadraticCurveTo(16, -24, 13, -10); c.quadraticCurveTo(10, 0, 0, 0); c.quadraticCurveTo(-10, 0, -13, -10); c.quadraticCurveTo(-16, -24, -5, -30); c.closePath(); fs(c, '#3fa7a0', 2);
+      c.fillStyle = '#f2c230'; c.fillRect(-12, -20, 24, 4); c.restore();
+      c.beginPath(); c.moveTo(6, -2); c.lineTo(22, -2); c.lineTo(22, 8); c.quadraticCurveTo(22, 18, 14, 22); c.quadraticCurveTo(6, 18, 6, 8); c.closePath(); fs(c, '#3fae46', 1.8);
+      line(c, 10, 9, 13, 13, '#fff', 2.2); line(c, 13, 13, 19, 5, '#fff', 2.2);
+    },
+    recup: function (c) {
+      c.save(); c.rotate(-0.4);
+      c.beginPath(); c.moveTo(-18, -10); c.lineTo(8, -10); c.lineTo(18, 0); c.lineTo(8, 10); c.lineTo(-18, 10); c.closePath(); fs(c, '#f4efe4', 2);
+      circ(c, 9, 0, 2.6); c.fillStyle = INK; c.fill();
+      c.font = '13px ' + A.FONT; c.textAlign = 'center'; c.fillStyle = '#c0392b'; c.fillText('€', -5, 5);
+      c.restore();
+    },
+    atelier: function (c) {
+      c.save(); c.rotate(0.7);
+      rr(c, -4, -6, 8, 30, 3); fs(c, '#8a9099', 2);
+      c.beginPath(); c.arc(0, -12, 11, 0, TAU); fs(c, '#8a9099', 2);
+      rr(c, -4, -26, 8, 12, 1); c.fillStyle = '#fbf6ea'; c.fill();
+      c.restore();
+    },
+    soldes: function (c) {
+      starPath(c, 0, 0, 22, 17, 12); fs(c, '#e2405e', 2);
+      c.font = '13px ' + A.FONT; c.textAlign = 'center'; c.fillStyle = '#fff'; c.fillText('-10%', 0, 5);
+    },
+    interets: function (c) {
+      ell(c, 0, 4, 19, 14); fs(c, '#ff9fb5', 2);
+      ell(c, 17, 4, 5, 4.5); fs(c, '#ff8aa5', 1.6); circ(c, 16, 3, 0.9); circ(c, 18.5, 3, 0.9); c.fillStyle = INK; c.fill();
+      c.beginPath(); c.moveTo(-6, -9); c.lineTo(-2, -16); c.lineTo(2, -9); c.closePath(); fs(c, '#ff8aa5', 1.4);
+      rr(c, -10, 16, 5, 6, 1); fs(c, '#ff8aa5', 1.2); rr(c, 6, 16, 5, 6, 1); fs(c, '#ff8aa5', 1.2);
+      circ(c, 6, -1, 1.4); c.fillStyle = INK; c.fill(); rr(c, -6, -9, 10, 2.5, 1); c.fill();
+      coin(c, -1, -20, 7);
+    },
+    prime: function (c) { coin(c, 0, 2, 17); starPath(c, 16, -16, 6, 2.4, 4); c.fillStyle = '#fff6b0'; c.fill(); },
+    anticipe: function (c) {
+      circ(c, -2, 4, 17); fs(c, '#fff', 2); rr(c, -6, -18, 8, 5, 2); fs(c, '#596273', 1.4);
+      line(c, -2, 4, -2, -6, INK, 2.2); line(c, -2, 4, 6, 8, INK, 2.2);
+      c.beginPath(); c.moveTo(14, -10); c.lineTo(22, -4); c.lineTo(14, 2); c.closePath(); fs(c, '#3fae46', 1.4);
+    },
+    chasseur: function (c) {
+      ['#e2405e', '#fff', '#e2405e', '#fff'].forEach(function (col, k) { circ(c, 0, 0, 20 - k * 5); fs(c, col, 1.6); });
+      c.save(); c.rotate(-0.7); rr(c, -2, -30, 4, 26, 2); fs(c, '#8a5a34', 1.4); c.restore();
+      coin(c, 14, 14, 7);
+    },
+    mecene: function (c) {
+      c.beginPath(); c.moveTo(-8, -14); c.quadraticCurveTo(-20, 0, -16, 14); c.quadraticCurveTo(0, 22, 16, 14); c.quadraticCurveTo(20, 0, 8, -14); c.closePath(); fs(c, '#a8693b', 2);
+      rr(c, -9, -18, 18, 6, 2); fs(c, '#7a4b2a', 1.6);
+      c.beginPath(); c.moveTo(-10, -24); c.lineTo(-6, -18); c.lineTo(0, -26); c.lineTo(6, -18); c.lineTo(10, -24); c.lineTo(9, -16); c.lineTo(-9, -16); c.closePath(); fs(c, '#f2c230', 1.4);
+      coin(c, 0, 4, 8);
+    },
+  };
+  // Icône d'un talent (64 x 64, mise en cache)
+  A.talentIcon = function (id) {
+    return A.icon('tal-' + id, 64, 64, function (c) {
+      c.translate(32, 32);
+      if (TALENT_DRAW[id]) TALENT_DRAW[id](c);
     });
   };
   A.coinIcon = function () {

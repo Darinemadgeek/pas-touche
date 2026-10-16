@@ -44,12 +44,13 @@
     opts = opts || {};
     this.level = level;
     this.demo = !!opts.demo;
+    this.relax = !!opts.relax;
     this.mods = PT.computeMods(opts.upgrades);
     this.paths = level.paths.map(buildPath);
     var end = level.paths[0][level.paths[0].length - 1];
     this.treasure = { x: end[0], y: end[1] };
     this.spots = level.spots.map(function (s, i) { return { i: i, x: s[0], y: s[1], tower: null }; });
-    this.coins = level.startCoins + this.mods.startCoins;
+    this.coins = level.startCoins + this.mods.startCoins + (level.type === 'casse' ? this.mods.casseCoins : 0);
     this.maxLives = level.lives + this.mods.lives;
     this.lives = this.maxLives;
     this.inRoom = this.maxLives;
@@ -90,7 +91,16 @@
   G.towerStats = function (t) {
     var def = PT.TOWERS[t.type], base = def.levels[t.level], m = this.mods, s = {};
     for (var k in base) s[k] = base[k];
+    var sp = t.level === 2 && t.spec && PT.SPECS[t.type] ? PT.SPECS[t.type][t.spec] : null;
+    if (sp) {
+      for (k in sp.mul || {}) if (s[k] != null) s[k] *= sp.mul[k];
+      for (k in sp.add || {}) if (s[k] != null) s[k] += sp.add[k];
+      ['stunHit', 'thermal', 'multi', 'heavyNet', 'beams', 'ramp', 'chill'].forEach(function (f) { if (sp[f]) s[f] = sp[f]; });
+      s.spec = t.spec;
+    }
     if (t.type === 'gardien' || t.type === 'chien') s.dmg *= m.guardDmg;
+    if (t.type === 'chien') s.dmg *= m.dogDmg;
+    if (t.type === 'laser') s.dps *= m.laserDmg;
     if (TECH[t.type]) s.range *= m.techRange;
     if (s.slowDur) s.slowDur *= m.slowDur;
     if (s.wet) s.wet *= m.slowDur;
@@ -101,7 +111,7 @@
       for (i = 0; i < this.towers.length; i++) {
         o = this.towers[i];
         if (o.type !== 'chef' || o.disabledT > 0) continue;
-        var cs = PT.TOWERS.chef.levels[o.level];
+        var cs = this.towerStats({ type: 'chef', level: o.level, spec: o.spec });
         if (dist2(o.x, o.y, t.x, t.y) <= cs.range * cs.range) { buff = Math.max(buff, cs.buff); rb = Math.max(rb, cs.rangeBuff); }
       }
     }
@@ -119,7 +129,7 @@
         o = this.towers[i];
         if (o.id !== t.id && o.type === 'gardien' && dist2(o.x, o.y, t.x, t.y) <= 170 * 170) n++;
       }
-      s.patrol = Math.min(0.3, 0.1 * n) * m.synergy;
+      s.patrol = Math.min(0.3, 0.1 * n) * m.patrol * m.synergy;
       s.rate *= 1 + s.patrol;
     }
     return s;
@@ -133,14 +143,19 @@
     return null;
   };
 
+  G.towerCost = function (type) {
+    var m = this.mods;
+    return Math.round(PT.TOWERS[type].cost * m.towerCost * (type === 'gardien' ? m.guardCost : 1));
+  };
+
   G.build = function (spot, type) {
-    var def = PT.TOWERS[type];
-    if (!def || spot.tower || this.coins < def.cost || this.availableTowers.indexOf(type) < 0) return null;
-    this.coins -= def.cost;
+    var def = PT.TOWERS[type], cost = def && this.towerCost(type);
+    if (!def || spot.tower || this.coins < cost || this.availableTowers.indexOf(type) < 0) return null;
+    this.coins -= cost;
     var t = {
       id: this.nextId++, type: type, spot: spot, x: spot.x, y: spot.y, level: 0, cd: 0.2,
-      target: null, aim: 0, face: 1, spent: def.cost, disabledT: 0, fireT: 0, lungeT: 0, lx: 0, ly: 0,
-      beamOn: false, builtT: 0,
+      target: null, aim: 0, face: 1, spent: cost, disabledT: 0, fireT: 0, lungeT: 0, lx: 0, ly: 0,
+      beamOn: false, builtT: 0, spec: null, target2: null, rampT: 0, rampOn: null,
     };
     spot.tower = t;
     this.towers.push(t);
@@ -153,10 +168,11 @@
     return lv ? Math.round(lv.cost * this.mods.upgradeCost) : null;
   };
 
-  G.upgrade = function (t) {
+  G.upgrade = function (t, spec) {
     var c = this.upgradeCost(t);
     if (c == null || this.coins < c) return false;
     this.coins -= c; t.spent += c; t.level++; t.builtT = 0;
+    if (t.level === 2) t.spec = spec === 'b' ? 'b' : 'a';
     this.emit('upgrade', { x: t.x, y: t.y, tower: t.type, level: t.level });
     return true;
   };
@@ -219,7 +235,7 @@
   /* ---------- Voleurs ---------- */
   G.spawnEnemy = function (s) {
     var def = PT.ENEMIES[s.type];
-    var hp = def.hp * this.level.hpMul * (1 + 0.06 * Math.max(0, this.waveIndex)) * (s.hp || 1);
+    var hp = def.hp * this.level.hpMul * (1 + 0.06 * Math.max(0, this.waveIndex)) * (s.hp || 1) * (this.relax ? PT.RELAX.hp : 1);
     var e = {
       id: this.nextId++, type: s.type, def: def, path: s.path, d: s.d || 0, dir: s.dir || 1,
       hp: hp, maxHp: hp, speed: def.speed * (0.94 + rand() * 0.12), lat: def.boss ? 0 : (rand() - 0.5) * 28,
@@ -245,7 +261,7 @@
   G.isCamo = function (e) { return (e.def.camo || e.smokeT > 0 || (this.dark && !e.lit)) && !e.seen; };
 
   G.targetable = function (e) {
-    return e.alive && !e.def.innocent && !e.disguised && e.leapT <= 0 && e.burrowT <= 0 && !this.isCamo(e);
+    return e.alive && !e.def.innocent && !e.disguised && e.leapT <= 0 && (e.burrowT <= 0 || e.thermal) && !this.isCamo(e);
   };
 
   // Distance qu'il reste au voleur pour sortir du musée (plus c'est petit, plus il est dangereux).
@@ -285,7 +301,7 @@
 
   G.catchEnemy = function (e) {
     e.alive = false;
-    var reward = Math.round(e.def.reward * this.mods.reward);
+    var reward = Math.round(e.def.reward * this.mods.reward * (e.def.boss || e.def.heavy ? this.mods.bigReward : 1));
     this.coins += reward;
     this.stats.caught++;
     this.stats.earned += reward;
@@ -411,7 +427,7 @@
         var hitAny = false;
         for (var i = 0; i < this.towers.length; i++) {
           var t = this.towers[i];
-          if (PT.TOWERS[t.type].electric && dist2(t.x, t.y, e.x, e.y) < 130 * 130) { t.disabledT = 3; hitAny = true; }
+          if (PT.TOWERS[t.type].electric && dist2(t.x, t.y, e.x, e.y) < 130 * 130) { t.disabledT = this.mods.empDur; hitAny = true; }
         }
         if (hitAny) { this.emit('emp', { x: e.x, y: e.y }); e.empCD = 6; } else e.empCD = 0.4;
       }
@@ -460,7 +476,7 @@
   /* ---------- Caméras ---------- */
   G.updateVision = function () {
     var es = this.enemies, i, j;
-    for (i = 0; i < es.length; i++) { es[i].seen = this.revealT > 0; es[i].mark = 0; }
+    for (i = 0; i < es.length; i++) { es[i].seen = this.revealT > 0; es[i].mark = 0; es[i].thermal = false; }
     if (this.dark) {
       for (i = 0; i < es.length; i++) {
         var en = es[i]; en.lit = false;
@@ -477,6 +493,7 @@
         if (dist2(t.x, t.y, e.x, e.y) <= r2) {
           if (e.def.decoy) { this.shatter(e); continue; }
           e.seen = true;
+          if (st.thermal && e.burrowT > 0) e.thermal = true;
           if (st.mark > e.mark) e.mark = st.mark;
           if (e.disguised) { e.disguised = false; this.emit('reveal', { x: e.x, y: e.y }); }
         }
@@ -485,11 +502,12 @@
   };
 
   /* ---------- Tirs ---------- */
-  G.pickTarget = function (t, range, preferUnslowed) {
+  // skip : voleur à ignorer (pour une deuxième cible)
+  G.pickTarget = function (t, range, preferUnslowed, skip) {
     var best = null, bestR = Infinity, alt = null, altR = Infinity, r2 = range * range;
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
-      if (!this.targetable(e)) continue;
+      if (e === skip || !this.targetable(e)) continue;
       if (dist2(t.x, t.y, e.x, e.y) > r2) continue;
       var rem = this.remaining(e);
       if (preferUnslowed && e.gluT > 0.4 && !e.def.slowImmune) { if (rem < altR) { altR = rem; alt = e; } continue; }
@@ -546,11 +564,17 @@
 
     if (def.beam) {
       var bt = this.pickTarget(t, st.range);
-      t.target = bt;
+      t.target = bt; t.target2 = null;
       if (bt) {
         t.beamOn = true;
         t.aim = Math.atan2(bt.y - 20 - t.y, bt.x - t.x);
-        this.hit(bt, st.dps * rateMul * dt * (bt.wetT > 0 ? 1 + 0.6 * this.mods.synergy : 1), true);
+        if (st.ramp) { if (t.rampOn !== bt) { t.rampOn = bt; t.rampT = 0; } t.rampT += dt; }
+        var heat = st.ramp ? 1 + Math.min(1.5, t.rampT * 0.75) : 1;
+        this.hit(bt, st.dps * rateMul * dt * heat * (bt.wetT > 0 ? 1 + 0.6 * this.mods.synergy : 1), true);
+        if (st.beams === 2) {
+          var b2 = this.pickTarget(t, st.range, false, bt);
+          if (b2) { t.target2 = b2; this.hit(b2, st.dps * rateMul * dt * (b2.wetT > 0 ? 1 + 0.6 * this.mods.synergy : 1), true); }
+        }
       }
       return;
     }
@@ -568,7 +592,11 @@
     if (def.melee) {
       t.lungeT = 0.25; t.lx = target.x; t.ly = target.y;
       // Croc-en-filet : double dégâts sur un voleur pris dans un filet
-      this.hit(target, st.dmg * (target.netT > 0 ? 1 + this.mods.synergy : 1));
+      this.hit(target, st.dmg * (target.netT > 0 ? 1 + this.mods.netBite * this.mods.synergy : 1));
+      if (st.multi === 2) {
+        var t2 = this.pickTarget(t, st.range, false, target);
+        if (t2) { this.hit(t2, st.dmg * (t2.netT > 0 ? 1 + this.mods.netBite * this.mods.synergy : 1)); this.emit('bite', { x: t2.x, y: t2.y }); }
+      }
       this.emit('bite', { x: target.x, y: target.y });
       return;
     }
@@ -577,6 +605,7 @@
       var self = this;
       this.splashTargets(target.x, target.y, st.splash, function (e) {
         self.hit(e, st.dmg);
+        if (st.chill && e.alive) self.applySlow(e, st.chill, 2);
         if (!e.alive || e.def.heavy || e.def.boss) return;
         self.push(e, st.push * (e.wetT > 0 ? 1 + self.mods.synergy : 1));
       });
@@ -585,7 +614,7 @@
     }
     var sx = t.x, sy = t.y - 44;
     if (def.projectile === 'matraque') {
-      this.projectiles.push({ kind: 'matraque', x: sx, y: sy, target: target, tx: target.x, ty: target.y - 20, speed: def.projSpeed, dmg: st.dmg, rot: 0 });
+      this.projectiles.push({ kind: 'matraque', x: sx, y: sy, target: target, tx: target.x, ty: target.y - 20, speed: def.projSpeed, dmg: st.dmg, rot: 0, stunHit: st.stunHit || 0 });
       this.emit('shoot', { tower: t.type, x: sx, y: sy });
     } else {
       var dd = Math.sqrt(dist2(sx, sy, target.x, target.y));
@@ -593,7 +622,7 @@
       var aimAt = this.predict(target, dur);
       this.projectiles.push({
         kind: def.projectile, sx: sx, sy: sy, x: sx, y: sy, tx: aimAt.x, ty: aimAt.y, t: 0, dur: dur,
-        dmg: st.dmg, splash: st.splash, slow: st.slow, slowDur: st.slowDur, puddle: st.puddle, stun: st.stun, rot: 0, arc: def.arc || 70, pierce: !!def.pierce,
+        dmg: st.dmg, splash: st.splash, slow: st.slow, slowDur: st.slowDur, puddle: st.puddle, stun: st.stun, rot: 0, arc: def.arc || 70, pierce: !!def.pierce, heavyNet: !!st.heavyNet,
       });
       this.emit('shoot', { tower: t.type, x: sx, y: sy });
     }
@@ -623,7 +652,7 @@
     var r2 = r * r;
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
-      if (!e.alive || e.def.innocent || e.disguised || e.leapT > 0 || e.burrowT > 0) continue;
+      if (!e.alive || e.def.innocent || e.disguised || e.leapT > 0 || (e.burrowT > 0 && !e.thermal)) continue;
       if (dist2(x, y, e.x, e.y) <= r2) fn(e);
     }
   };
@@ -639,6 +668,7 @@
         if (d <= step + 6) {
           if (p.target && p.target.alive && this.targetable(p.target)) {
             this.hit(p.target, p.dmg);
+            if (p.stunHit) this.applyStun(p.target, p.stunHit);
             this.emit('hit', { x: p.tx, y: p.ty, kind: 'matraque' });
           }
           done = true;
@@ -656,7 +686,11 @@
             this.puddles.push({ x: p.tx, y: p.ty, r: p.splash * 0.85, slow: p.slow, t: p.puddle, max: p.puddle, seed: rand() * 10 });
             this.emit('splat', { x: p.tx, y: p.ty });
           } else if (p.kind === 'filet') {
-            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg); self.applyStun(e, p.stun, true); });
+            this.splashTargets(p.tx, p.ty, p.splash, function (e) {
+              self.hit(e, p.dmg);
+              if (p.heavyNet && e.alive && e.def.stunImmune && !e.def.boss && e.leapT <= 0) { e.stunT = Math.max(e.stunT, p.stun * 0.5); e.netT = Math.max(e.netT, p.stun * 0.5); }
+              else self.applyStun(e, p.stun, true);
+            });
             this.emit('net', { x: p.tx, y: p.ty, r: p.splash });
           } else if (p.kind === 'boulet') {
             this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg * (e.slowT > 0 ? 1 + 0.35 * self.mods.synergy : 1), p.pierce); });
@@ -688,13 +722,14 @@
   G.usePower = function (id, x, y) {
     var p = this.powers[id], def = PT.POWERS[id];
     if (!p || p.cd > 0 || this.state === 'won' || this.state === 'lost') return false;
-    p.cd = def.cd * this.mods.powerCd;
+    p.cd = def.cd * this.mods.powerCd * (id === 'cafe' ? this.mods.cafeCd : 1);
     p.max = p.cd;
     if (id === 'buste') {
       var m = this.mods, r = def.radius * m.bustRadius, dmg = def.dmg * m.bustDmg;
       var xs = m.bustDouble ? [x - r * 0.75, x + r * 0.75] : [x];
       for (var b = 0; b < xs.length; b++) {
-        this.drops.push({ x: xs[b], y: y, t: 0.6 + b * 0.12, max: 0.6 + b * 0.12, r: r, dmg: dmg });
+        var delay = m.bustDelay + b * 0.12;
+        this.drops.push({ x: xs[b], y: y, t: delay, max: delay, r: r, dmg: dmg });
         this.emit('bustFall', { x: xs[b], y: y });
       }
     } else if (id === 'alarme') {
@@ -710,7 +745,7 @@
       this.cafeT = def.dur + this.mods.cafePlus;
       this.emit('cafe', {});
     } else if (id === 'verrou') {
-      this.lockT = def.dur;
+      this.lockT = def.dur + this.mods.lockPlus;
       this.emit('lock', {});
     }
     return true;
@@ -722,7 +757,13 @@
       var d = this.drops[i];
       d.t -= dt;
       if (d.t <= 0) {
-        this.splashTargets(d.x, d.y, d.r || def.radius, function (e) { self.hit(e, d.dmg || def.dmg); self.applyStun(e, def.stun); });
+        var knock = self.mods.bustStun;
+        this.splashTargets(d.x, d.y, d.r || def.radius, function (e) {
+          self.hit(e, d.dmg || def.dmg);
+          // Buste assommant : même les Costauds restent sonnés (le boss un peu moins)
+          if (knock && e.alive) e.stunT = Math.max(e.stunT, e.def.boss ? 1 : knock);
+          else self.applyStun(e, def.stun);
+        });
         this.emit('bustImpact', { x: d.x, y: d.y, r: d.r || def.radius });
         this.drops.splice(i, 1);
       }
@@ -783,7 +824,8 @@
 
   G.computeStars = function () {
     var r = this.lives / this.maxLives;
-    return r >= 0.9 ? 3 : r >= 0.5 ? 2 : 1;
+    var st = r >= 1 ? 5 : r >= 0.85 ? 4 : r >= 0.65 ? 3 : r >= 0.4 ? 2 : 1;
+    return this.relax ? Math.min(st, PT.RELAX.maxStars) : st;
   };
 
   /* ---------- Mode démo (fond animé du menu) ---------- */

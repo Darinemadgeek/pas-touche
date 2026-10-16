@@ -15,7 +15,7 @@ var MAX_TRIES = 6;
 profiles.forEach(function (prof) {
   var stars = {}, upgrades = {}, spent = 0, totalTries = 0, bugs = [], walls = [];
   // Les étoiles des salles déjà passées (si on commence plus loin) sont estimées
-  for (var k = 1; k < from; k++) stars[k] = prof === 'novice' ? 2 : 3;
+  for (var k = 1; k < from; k++) stars[k] = prof === 'novice' ? 3 : 4;
   console.log('\n######## Profil ' + prof + ' ########');
   console.log('salle | essais | étoiles | vies restantes | durée');
   PT.LEVELS.forEach(function (level) {
@@ -26,7 +26,7 @@ profiles.forEach(function (prof) {
     var tries = 0, res = null;
     while (tries < MAX_TRIES) {
       tries++;
-      try { res = bot.play(level, upgrades, prof, level.id * 1000 + tries, tries); }
+      try { res = bot.play(level, upgrades, prof, level.id * 1000 + tries, tries, tries > PT.RELAX.after); }
       catch (e) { bugs.push('salle ' + level.id + ' : ' + e.message); res = { state: 'bug', stars: 0, lives: 0, max: 1, time: 0 }; break; }
       if (res.state === 'won') break;
     }

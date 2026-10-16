@@ -23,7 +23,6 @@
   var ICON_SOUND = '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#2a1c16"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="#2a1c16" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
   var ICON_MUTE = '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#2a1c16"/><path d="M16 9l5 6M21 9l-5 6" stroke="#2a1c16" stroke-width="2.4" stroke-linecap="round"/></svg>';
   var ICON_FULL = '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" stroke="#2a1c16" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  var ICON_BACK = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke="#2a1c16" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   /* ================= Écrans ================= */
   UI.closeScreens = function () { $('screens').innerHTML = ''; };
@@ -55,7 +54,9 @@
     click(b, function () { UI.showAtelier(back); });
     return b;
   }
-  function backBtn(fn) { var b = el('button', 'btn-round', ICON_BACK); b.setAttribute('aria-label', 'Retour'); click(b, fn); return b; }
+  // Croix rouge « Fermer », en haut à droite, là où on la cherche d'instinct
+  var ICON_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  function closeBtn(fn) { var b = el('button', 'btn-round btn-close', ICON_CLOSE); b.setAttribute('aria-label', 'Fermer'); click(b, fn); return b; }
 
   /* ---------- Titre ---------- */
   UI.showTitle = function () {
@@ -116,11 +117,11 @@
     var a = App();
     var s = UI.screen('scr-levels');
     var head = el('div', 'screen-head');
-    head.appendChild(backBtn(UI.showTitle));
+    var left = el('div', 'head-right', starsBadge());
+    left.appendChild(shopBtn('l-shop', UI.showLevels));
+    head.appendChild(left);
     head.appendChild(el('h2', '', 'Choisissez une salle'));
-    var right = el('div', 'head-right', starsBadge());
-    right.appendChild(shopBtn('l-shop', UI.showLevels));
-    head.appendChild(right);
+    head.appendChild(closeBtn(UI.showTitle));
     s.appendChild(head);
     // Les salles sont rangées par ailes de 10 ; on ouvre celle de la dernière salle débloquée
     var nWings = Math.ceil(PT.LEVELS.length / 10), lastOpen = 0;
@@ -131,7 +132,7 @@
       var got = 0, open = a.isUnlocked(w * 10);
       PT.LEVELS.slice(w * 10, w * 10 + 10).forEach(function (lv) { got += a.save.stars[lv.id] || 0; });
       var tb = el('button', 'wing' + (w === UI.wing ? ' on' : '') + (open ? '' : ' locked'),
-        '<small>Aile ' + (w + 1) + '</small>' + esc(WINGS[w] || '') + '<span>' + got + '/' + Math.min(10, PT.LEVELS.length - w * 10) * 3 + ' ★</span>');
+        '<small>Aile ' + (w + 1) + '</small>' + esc(WINGS[w] || '') + '<span>' + got + '/' + Math.min(10, PT.LEVELS.length - w * 10) * PT.MAX_STARS + ' ★</span>');
       (function (w, open) {
         if (open) click(tb, function () { UI.wing = w; UI.showLevels(); });
         else tb.addEventListener('click', function () { PT.Audio.play('error'); UI.toast('Aile fermée', 'Terminez la salle ' + (w * 10) + ' pour l’ouvrir'); });
@@ -145,7 +146,7 @@
       var unlocked = a.isUnlocked(idx), stars = a.save.stars[lv.id] || 0;
       var b = el('button', 'lvl' + (unlocked ? '' : ' locked'));
       var st = '';
-      for (var k = 0; k < 3; k++) st += '<img alt="" src="' + A.starIcon(k < stars) + '">';
+      for (var k = 0; k < PT.MAX_STARS; k++) st += '<img alt="" src="' + A.starIcon(k < stars) + '">';
       var badge = lv.type === 'casse' ? '<span class="badge casse">CASSE</span>' : lv.variant ? '<span class="badge variante">' + VARIANTS[lv.variant] + '</span>' : '';
       b.innerHTML = badge + '<img class="thumb" alt="" src="' + thumb(lv) + '"><div class="body"><span class="num">SALLE ' + lv.id + '</span>' +
         '<span class="name">' + esc(lv.name) + '</span><span class="sub">' + esc(lv.subtitle) + '</span><span class="stars">' + st + '</span></div>';
@@ -249,7 +250,7 @@
     var a = App(), lv = info.level, idx = a.levelIdx, next = PT.LEVELS[idx + 1];
     var s = UI.screen('scr-win');
     var stars = '';
-    for (var k = 0; k < 3; k++) stars += '<img alt="" class="' + (k < info.stars ? 'on' : '') + '" style="animation-delay:' + (0.25 + k * 0.3) + 's" src="' + A.starIcon(k < info.stars) + '">';
+    for (var k = 0; k < PT.MAX_STARS; k++) stars += '<img alt="" class="' + (k < info.stars ? 'on' : '') + '" style="animation-delay:' + (0.25 + k * 0.3) + 's" src="' + A.starIcon(k < info.stars) + '">';
     var unl = '';
     if (info.firstClear && next) {
       PT.TOWER_ORDER.forEach(function (t) { if (PT.TOWERS[t].unlock === next.id) unl += chip(A.towerIcon(t), PT.TOWERS[t].name, 'Défense'); });
@@ -292,66 +293,144 @@
     tips.push('Placez vos défenses près des virages : les voleurs y passent à l’aller ET au retour.');
     tips.push('Améliorer une défense coûte souvent moins cher que d’en construire une nouvelle.');
     tips.push('Dépensez vos étoiles à l’Atelier pour des bonus permanents.');
+    var canRelax = !a.relax && ((a.save.fails || {})[lv.id] || 0) >= PT.RELAX.after;
     var s = UI.screen('scr-lose');
     s.innerHTML = '<div class="frame result"><div class="eyebrow">Salle ' + lv.id + ' · vague ' + (info.game.waveIndex + 1) + '/' + lv.waves.length + '</div><h2>Cambriolé !</h2>' +
       '<div class="quote"><img alt="" src="' + A.portrait('gentleman') + '"><p>« ' + LOSE_QUOTES[(Math.random() * LOSE_QUOTES.length) | 0] + ' »</p></div>' +
       '<p><b>Astuce :</b> ' + tips[(Math.random() * Math.min(4, tips.length)) | 0] + '</p>' +
-      '<div class="actions"><button class="btn ghost small" id="l-menu">Salles</button><button class="btn ghost small" id="l-shop">Atelier</button><button class="btn big red" id="l-retry">Réessayer</button></div></div>';
+      (canRelax ? '<div class="relax"><b>Cette salle vous résiste ?</b> Rejouez-la en <b>mode détente</b> : les voleurs sont 25 % moins résistants, mais vous gagnerez ' + PT.RELAX.maxStars + ' étoiles au plus.</div>' : '') +
+      '<div class="actions"><button class="btn ghost small" id="l-menu">Salles</button><button class="btn ghost small" id="l-shop">Atelier</button>' +
+      (canRelax ? '<button class="btn green" id="l-relax">Mode détente</button>' : '') + '<button class="btn big red" id="l-retry">Réessayer</button></div></div>';
+    if (canRelax) click($('l-relax'), function () { a.startLevel(a.levelIdx, true); });
     click($('l-menu'), function () { a.quitToLevels(); });
     click($('l-shop'), function () { a.quitToLevels(); UI.showAtelier(UI.showLevels); });
-    click($('l-retry'), function () { a.startLevel(a.levelIdx); });
+    click($('l-retry'), function () { a.startLevel(a.levelIdx, a.relax); });
   };
 
   /* ---------- Atelier : arbre de talents ---------- */
-  UI.showAtelier = function (back, confirmReset) {
-    var a = App();
+  UI.atelierBranch = 'def';
+  UI.atelierSel = null;
+  function talentState(u, a) {
+    var r = a.save.upgrades[u.id] || 0, max = u.costs.length;
+    if (r >= max) return 'done';
+    if (u.excl && (a.save.upgrades[u.excl] || 0) > 0) return 'banned';
+    if (!PT.upgradeOpen(u.id, a.save.upgrades)) return 'locked';
+    return a.starsFree() >= u.costs[r] ? 'buy' : 'poor';
+  }
+  // Pastille compacte : nom, rangs, prix
+  // Talent = un rond avec son dessin, ses rangs en petits points, et son nom dessous.
+  function pillHtml(u, a) {
+    var r = a.save.upgrades[u.id] || 0, max = u.costs.length, st = talentState(u, a);
+    var badge = st === 'locked' ? '<span class="badge">🔒</span>' : st === 'banned' ? '<span class="badge no">✕</span>' : st === 'done' ? '<span class="badge ok">✓</span>' : '';
+    var pips = '';
+    for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
+    return '<button class="pill-node ' + st + (r > 0 ? ' owned' : '') + (UI.atelierSel === u.id ? ' sel' : '') + '" data-id="' + u.id + '"' + (u.req ? ' data-req="' + u.req + '"' : '') + '>' +
+      '<span class="dot"><img alt="" src="' + A.talentIcon(u.id) + '">' + badge + '</span><span class="pips">' + pips + '</span><span class="nm">' + esc(u.name) + '</span></button>';
+  }
+  function drawTreeLines(box, color) {
+    // Traits fins entre les ronds ; positions de mise en page (insensibles à l'animation du cadre)
+    var svg = box.querySelector('svg.links'), out = '';
+    function dot(n) { var d = n.querySelector('.dot'); return { x: n.offsetLeft + d.offsetLeft + d.offsetWidth / 2, top: n.offsetTop + d.offsetTop, bot: n.offsetTop + d.offsetTop + d.offsetHeight }; }
+    box.querySelectorAll('.pill-node[data-req]').forEach(function (n) {
+      var p = box.querySelector('.pill-node[data-id="' + n.getAttribute('data-req') + '"]');
+      if (!p) return;
+      var A1 = dot(p), B1 = dot(n), y1 = A1.bot, y2 = B1.top, my = (y1 + y2) / 2, on = p.classList.contains('owned');
+      // Le trait part du rond et contourne le nom du talent parent
+      var yl = p.offsetTop + p.offsetHeight + 2;
+      out += '<path d="M' + A1.x + ' ' + yl + ' C' + A1.x + ' ' + (yl + y2) / 2 + ' ' + B1.x + ' ' + (yl + y2) / 2 + ' ' + B1.x + ' ' + y2 + '" stroke="' + (on ? color : '#d6c9b3') + '"' + (on ? '' : ' stroke-dasharray="3 4"') + ' />';
+    });
+    svg.setAttribute('width', box.offsetWidth); svg.setAttribute('height', box.offsetHeight);
+    svg.innerHTML = out;
+  }
+  UI.showAtelier = function (back) {
     var s = UI.screen('scr-atelier');
     var head = el('div', 'screen-head');
-    head.appendChild(backBtn(back || UI.showTitle));
+    head.appendChild(el('div', 'a-stars', starsBadge()));
     head.appendChild(el('h2', '', 'L’Atelier'));
-    head.appendChild(el('div', '', starsBadge()));
+    head.appendChild(closeBtn(back || UI.showTitle));
     s.appendChild(head);
-    var f = el('div', 'frame shop');
+    var f = el('div', 'frame shop atelier');
     f.style.marginTop = 'calc(var(--u) * 56)';
-    var html = '<p>Gagnez jusqu’à 3 étoiles par salle et investissez-les dans vos talents. Dans chaque branche, un talent s’ouvre dès que celui du dessus a au moins un rang.</p><div class="tree">';
-    PT.BRANCHES.forEach(function (br) {
-      html += '<div class="branch" style="--bc:' + br.color + '"><h3>' + esc(br.name) + '</h3>';
-      PT.UPGRADES.filter(function (u) { return u.branch === br.id; }).forEach(function (u, i, list) {
-        var r = a.save.upgrades[u.id] || 0, max = u.costs.length, cost = u.costs[r];
-        var open = PT.upgradeOpen(u.id, a.save.upgrades);
-        var pips = '';
-        for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
-        var state = r >= max ? 'done' : !open ? 'locked' : a.starsFree() >= cost ? 'buy' : 'poor';
-        html += '<div class="node ' + state + '"><b>' + esc(u.name) + '</b><small>' + esc(u.desc(Math.max(1, r < max ? r + 1 : r))) + '</small>' +
-          (r > 0 && r < max ? '<small class="now">Actuel : ' + esc(u.desc(r)) + '</small>' : '') +
-          '<div class="pips">' + pips + '</div>' +
-          (r >= max ? '<span class="eyebrow">Maximum</span>' :
-            !open ? '<span class="eyebrow">Débloquez « ' + esc(list[i - 1].name) + ' »</span>' :
-            '<button class="btn small" data-up="' + u.id + '"' + (a.starsFree() < cost ? ' disabled' : '') + '><img alt="" src="' + A.starIcon(true) + '">' + cost + '</button>') + '</div>';
-      });
-      html += '</div>';
-    });
-    html += '</div><div class="actions">' + (confirmReset ? '<span class="confirm-line">Rembourser toutes les étoiles dépensées ?</span><button class="btn small ghost" id="a-no">Non</button><button class="btn small red" id="a-yes">Oui, rembourser</button>' : '<button class="btn small ghost" id="a-reset">Rembourser mes étoiles</button>') + '</div>';
-    f.innerHTML = html;
     s.appendChild(f);
-    f.querySelectorAll('[data-up]').forEach(function (b) {
-      click(b, function () {
-        if (a.buyUpgrade(b.getAttribute('data-up'))) { PT.Audio.play('upgrade'); UI.showAtelier(back); }
-        else PT.Audio.play('error');
-      });
-    });
-    if ($('a-reset')) click($('a-reset'), function () { UI.showAtelier(back, true); });
-    if ($('a-no')) click($('a-no'), function () { UI.showAtelier(back); });
-    if ($('a-yes')) click($('a-yes'), function () { a.save.upgrades = {}; a.persist(); UI.showAtelier(back); });
+    renderAtelier(f, false);
   };
+  // Redessine le contenu de l'Atelier sans rouvrir l'écran (garde la position de défilement)
+  function renderAtelier(f, confirmReset) {
+    var a = App();
+    var scroll = f.scrollTop;
+    var badge = document.querySelector('#scr-atelier .a-stars');
+    if (badge) badge.innerHTML = starsBadge();
+    var sel = PT.upgradeById(UI.atelierSel);
+    if (!sel) sel = PT.UPGRADES.filter(function (u) { return talentState(u, a) === 'buy'; })[0] || PT.UPGRADES.filter(function (u) { return talentState(u, a) !== 'done'; })[0] || PT.UPGRADES[0];
+    UI.atelierSel = sel.id;
+    var br = PT.BRANCHES.filter(function (x) { return x.id === sel.branch; })[0];
+    // Toute la marge de progression d'un coup d'œil
+    var html = '<div class="atelier-top"><span><b>' + a.starsTotal() + '</b> étoiles gagnées sur ' + PT.LEVELS.length * PT.MAX_STARS + '</span><span><b>' + a.starsSpent() + '</b> investies</span><span><b>' + a.starsFree() + '</b> à dépenser</span></div>';
+    html += '<div class="atelier-body" style="--bc:' + br.color + '"><div class="branches">';
+    PT.BRANCHES.forEach(function (x) {
+      var list = PT.UPGRADES.filter(function (u) { return u.branch === x.id; });
+      var spent = 0, cap = 0;
+      list.forEach(function (u) {
+        var r = a.save.upgrades[u.id] || 0;
+        for (var k = 0; k < u.costs.length; k++) { if (!u.excl || u.id < u.excl) cap += u.costs[k]; if (k < r) spent += u.costs[k]; }
+      });
+      html += '<div class="talent-tree" style="--bc:' + x.color + '"><svg class="links" aria-hidden="true"></svg>' +
+        '<div class="bhead"><b>' + esc(x.name) + '</b><span class="bar"><i style="width:' + Math.round(100 * spent / cap) + '%"></i></span></div>';
+      list.filter(function (u) { return u.path === 't'; }).forEach(function (u) { html += '<div class="trow">' + pillHtml(u, a) + '</div>'; });
+      var pa = list.filter(function (u) { return u.path === 'a' && !u.excl; }), pb = list.filter(function (u) { return u.path === 'b' && !u.excl; });
+      for (var i = 0; i < Math.max(pa.length, pb.length); i++) html += '<div class="trow two">' + (pa[i] ? pillHtml(pa[i], a) : '<span></span>') + (pb[i] ? pillHtml(pb[i], a) : '<span></span>') + '</div>';
+      html += '<div class="trow two">';
+      ['a', 'b'].forEach(function (p) {
+        var duo = list.filter(function (u) { return u.path === p && u.excl; });
+        html += '<div class="duo">' + pillHtml(duo[0], a) + pillHtml(duo[1], a) + '</div>';
+      });
+      html += '</div></div>';
+    });
+    html += '</div>';
+
+    // Panneau de détail
+    var r = a.save.upgrades[sel.id] || 0, max = sel.costs.length, st = talentState(sel, a);
+    var why = st === 'banned' ? 'Vous avez choisi l’autre option : remboursez vos étoiles pour changer d’avis.' :
+      st === 'locked' ? 'Achetez d’abord « ' + esc(PT.upgradeById(sel.req).name) + ' ».' : '';
+    html += '<div class="talent-detail"><small class="hint">Touchez un talent pour le voir ici</small><div class="td-head"><img alt="" src="' + A.talentIcon(sel.id) + '"><h3>' + esc(sel.name) + '</h3></div>' +
+      (sel.excl ? '<span class="excl-tag">Au choix avec « ' + esc(PT.upgradeById(sel.excl).name) + ' »</span>' : '') +
+      '<p class="rank">' + (sel.path === 't' ? 'Tronc commun' : 'Voie : ' + esc(br.paths[sel.path])) + ' · rang ' + r + ' / ' + max + '</p>' +
+      (r > 0 ? '<p class="now">Actuel : ' + esc(sel.desc(r)) + '</p>' : '') +
+      (r < max ? '<p class="next">' + (r > 0 ? 'Prochain : ' : '') + esc(sel.desc(r + 1)) + '</p>' : '<p class="next">Talent au maximum.</p>') +
+      (why ? '<p class="why">' + why + '</p>' : '') +
+      (r < max && (st === 'buy' || st === 'poor') ? '<button class="btn" id="a-buy"' + (st === 'poor' ? ' disabled' : '') + '><img alt="" src="' + A.starIcon(true) + '">Acheter · ' + sel.costs[r] + '</button>' +
+        (st === 'poor' ? '<p class="why">Il vous manque ' + (sel.costs[r] - a.starsFree()) + ' étoile' + (sel.costs[r] - a.starsFree() > 1 ? 's' : '') + '.</p>' : '') : '') +
+      '<div class="refund">' + (confirmReset ? '<span>Tout rembourser ?</span><button class="btn small ghost" id="a-no">Non</button><button class="btn small red" id="a-yes">Oui</button>' : '<button class="linkish" id="a-reset">Rembourser mes étoiles (gratuit)</button>') + '</div>' +
+      '</div></div>';
+    f.innerHTML = html;
+    f.scrollTop = scroll;
+    f.querySelectorAll('.talent-tree').forEach(function (box) { drawTreeLines(box, box.style.getPropertyValue('--bc')); });
+    f.querySelectorAll('.pill-node').forEach(function (n) {
+      click(n, function () { UI.atelierSel = n.getAttribute('data-id'); PT.Audio.play('click'); renderAtelier(f); });
+    });
+    if ($('a-buy')) click($('a-buy'), function () {
+      if (a.buyUpgrade(sel.id)) {
+        PT.Audio.play('upgrade'); renderAtelier(f);
+        var bought = f.querySelector('.pill-node[data-id="' + sel.id + '"] .dot');
+        if (bought) bought.classList.add('bought');
+      }
+      else PT.Audio.play('error');
+    });
+    if ($('a-reset')) click($('a-reset'), function () { renderAtelier(f, true); });
+    if ($('a-no')) click($('a-no'), function () { renderAtelier(f); });
+    if ($('a-yes')) click($('a-yes'), function () { a.save.upgrades = {}; a.persist(); PT.Audio.play('sell'); renderAtelier(f); });
+  }
+  window.addEventListener('resize', function () {
+    document.querySelectorAll('#scr-atelier .talent-tree').forEach(function (box) { drawTreeLines(box, box.style.getPropertyValue('--bc')); });
+  });
 
   UI.showSuspects = function (back) {
     var a = App();
     var s = UI.screen('scr-suspects');
     var head = el('div', 'screen-head');
-    head.appendChild(backBtn(back || UI.showTitle));
-    head.appendChild(el('h2', '', 'Fichier des suspects'));
     head.appendChild(el('div', ''));
+    head.appendChild(el('h2', '', 'Fichier des suspects'));
+    head.appendChild(closeBtn(back || UI.showTitle));
     s.appendChild(head);
     var f = el('div', 'frame shop');
     f.style.marginTop = 'calc(var(--u) * 56)';
@@ -398,6 +477,7 @@
       (confirmReset ? '<p class="confirm-line">Les étoiles, améliorations et suspects découverts seront effacés.</p>' : '') +
       '<p style="margin-top:12px;font-size:calc(var(--u) * 14)">Raccourcis clavier : <b>Espace</b> vague suivante, <b>1</b> à <b>4</b> pouvoirs, <b>V</b> vitesse, <b>Échap</b> pause.</p>' +
       '<div class="actions"><button class="btn" id="o-back">Retour</button></div></div>';
+    s.querySelector('.frame').appendChild(closeBtn(back || UI.showTitle)).classList.add('in-frame');
     bindToggles();
     click($('o-full'), function () { a.toggleFullscreen(); });
     click($('o-back'), back || UI.showTitle);
@@ -602,26 +682,26 @@
     ring.style.cssText = 'left:' + (L.cx - radius) + 'px;top:' + (L.cy - radius) + 'px;width:' + radius * 2 + 'px;height:' + radius * 2 + 'px';
     r.appendChild(ring);
     types.forEach(function (t, i) {
-      var d = PT.TOWERS[t];
-      var b = el('button', 'r-item', '<img alt="" src="' + A.towerIcon(t) + '"><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">' + d.cost + '</span>');
-      b.dataset.type = t; b.dataset.cost = d.cost;
-      b.setAttribute('aria-label', d.name + ', ' + d.cost + ' pièces');
+      var d = PT.TOWERS[t], cost = g.towerCost(t);
+      var b = el('button', 'r-item', '<img alt="" src="' + A.towerIcon(t) + '"><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">' + cost + '</span>');
+      b.dataset.type = t; b.dataset.cost = cost;
+      b.setAttribute('aria-label', d.name + ', ' + cost + ' pièces');
       b.style.left = L.pos[i].x + 'px'; b.style.top = L.pos[i].y + 'px';
       b.style.animationDelay = (i * 0.025) + 's';
       b.addEventListener('click', function (ev) {
         ev.stopPropagation(); PT.Audio.unlock();
         if (UI.radialSel === t) {
           if (g.build(spot, t)) { UI.closeRadial(); }
-          else { PT.Audio.play('error'); UI.toast('Pas assez de pièces', 'Il en faut ' + d.cost); }
+          else { PT.Audio.play('error'); UI.toast('Pas assez de pièces', 'Il en faut ' + cost); }
           return;
         }
         PT.Audio.play('click');
         UI.radialSel = t;
         r.querySelectorAll('.r-item').forEach(function (x) { x.classList.toggle('sel', x === b); });
         var st = statsFor(g, t, 0, { x: spot.x, y: spot.y, id: -1 });
-        UI.preview = { x: spot.x, y: spot.y - 10, range: st.range, ok: g.coins >= d.cost };
-        UI.showTip('<h4>' + esc(d.name) + ' · ' + d.cost + ' pièces</h4><p>' + esc(d.desc) + '</p>' + statLine(t, st) + synergiesOf(t) +
-          '<div class="hint">' + (g.coins >= d.cost ? 'Touchez à nouveau pour construire.' : 'Pas encore assez de pièces.') + '</div>');
+        UI.preview = { x: spot.x, y: spot.y - 10, range: st.range, ok: g.coins >= cost };
+        UI.showTip('<h4>' + esc(d.name) + ' · ' + cost + ' pièces</h4><p>' + esc(d.desc) + '</p>' + statLine(t, st) + synergiesOf(t) +
+          '<div class="hint">' + (g.coins >= cost ? 'Touchez à nouveau pour construire.' : 'Pas encore assez de pièces.') + '</div>');
       });
       r.appendChild(b);
     });
@@ -639,46 +719,60 @@
     UI.selectedTower = tower;
     UI.radialKind = 'tower';
     var d = PT.TOWERS[tower.type], st = g.towerStats(tower), cost = g.upgradeCost(tower), sell = g.sellValue(tower);
+    var specs = tower.level === 1 && PT.SPECS[tower.type];
     UI.preview = { x: tower.x, y: tower.y - 10, range: st.range };
-    var u = a.u, radius = 70 * u;
+    var u = a.u, radius = (specs ? 80 : 70) * u;
     var sp = a.renderer.toScreen(tower.x, tower.y - 30);
-    var L = layoutRadial(sp.x, sp.y, 2, radius);
+    var L = layoutRadial(sp.x, sp.y, specs ? 3 : 2, radius);
     UI.radialCx = L.cx; UI.radialCy = L.cy; UI.radialR = radius;
     r.innerHTML = '';
-    var up = el('button', 'r-item' + (cost == null ? ' max' : ''));
-    if (cost == null) up.innerHTML = '<span class="lbl">MAX</span>';
-    else {
-      up.innerHTML = '<img alt="" src="' + A.towerIcon(tower.type, tower.level + 1) + '"><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">' + cost + '</span>';
-      up.dataset.cost = cost;
-    }
-    up.setAttribute('aria-label', cost == null ? 'Niveau maximum' : 'Améliorer pour ' + cost + ' pièces');
-    up.style.left = L.pos[0].x + 'px'; up.style.top = L.pos[0].y + 'px';
-    var sl = el('button', 'r-item sell', '<span class="lbl">Vendre</span><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">+' + sell + '</span>');
-    sl.setAttribute('aria-label', 'Vendre pour ' + sell + ' pièces');
-    sl.style.left = L.pos[1].x + 'px'; sl.style.top = L.pos[1].y + 'px';
-    r.appendChild(up); r.appendChild(sl);
-    r.hidden = false;
-    var info = '<h4>' + esc(d.name) + ' · niveau ' + (tower.level + 1) + '/3</h4>' + statLine(tower.type, st) + synergiesOf(tower.type);
-    UI.showTip(info + '<div class="hint">Touchez l’amélioration ou la vente.</div>');
-    up.addEventListener('click', function (ev) {
-      ev.stopPropagation(); PT.Audio.unlock();
-      if (cost == null) { PT.Audio.play('error'); return; }
-      if (UI.radialSel === 'up') {
-        if (g.upgrade(tower)) UI.openTower(tower);
-        else { PT.Audio.play('error'); UI.toast('Pas assez de pièces', 'Il en faut ' + cost); }
-        return;
+    var coin = '<img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">';
+    var items = [];
+    function select(btn, key) { UI.radialSel = key; items.forEach(function (x) { x.classList.toggle('sel', x === btn); }); }
+    function upItem(spec, pos) {
+      var b = el('button', 'r-item' + (cost == null ? ' max' : '') + (spec ? ' spec' : ''));
+      if (cost == null) b.innerHTML = '<span class="lbl">MAX</span>';
+      else {
+        b.innerHTML = '<img alt="" src="' + A.towerIcon(tower.type, tower.level + 1) + '">' + (spec ? '<span class="spec-name" style="background:' + specs[spec].color + '">' + esc(specs[spec].name) + '</span>' : '') +
+          '<span class="price">' + coin + cost + '</span>';
+        b.dataset.cost = cost;
       }
-      PT.Audio.play('click');
-      UI.radialSel = 'up'; up.classList.add('sel'); sl.classList.remove('sel');
-      var nx = statsFor(g, tower.type, tower.level + 1, tower);
-      UI.preview = { x: tower.x, y: tower.y - 10, range: nx.range, ok: g.coins >= cost };
-      UI.showTip('<h4>Améliorer : niveau ' + (tower.level + 2) + ' · ' + cost + ' pièces</h4>' + statLine(tower.type, st, nx) + '<div class="hint">Touchez à nouveau pour confirmer.</div>');
-    });
+      b.setAttribute('aria-label', cost == null ? 'Niveau maximum' : (spec ? specs[spec].name + ', ' : 'Améliorer, ') + cost + ' pièces');
+      b.style.left = pos.x + 'px'; b.style.top = pos.y + 'px';
+      b.addEventListener('click', function (ev) {
+        ev.stopPropagation(); PT.Audio.unlock();
+        if (cost == null) { PT.Audio.play('error'); return; }
+        var key = 'up' + (spec || '');
+        if (UI.radialSel === key) {
+          if (g.upgrade(tower, spec)) UI.openTower(tower);
+          else { PT.Audio.play('error'); UI.toast('Pas assez de pièces', 'Il en faut ' + cost); }
+          return;
+        }
+        PT.Audio.play('click');
+        select(b, key);
+        var nx = g.towerStats({ type: tower.type, level: tower.level + 1, spec: spec, x: tower.x, y: tower.y, id: tower.id });
+        UI.preview = { x: tower.x, y: tower.y - 10, range: nx.range, ok: g.coins >= cost };
+        UI.showTip(spec ? '<h4>' + esc(specs[spec].name) + ' · ' + cost + ' pièces</h4><p>' + esc(specs[spec].desc) + '</p>' + statLine(tower.type, st, nx) +
+            '<div class="hint">Choix définitif pour cette défense. Touchez à nouveau pour confirmer.</div>'
+          : '<h4>Améliorer : niveau ' + (tower.level + 2) + ' · ' + cost + ' pièces</h4>' + statLine(tower.type, st, nx) + '<div class="hint">Touchez à nouveau pour confirmer.</div>');
+      });
+      items.push(b); r.appendChild(b);
+    }
+    if (specs) { upItem('a', L.pos[0]); upItem('b', L.pos[1]); } else upItem(null, L.pos[0]);
+    var slPos = L.pos[specs ? 2 : 1];
+    var sl = el('button', 'r-item sell', '<span class="lbl">Vendre</span><span class="price">' + coin + '+' + sell + '</span>');
+    sl.setAttribute('aria-label', 'Vendre pour ' + sell + ' pièces');
+    sl.style.left = slPos.x + 'px'; sl.style.top = slPos.y + 'px';
+    r.appendChild(sl); items.push(sl);
+    r.hidden = false;
+    var spName = tower.spec && PT.SPECS[tower.type] ? ' · ' + PT.SPECS[tower.type][tower.spec].name : '';
+    UI.showTip('<h4>' + esc(d.name) + esc(spName) + ' · niveau ' + (tower.level + 1) + '/3</h4>' + statLine(tower.type, st) + synergiesOf(tower.type) +
+      '<div class="hint">' + (specs ? 'Niveau 3 : choisissez une spécialisation.' : 'Touchez l’amélioration ou la vente.') + '</div>');
     sl.addEventListener('click', function (ev) {
       ev.stopPropagation(); PT.Audio.unlock();
       if (UI.radialSel === 'sell') { g.sell(tower); UI.closeRadial(); return; }
       PT.Audio.play('click');
-      UI.radialSel = 'sell'; sl.classList.add('sel'); up.classList.remove('sel');
+      select(sl, 'sell');
       UI.preview = { x: tower.x, y: tower.y - 10, range: st.range };
       UI.showTip('<h4>Vendre pour ' + sell + ' pièces ?</h4><p>Touchez à nouveau pour confirmer la vente.</p>');
     });

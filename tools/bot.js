@@ -37,14 +37,14 @@ function mulberry(seed) {
 
 // Joue une salle ; renvoie l'issue et des indicateurs pour repérer les bugs.
 // attempt : numéro de l'essai ; comme un vrai joueur, le bot change de placement après un échec
-function play(level, upgrades, profileName, seed, attempt) {
+function play(level, upgrades, profileName, seed, attempt, relax) {
   var P = PROFILES[profileName];
   var retry = (attempt || 1) - 1;
   var rnd = mulberry(seed || 1);
   var saveRandom = Math.random;
   Math.random = rnd; // parties reproductibles
   try {
-    var g = new PT.Game(level, { upgrades: upgrades });
+    var g = new PT.Game(level, { upgrades: upgrades, relax: relax });
     var types = {};
     level.waves.forEach(function (w) { w.groups.forEach(function (gr) { types[gr.t] = (types[gr.t] || 0) + gr.n; }); });
     var has = function (k) { return Object.keys(types).some(function (t) { return PT.ENEMIES[t][k]; }); };
@@ -120,7 +120,7 @@ function play(level, upgrades, profileName, seed, attempt) {
           var score = c - (tw.type === 'laser' || tw.type === 'gardien' ? 40 : 0);
           if (!best || score < best.s) best = { tw: tw, c: c, s: score };
         });
-        if (best && g.coins >= best.c) g.upgrade(best.tw);
+        if (best && g.coins >= best.c) g.upgrade(best.tw, rnd() < 0.5 ? 'a' : 'b');
       }
       // Pouvoirs
       if (rnd() < P.powers) {
@@ -159,17 +159,19 @@ function play(level, upgrades, profileName, seed, attempt) {
 }
 
 // Dépense les étoiles libres dans l'arbre de talents, dans l'ordre d'un joueur raisonnable
-var SPEND = ['budget', 'formation', 'recharge', 'assurance', 'optique', 'formation', 'budget', 'granit', 'glu', 'recup', 'perfo', 'sirene', 'prime',
-  'optique', 'formation', 'recharge', 'assurance', 'atelier', 'expresso', 'budget', 'granit', 'anticipe', 'glu', 'optique', 'prime', 'atelier',
-  'recharge', 'assurance', 'synergie', 'doublebuste', 'sirene', 'expresso', 'recup', 'interets'];
+var SPEND = ['budget', 'formation', 'recharge', 'assurance', 'glu', 'formation', 'budget', 'granit', 'optique', 'recup', 'sirene', 'prime',
+  'optique', 'formation', 'recharge', 'assurance', 'surchauffe', 'chute', 'atelier', 'expresso', 'budget', 'granit', 'patrouille', 'anticipe',
+  'glu', 'optique', 'prime', 'atelier', 'machoires', 'surchauffe', 'recharge', 'assurance', 'synergie', 'doublebuste', 'sirene', 'expresso',
+  'recup', 'interets', 'chasseur', 'serrures', 'patrouille', 'perfo'];
 function spend(upgrades, free) {
   var changed = true;
   while (changed) {
     changed = false;
     for (var i = 0; i < SPEND.length; i++) {
-      var id = SPEND[i], u = PT.UPGRADES.filter(function (x) { return x.id === id; })[0];
+      var id = SPEND[i], u = PT.upgradeById(id);
       var r = upgrades[id] || 0;
-      if (r >= u.costs.length || !PT.upgradeOpen(id, upgrades)) continue;
+      if (r >= u.costs.length) continue;
+      if (!PT.upgradeOpen(id, upgrades)) { if (u.excl && upgrades[u.excl] > 0) continue; break; }
       if (u.costs[r] <= free) { upgrades[id] = r + 1; free -= u.costs[r]; changed = true; break; }
       break; // on économise pour le prochain talent prévu
     }

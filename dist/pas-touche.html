@@ -409,23 +409,62 @@ img { -webkit-user-drag: none; pointer-events: none; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
 }
 
-/* Atelier en arbre de talents */
-.tree { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(var(--u) * 12); }
-.branch { display: flex; flex-direction: column; gap: calc(var(--u) * 10); position: relative; }
-.branch h3 { margin: 0; text-align: center; color: var(--bc) !important; }
-.branch::before { content: ""; position: absolute; left: 50%; top: calc(var(--u) * 30); bottom: calc(var(--u) * 20); width: calc(var(--u) * 4); background: var(--bc); opacity: 0.35; transform: translateX(-50%); border-radius: 4px; }
-.node { position: relative; display: flex; flex-direction: column; gap: calc(var(--u) * 5); background: #fff; border: calc(var(--u) * 3) solid var(--ink); border-radius: calc(var(--u) * 12); padding: calc(var(--u) * 8) calc(var(--u) * 10); box-shadow: 0 calc(var(--u) * 4) 0 var(--bc); }
-.node b { font-family: var(--font-display); font-weight: normal; font-size: calc(var(--u) * 17); line-height: 1.05; }
-.node small { font-size: calc(var(--u) * 12.5); line-height: 1.25; font-weight: 700; color: #5a4636; }
-.node small.now { color: var(--green); }
-.node .pips { display: flex; gap: calc(var(--u) * 4); }
-.node .pips i { width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; border: 2px solid var(--ink); background: #e5dccb; }
-.node .pips i.on { background: var(--bc); }
-.node .btn { align-self: flex-start; }
-.node.locked { opacity: 0.55; filter: grayscale(0.6); }
-.node.done { background: #fff7dc; }
-.node .eyebrow { font-size: calc(var(--u) * 12); }
-@media (max-width: 720px) { .tree { grid-template-columns: 1fr; } }
+/* Atelier fin : les trois branches à l'écran, détail à droite */
+.shop.atelier { width: min(100%, calc(var(--u) * 1100)); }
+.atelier-top { display: flex; justify-content: center; flex-wrap: wrap; gap: calc(var(--u) * 22); font-size: calc(var(--u) * 14); margin-bottom: calc(var(--u) * 10); }
+.atelier-top b { font-family: var(--font-display); font-weight: normal; font-size: calc(var(--u) * 19); }
+.atelier-body { display: grid; grid-template-columns: minmax(0, 3fr) minmax(calc(var(--u) * 220), 1fr); gap: calc(var(--u) * 14); align-items: start; }
+.branches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(var(--u) * 8); }
+.talent-tree { position: relative; display: flex; flex-direction: column; gap: calc(var(--u) * 7); padding: calc(var(--u) * 8) calc(var(--u) * 2) calc(var(--u) * 10); border-radius: calc(var(--u) * 10); background: color-mix(in srgb, var(--bc) 6%, transparent); }
+.talent-tree svg.links { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+.talent-tree svg.links path { fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.bhead { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 4); margin-bottom: calc(var(--u) * 2); }
+.bhead b { font-family: var(--font-display); font-weight: normal; font-size: calc(var(--u) * 17); color: var(--bc); }
+.bhead .bar { width: 64%; height: 3px; border-radius: 999px; background: #e5dccb; overflow: hidden; }
+.bhead .bar i { display: block; height: 100%; background: var(--bc); }
+.trow { display: flex; justify-content: center; }
+.trow.two { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 2); justify-items: center; }
+.pill-node { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; background: none; border: 0; color: var(--ink); cursor: pointer; font: inherit; max-width: calc(var(--u) * 92); }
+.pill-node .dot { position: relative; width: calc(var(--u) * 36); height: calc(var(--u) * 36); display: grid; place-items: center; border-radius: 50%; background: #fffdf7; border: 1.5px solid #cdbfa6; transition: transform 0.15s; }
+.pill-node .dot img { width: 86%; height: 86%; object-fit: contain; }
+.pill-node .badge { position: absolute; right: -4px; bottom: -3px; width: calc(var(--u) * 15); height: calc(var(--u) * 15); border-radius: 50%; display: grid; place-items: center; font-size: calc(var(--u) * 8.5); background: #fff; border: 1px solid #cdbfa6; line-height: 1; }
+.pill-node .badge.ok { background: var(--bc); color: #fff; border-color: var(--bc); font-size: calc(var(--u) * 10); font-weight: 900; }
+.pill-node .badge.no { background: #a89f92; color: #fff; }
+.pill-node .pips { display: flex; gap: 2px; height: calc(var(--u) * 5); }
+.pill-node .pips i { width: calc(var(--u) * 5); height: calc(var(--u) * 5); border-radius: 50%; background: #e2d6c2; }
+.pill-node .pips i.on { background: var(--bc); }
+.pill-node .nm { font-size: calc(var(--u) * 10.5); font-weight: 800; line-height: 1.1; text-align: center; color: #6b5440; }
+.pill-node:hover .dot { transform: scale(1.08); }
+.pill-node.buy .dot { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,182,50,0.35); }
+.pill-node.owned .dot { border-color: var(--bc); border-width: 2px; }
+.pill-node.done .dot { background: color-mix(in srgb, var(--bc) 16%, #fff); border-color: var(--bc); border-width: 2px; }
+.pill-node.done .nm, .pill-node.owned .nm { color: var(--ink); }
+.pill-node.locked .dot img { filter: grayscale(1); opacity: 0.45; }
+.pill-node.locked .nm { opacity: 0.6; }
+.pill-node.banned { opacity: 0.35; filter: grayscale(1); }
+.pill-node.banned .nm { text-decoration: line-through; }
+.pill-node.sel .dot { outline: 2px solid var(--ink); outline-offset: 2px; transform: scale(1.4); animation: selPop 0.25s ease-out; }
+.pill-node.sel .pips { margin-top: calc(var(--u) * 8); }
+.pill-node.sel .nm { color: var(--ink); font-size: calc(var(--u) * 12); }
+.pill-node.sel { z-index: 3; }
+@keyframes selPop { from { transform: scale(1); } }
+.duo { display: flex; gap: calc(var(--u) * 2); width: 100%; justify-content: center; }
+.duo .pill-node { max-width: calc(var(--u) * 60); }
+.duo .pill-node .dot { border-radius: calc(var(--u) * 12); }
+.duo .pill-node .nm { font-size: calc(var(--u) * 9.5); }
+.talent-detail .td-head { display: flex; align-items: center; gap: calc(var(--u) * 8); }
+.talent-detail .td-head img { width: calc(var(--u) * 58); height: calc(var(--u) * 58); flex: none; background: color-mix(in srgb, var(--bc) 10%, #fff); border-radius: 50%; border: 1.5px solid var(--bc); padding: calc(var(--u) * 3); }
+.talent-detail { background: #fff; border: 1.5px solid var(--ink); border-radius: calc(var(--u) * 12); padding: calc(var(--u) * 14); box-shadow: 0 calc(var(--u) * 3) 0 var(--bc); display: flex; flex-direction: column; gap: calc(var(--u) * 7); }
+.talent-detail h3 { margin: 0 !important; color: var(--ink) !important; font-size: calc(var(--u) * 21) !important; }
+.talent-detail p { margin: 0; font-size: calc(var(--u) * 14.5); line-height: 1.3; }
+.talent-detail .rank { font-size: calc(var(--u) * 12.5); font-weight: 800; color: var(--bc); }
+.talent-detail .now { color: var(--green); font-weight: 800; }
+.talent-detail .next { font-weight: 800; }
+.talent-detail .why { color: #a0412e; font-size: calc(var(--u) * 13); font-weight: 700; }
+.talent-detail .hint { font-size: calc(var(--u) * 11.5); color: #8a6a3a; font-weight: 700; }
+.talent-detail .excl-tag { align-self: flex-start; font-size: calc(var(--u) * 11.5); font-weight: 800; color: #fff; background: var(--red); border-radius: 999px; padding: 1px calc(var(--u) * 9); }
+.talent-detail .btn { align-self: stretch; }
+@media (max-width: 760px) { .atelier-body { grid-template-columns: 1fr; } }
 
 /* Ailes du musée (onglets du choix des salles) */
 .wings { display: flex; gap: calc(var(--u) * 8); justify-content: center; flex-wrap: wrap; padding: calc(var(--u) * 6) calc(var(--u) * 12) 0; }
@@ -444,6 +483,24 @@ img { -webkit-user-drag: none; pointer-events: none; }
 .head-right { display: flex; gap: calc(var(--u) * 8); align-items: center; }
 .btn.notify { position: relative; }
 .btn.notify::after { content: "!"; position: absolute; top: calc(var(--u) * -10); right: calc(var(--u) * -10); width: calc(var(--u) * 24); height: calc(var(--u) * 24); border-radius: 50%; background: var(--red); color: #fff; border: calc(var(--u) * 2) solid var(--ink); display: grid; place-items: center; font-family: var(--font-display); font-size: calc(var(--u) * 15); animation: ready 1.2s infinite; }
+
+/* Bouton Fermer : croix rouge en haut à droite */
+.btn-close { background: var(--red); color: #fff; }
+.btn-close svg { width: 50%; height: 50%; }
+.btn-close.in-frame { position: absolute; top: calc(var(--u) * -26); right: calc(var(--u) * -26); z-index: 2; }
+
+/* Choix de spécialisation dans le menu d'une défense */
+.r-item.spec .spec-name { position: absolute; top: calc(var(--u) * -12); left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: var(--font-display); font-size: calc(var(--u) * 12); color: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 0 calc(var(--u) * 7); }
+.r-item.spec.sel::after { right: auto; left: calc(var(--u) * -8); }
+
+/* Proposition du mode détente sur l'écran de défaite */
+.relax { background: #e6f6dd; border: 1.5px solid var(--green); border-radius: calc(var(--u) * 10); padding: calc(var(--u) * 8) calc(var(--u) * 12); font-size: calc(var(--u) * 15); margin: calc(var(--u) * 6) 0; }
+
+/* Atelier : remboursement discret dans le panneau, petit éclat quand on achète */
+.talent-detail .refund { margin-top: calc(var(--u) * 4); padding-top: calc(var(--u) * 8); border-top: 1px dashed #d6c9b3; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 6); font-size: calc(var(--u) * 13); font-weight: 800; }
+.linkish { background: none; border: 0; padding: 0; font: inherit; font-size: calc(var(--u) * 12.5); font-weight: 800; color: #8a6a3a; text-decoration: underline; cursor: pointer; }
+.pill-node .dot.bought { animation: bought 0.5s ease-out; }
+@keyframes bought { 0% { box-shadow: 0 0 0 0 rgba(242,182,50,0.9); } 100% { box-shadow: 0 0 0 calc(var(--u) * 16) rgba(242,182,50,0); } }
 
 </style>
 </head>
@@ -588,6 +645,51 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
   PT.TOWER_ORDER = ['gardien', 'glu', 'camera', 'chien', 'filet', 'laser', 'canon', 'ventilo', 'arroseur', 'chef'];
 
+  /* ---------- Spécialisations : au passage au niveau 3, on choisit l'une des deux versions ----------
+     mul : multiplie une statistique ; add : s'ajoute à une statistique ; les autres champs activent un effet. */
+  PT.SPECS = {
+    gardien: {
+      a: { name: 'Sergent', color: '#d8402f', desc: 'Matraque plus lourde : +50 % de dégâts, et elle assomme un instant.', mul: { dmg: 1.5 }, stunHit: 0.35 },
+      b: { name: 'Sifflet', color: '#3d6fd6', desc: '+60 % de cadence et +10 % de portée.', mul: { rate: 1.6, range: 1.1 } },
+    },
+    glu: {
+      a: { name: 'Glu géante', color: '#5cc23a', desc: 'Flaques 40 % plus larges qui durent bien plus longtemps.', mul: { splash: 1.4, puddle: 1.6 } },
+      b: { name: 'Glu acide', color: '#c9d93a', desc: 'Une glu qui ronge : dégâts multipliés par 3,5.', mul: { dmg: 3.5 } },
+    },
+    camera: {
+      a: { name: 'Caméra thermique', color: '#e2405e', desc: '+25 % de portée, et elle repère les Taupes sous terre (vos défenses peuvent les toucher).', mul: { range: 1.25 }, thermal: true },
+      b: { name: 'Caméra zoom', color: '#4fb6e8', desc: 'Les voleurs filmés prennent 25 % de dégâts en plus.', add: { mark: 0.25 } },
+    },
+    chien: {
+      a: { name: 'Molosse', color: '#7a4b2a', desc: '+70 % de dégâts par morsure.', mul: { dmg: 1.7 } },
+      b: { name: 'Meute', color: '#d8a066', desc: 'Mord deux voleurs à la fois, et un peu plus vite.', mul: { rate: 1.2 }, multi: 2 },
+    },
+    filet: {
+      a: { name: 'Filet lesté', color: '#8a5a34', desc: 'Immobilise 60 % plus longtemps, et retient même les Costauds (moins longtemps).', mul: { stun: 1.6 }, heavyNet: true },
+      b: { name: 'Filet géant', color: '#e0703a', desc: 'Un filet 45 % plus large pour attraper tout le groupe.', mul: { splash: 1.45 } },
+    },
+    laser: {
+      a: { name: 'Rayon double', color: '#ff3d5a', desc: 'Deux rayons, deux cibles en même temps.', beams: 2 },
+      b: { name: 'Rayon fondant', color: '#ff9f1c', desc: 'Plus il reste sur la même cible, plus il chauffe : jusqu’à 2,5 fois plus de dégâts.', ramp: true },
+    },
+    canon: {
+      a: { name: 'Mortier', color: '#596273', desc: 'Explosion 45 % plus large et +10 % de portée.', mul: { splash: 1.45, range: 1.1 } },
+      b: { name: 'Boulet de bronze', color: '#c9953c', desc: '+60 % de dégâts par boulet.', mul: { dmg: 1.6 } },
+    },
+    ventilo: {
+      a: { name: 'Tornade', color: '#5fb8c9', desc: 'Repousse 60 % plus loin.', mul: { push: 1.6 } },
+      b: { name: 'Souffle glacé', color: '#9fe7ff', desc: 'La rafale ralentit aussi les voleurs pendant 2 secondes.', chill: 0.45 },
+    },
+    arroseur: {
+      a: { name: 'Lance d’incendie', color: '#d8402f', desc: 'Ralentit 15 % de plus et mouille plus longtemps.', add: { slow: 0.15 }, mul: { wet: 1.3 } },
+      b: { name: 'Brumisateur', color: '#3f7fd9', desc: '+35 % de portée.', mul: { range: 1.35 } },
+    },
+    chef: {
+      a: { name: 'Commandant', color: '#d9a440', desc: 'Renfort de dégâts +15 % de plus.', add: { buff: 0.15 } },
+      b: { name: 'Stratège', color: '#2c4a9a', desc: '+20 % de portée, et ses défenses voient encore plus loin.', mul: { range: 1.2 }, add: { rangeBuff: 0.14 } },
+    },
+  };
+
   /* ---------- Synergies entre défenses (affichées dans l'interface, appliquées par le moteur) ---------- */
   PT.SYNERGIES = [
     { id: 'camera', name: 'Filmé', towers: ['camera'], desc: 'Un voleur filmé par une Caméra prend plus de dégâts de toutes les défenses.' },
@@ -693,41 +795,63 @@ img { -webkit-user-drag: none; pointer-events: none; }
   PT.POWER_ORDER = ['buste', 'alarme', 'cafe', 'verrou'];
 
   /* ---------- Atelier : arbre de talents payé en étoiles ----------
-     Trois branches. Dans une branche, un talent s'ouvre dès que le précédent a au moins un rang. */
+     Chaque branche a un tronc commun, puis se sépare en deux voies (a et b).
+     req : talent qui doit avoir au moins un rang ; excl : talent rival (on ne peut prendre que l'un des deux). */
   PT.BRANCHES = [
-    { id: 'def', name: 'Défenses', color: '#3d6fd6' },
-    { id: 'pow', name: 'Pouvoirs', color: '#d8402f' },
-    { id: 'eco', name: 'Économie', color: '#c9952e' },
+    { id: 'def', name: 'Défenses', color: '#3d6fd6', paths: { a: 'Gardiens et chiens', b: 'Technologie' } },
+    { id: 'pow', name: 'Pouvoirs', color: '#d8402f', paths: { a: 'Buste', b: 'Alarme et café' } },
+    { id: 'eco', name: 'Économie', color: '#c9952e', paths: { a: 'Commerce', b: 'Primes' } },
   ];
   PT.UPGRADES = [
-    { id: 'formation', branch: 'def', name: 'Formation des gardiens', costs: [1, 2, 3], desc: function (r) { return '+' + (15 * r) + ' % de dégâts pour Gardiens et Bouledogues'; } },
-    { id: 'optique', branch: 'def', name: 'Optique HD', costs: [2, 2, 3], desc: function (r) { return '+' + (10 * r) + ' % de portée pour Caméras, Filets, Lasers, Canons et Ventilateurs'; } },
-    { id: 'glu', branch: 'def', name: 'Glu extra-forte', costs: [2, 3], desc: function (r) { return '+' + (25 * r) + ' % de durée de ralentissement et de mouillage'; } },
-    { id: 'perfo', branch: 'def', name: 'Munitions perforantes', costs: [4], desc: function () { return 'Les armures n’arrêtent plus que la moitié des coups'; } },
-    { id: 'atelier', branch: 'def', name: 'Atelier de réparation', costs: [3, 4], desc: function (r) { return 'Améliorations des défenses ' + (12 * r) + ' % moins chères'; } },
-    { id: 'synergie', branch: 'def', name: 'Esprit d’équipe', costs: [6], desc: function () { return 'Les bonus de synergie sont 50 % plus forts'; } },
+    // Défenses
+    { id: 'formation', branch: 'def', path: 't', name: 'Formation des gardiens', costs: [1, 2, 3], desc: function (r) { return '+' + (15 * r) + ' % de dégâts pour Gardiens et Bouledogues'; } },
+    { id: 'glu', branch: 'def', path: 't', req: 'formation', name: 'Glu extra-forte', costs: [2, 3], desc: function (r) { return '+' + (25 * r) + ' % de durée de ralentissement et de mouillage'; } },
+    { id: 'patrouille', branch: 'def', path: 'a', req: 'glu', name: 'Patrouille renforcée', costs: [2, 3], desc: function (r) { return 'Bonus de Patrouille +' + (25 * r) + ' % (jusqu’à +' + Math.round(30 * (1 + 0.25 * r)) + ' % de cadence)'; } },
+    { id: 'machoires', branch: 'def', path: 'a', req: 'patrouille', name: 'Mâchoires d’acier', costs: [3], desc: function () { return 'Bouledogue +25 % de dégâts, triple dégâts sur les voleurs pris au filet'; } },
+    { id: 'brigade', branch: 'def', path: 'a', req: 'machoires', excl: 'perfo', name: 'Brigade nombreuse', costs: [5], desc: function () { return 'Les Gardiens coûtent 25 % moins cher'; } },
+    { id: 'perfo', branch: 'def', path: 'a', req: 'machoires', excl: 'brigade', name: 'Munitions perforantes', costs: [5], desc: function () { return 'Les armures n’arrêtent plus que la moitié des coups'; } },
+    { id: 'optique', branch: 'def', path: 'b', req: 'glu', name: 'Optique HD', costs: [2, 2, 3], desc: function (r) { return '+' + (10 * r) + ' % de portée pour Caméras, Filets, Lasers, Canons et Ventilateurs'; } },
+    { id: 'surchauffe', branch: 'def', path: 'b', req: 'optique', name: 'Laser surchauffé', costs: [3, 4], desc: function (r) { return 'Laser : +' + (15 * r) + ' % de dégâts'; } },
+    { id: 'blindage', branch: 'def', path: 'b', req: 'surchauffe', excl: 'synergie', name: 'Câbles blindés', costs: [5], desc: function () { return 'Les Hackeuses ne coupent plus vos défenses qu’une seconde'; } },
+    { id: 'synergie', branch: 'def', path: 'b', req: 'surchauffe', excl: 'blindage', name: 'Esprit d’équipe', costs: [5], desc: function () { return 'Les bonus de synergie sont 50 % plus forts'; } },
 
-    { id: 'recharge', branch: 'pow', name: 'Recharge express', costs: [1, 2, 3], desc: function (r) { return '-' + (10 * r) + ' % de temps de recharge des pouvoirs'; } },
-    { id: 'granit', branch: 'pow', name: 'Buste en granit', costs: [2, 3], desc: function (r) { return 'Buste : +' + (40 * r) + ' % de dégâts et +' + (15 * r) + ' % de zone'; } },
-    { id: 'sirene', branch: 'pow', name: 'Sirène longue durée', costs: [2, 3], desc: function (r) { return 'Alarme : +' + r + ' s de gel'; } },
-    { id: 'expresso', branch: 'pow', name: 'Double expresso', costs: [3, 4], desc: function (r) { return 'Pause café : +' + (3 * r) + ' s'; } },
-    { id: 'doublebuste', branch: 'pow', name: 'Collection de bustes', costs: [6], desc: function () { return 'Le buste tombe en double, côte à côte'; } },
+    // Pouvoirs
+    { id: 'recharge', branch: 'pow', path: 't', name: 'Recharge express', costs: [1, 2, 3], desc: function (r) { return '-' + (10 * r) + ' % de temps de recharge des pouvoirs'; } },
+    { id: 'granit', branch: 'pow', path: 'a', req: 'recharge', name: 'Buste en granit', costs: [2, 3], desc: function (r) { return 'Buste : +' + (40 * r) + ' % de dégâts et +' + (15 * r) + ' % de zone'; } },
+    { id: 'chute', branch: 'pow', path: 'a', req: 'granit', name: 'Chute libre', costs: [2], desc: function () { return 'Le buste tombe deux fois plus vite'; } },
+    { id: 'doublebuste', branch: 'pow', path: 'a', req: 'chute', excl: 'assomme', name: 'Collection de bustes', costs: [5], desc: function () { return 'Le buste tombe en double, côte à côte'; } },
+    { id: 'assomme', branch: 'pow', path: 'a', req: 'chute', excl: 'doublebuste', name: 'Buste assommant', costs: [5], desc: function () { return 'Les voleurs touchés restent assommés 3 secondes, même les Costauds'; } },
+    { id: 'sirene', branch: 'pow', path: 'b', req: 'recharge', name: 'Sirène longue durée', costs: [2, 3], desc: function (r) { return 'Alarme : +' + r + ' s de gel'; } },
+    { id: 'expresso', branch: 'pow', path: 'b', req: 'sirene', name: 'Double expresso', costs: [3, 4], desc: function (r) { return 'Pause café : +' + (3 * r) + ' s'; } },
+    { id: 'serrures', branch: 'pow', path: 'b', req: 'expresso', excl: 'machine', name: 'Serrures renforcées', costs: [5], desc: function () { return 'Verrouillage : +4 s'; } },
+    { id: 'machine', branch: 'pow', path: 'b', req: 'expresso', excl: 'serrures', name: 'Machine à café', costs: [5], desc: function () { return 'La Pause café se recharge 40 % plus vite'; } },
 
-    { id: 'budget', branch: 'eco', name: 'Budget municipal', costs: [1, 2, 2], desc: function (r) { return '+' + (30 * r) + ' pièces au début de chaque salle'; } },
-    { id: 'assurance', branch: 'eco', name: 'Assurance tous risques', costs: [1, 2, 3], desc: function (r) { return '+' + (2 * r) + ' objets dans la collection'; } },
-    { id: 'recup', branch: 'eco', name: 'Brocante', costs: [1, 2], desc: function (r) { return 'Revente des défenses à ' + (60 + 15 * r) + ' %'; } },
-    { id: 'prime', branch: 'eco', name: 'Prime de capture', costs: [3, 4], desc: function (r) { return '+' + (10 * r) + ' % de pièces par voleur attrapé'; } },
-    { id: 'anticipe', branch: 'eco', name: 'Zèle', costs: [3], desc: function () { return 'Bonus doublé quand vous appelez une vague en avance'; } },
-    { id: 'interets', branch: 'eco', name: 'Placement prudent', costs: [5], desc: function () { return 'À chaque vague, +4 % de vos pièces en intérêts (30 au plus)'; } },
+    // Économie
+    { id: 'budget', branch: 'eco', path: 't', name: 'Budget municipal', costs: [1, 2, 2], desc: function (r) { return '+' + (30 * r) + ' pièces au début de chaque salle'; } },
+    { id: 'assurance', branch: 'eco', path: 't', req: 'budget', name: 'Assurance tous risques', costs: [1, 2, 3], desc: function (r) { return '+' + (2 * r) + ' objets dans la collection'; } },
+    { id: 'recup', branch: 'eco', path: 'a', req: 'assurance', name: 'Brocante', costs: [1, 2], desc: function (r) { return 'Revente des défenses à ' + (60 + 15 * r) + ' %'; } },
+    { id: 'atelier', branch: 'eco', path: 'a', req: 'recup', name: 'Atelier de réparation', costs: [3, 4], desc: function (r) { return 'Améliorations des défenses ' + (12 * r) + ' % moins chères'; } },
+    { id: 'soldes', branch: 'eco', path: 'a', req: 'atelier', excl: 'interets', name: 'Soldes permanentes', costs: [5], desc: function () { return 'Toutes les défenses coûtent 10 % moins cher'; } },
+    { id: 'interets', branch: 'eco', path: 'a', req: 'atelier', excl: 'soldes', name: 'Placement prudent', costs: [5], desc: function () { return 'À chaque vague, +4 % de vos pièces en intérêts (30 au plus)'; } },
+    { id: 'prime', branch: 'eco', path: 'b', req: 'assurance', name: 'Prime de capture', costs: [3, 4], desc: function (r) { return '+' + (10 * r) + ' % de pièces par voleur attrapé'; } },
+    { id: 'anticipe', branch: 'eco', path: 'b', req: 'prime', name: 'Zèle', costs: [3], desc: function () { return 'Bonus doublé quand vous appelez une vague en avance'; } },
+    { id: 'chasseur', branch: 'eco', path: 'b', req: 'anticipe', excl: 'mecene', name: 'Chasseur de primes', costs: [5], desc: function () { return 'Boss, Costauds et Déménageurs rapportent le double'; } },
+    { id: 'mecene', branch: 'eco', path: 'b', req: 'anticipe', excl: 'chasseur', name: 'Mécène', costs: [5], desc: function () { return '+100 pièces au début des niveaux casse'; } },
   ];
+  // Jusqu'à 5 étoiles par salle : les talents coûtent plus cher, mais laissent de la marge pour choisir.
+  PT.MAX_STARS = 5;
+  // Mode détente (proposé après 2 échecs) : voleurs moins résistants, étoiles plafonnées
+  PT.RELAX = { hp: 0.75, maxStars: 3, after: 2 };
+  PT.UPGRADES.forEach(function (u) { u.costs = u.costs.map(function (c) { return Math.max(1, Math.round(c * 2.5)); }); });
+  PT.upgradeById = function (id) { return PT.UPGRADES.filter(function (x) { return x.id === id; })[0]; };
 
-  // Un talent est accessible si le talent précédent de sa branche a au moins un rang.
+  // Un talent est accessible si son prérequis a au moins un rang et si son rival n'a pas été pris.
   PT.upgradeOpen = function (id, upgrades) {
-    var u = PT.UPGRADES.filter(function (x) { return x.id === id; })[0];
+    var u = PT.upgradeById(id);
     if (!u) return false;
-    var same = PT.UPGRADES.filter(function (x) { return x.branch === u.branch; });
-    var i = same.indexOf(u);
-    return i === 0 || (upgrades[same[i - 1].id] || 0) > 0;
+    if (u.req && !(upgrades[u.req] > 0)) return false;
+    if (u.excl && upgrades[u.excl] > 0) return false;
+    return true;
   };
 
   // Traduit les rangs achetés en modificateurs utilisés par le moteur.
@@ -736,21 +860,34 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var r = function (id) { return u[id] || 0; };
     return {
       startCoins: 30 * r('budget'),
+      casseCoins: r('mecene') ? 100 : 0,
       guardDmg: 1 + 0.15 * r('formation'),
+      dogDmg: r('machoires') ? 1.25 : 1,
+      netBite: r('machoires') ? 2 : 1,
+      patrol: 1 + 0.25 * r('patrouille'),
       slowDur: 1 + 0.25 * r('glu'),
       techRange: 1 + 0.1 * r('optique'),
+      laserDmg: 1 + 0.15 * r('surchauffe'),
+      empDur: r('blindage') ? 1 : 3,
       lives: 2 * r('assurance'),
       sell: 0.6 + 0.15 * r('recup'),
       powerCd: 1 - 0.1 * r('recharge'),
       armorPierce: r('perfo') ? 0.5 : 0,
       upgradeCost: 1 - 0.12 * r('atelier'),
+      towerCost: r('soldes') ? 0.9 : 1,
+      guardCost: r('brigade') ? 0.75 : 1,
       synergy: r('synergie') ? 1.5 : 1,
       bustDmg: 1 + 0.4 * r('granit'),
       bustRadius: 1 + 0.15 * r('granit'),
+      bustDelay: r('chute') ? 0.3 : 0.6,
       bustDouble: r('doublebuste') > 0,
+      bustStun: r('assomme') ? 3 : 0,
       alarmPlus: r('sirene'),
       cafePlus: 3 * r('expresso'),
+      cafeCd: r('machine') ? 0.6 : 1,
+      lockPlus: r('serrures') ? 4 : 0,
       reward: 1 + 0.1 * r('prime'),
+      bigReward: r('chasseur') ? 2 : 1,
       earlyMul: r('anticipe') ? 2 : 1,
       interest: r('interets') ? 0.04 : 0,
     };
@@ -1441,14 +1578,14 @@ img { -webkit-user-drag: none; pointer-events: none; }
   var BREATHER = { 16: 1, 21: 1, 26: 1, 31: 1, 36: 1, 41: 1, 46: 1 };
   // Résistance des voleurs, réglée salle par salle par le bot de campagne (tools/campagne.js).
   var HPMUL = {
-    11: 5.76, 12: 4.05, 13: 5.65, 14: 5.65, 15: 3.94, 16: 5.24, 17: 6.23, 18: 5.5, 19: 2.59, 20: 5,
-    21: 4.02, 22: 4.92, 23: 5.26, 24: 3.04, 25: 5.97, 26: 5.29, 27: 5.05, 28: 4.6, 29: 5.84, 30: 4.73,
-    31: 4.92, 32: 2.55, 33: 3.41, 34: 7.4, 35: 5.58, 36: 6.42, 37: 7.63, 38: 7.71, 39: 5.34, 40: 5.58,
-    41: 6.29, 42: 7.74, 43: 8.12, 44: 6, 45: 3.05, 46: 7, 47: 8.45, 48: 6.7, 49: 4.47, 50: 7.26,
+    11: 5.54, 12: 3.84, 13: 5.61, 14: 5.65, 15: 3.84, 16: 4.63, 17: 5.76, 18: 4.07, 19: 2.38, 20: 3.73,
+    21: 3.47, 22: 3.91, 23: 3.99, 24: 2.46, 25: 5.71, 26: 4.44, 27: 4.97, 28: 4.18, 29: 6.23, 30: 4.13,
+    31: 5.13, 32: 2.2, 33: 3.62, 34: 6.43, 35: 5.05, 36: 5.5, 37: 6.56, 38: 6.6, 39: 4.68, 40: 5.13,
+    41: 5.23, 42: 6.5, 43: 6.82, 44: 4.97, 45: 2.82, 46: 5.34, 47: 7, 48: 6.02, 49: 3.91, 50: 5.36,
   };
   // Coefficient par aile, réglé sur la campagne complète du joueur moyen (tools/campagne.js) :
   // chaque aile doit être un peu plus exigeante que la précédente.
-  var WING_MUL = [1, 1, 1.06, 1.16, 1.04];
+  var WING_MUL = [1, 1, 1.06, 1.16, 1.13];
   PT.HPMUL = HPMUL;
 
   var CREW_NAMES = {
@@ -1681,12 +1818,13 @@ img { -webkit-user-drag: none; pointer-events: none; }
     opts = opts || {};
     this.level = level;
     this.demo = !!opts.demo;
+    this.relax = !!opts.relax;
     this.mods = PT.computeMods(opts.upgrades);
     this.paths = level.paths.map(buildPath);
     var end = level.paths[0][level.paths[0].length - 1];
     this.treasure = { x: end[0], y: end[1] };
     this.spots = level.spots.map(function (s, i) { return { i: i, x: s[0], y: s[1], tower: null }; });
-    this.coins = level.startCoins + this.mods.startCoins;
+    this.coins = level.startCoins + this.mods.startCoins + (level.type === 'casse' ? this.mods.casseCoins : 0);
     this.maxLives = level.lives + this.mods.lives;
     this.lives = this.maxLives;
     this.inRoom = this.maxLives;
@@ -1727,7 +1865,16 @@ img { -webkit-user-drag: none; pointer-events: none; }
   G.towerStats = function (t) {
     var def = PT.TOWERS[t.type], base = def.levels[t.level], m = this.mods, s = {};
     for (var k in base) s[k] = base[k];
+    var sp = t.level === 2 && t.spec && PT.SPECS[t.type] ? PT.SPECS[t.type][t.spec] : null;
+    if (sp) {
+      for (k in sp.mul || {}) if (s[k] != null) s[k] *= sp.mul[k];
+      for (k in sp.add || {}) if (s[k] != null) s[k] += sp.add[k];
+      ['stunHit', 'thermal', 'multi', 'heavyNet', 'beams', 'ramp', 'chill'].forEach(function (f) { if (sp[f]) s[f] = sp[f]; });
+      s.spec = t.spec;
+    }
     if (t.type === 'gardien' || t.type === 'chien') s.dmg *= m.guardDmg;
+    if (t.type === 'chien') s.dmg *= m.dogDmg;
+    if (t.type === 'laser') s.dps *= m.laserDmg;
     if (TECH[t.type]) s.range *= m.techRange;
     if (s.slowDur) s.slowDur *= m.slowDur;
     if (s.wet) s.wet *= m.slowDur;
@@ -1738,7 +1885,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       for (i = 0; i < this.towers.length; i++) {
         o = this.towers[i];
         if (o.type !== 'chef' || o.disabledT > 0) continue;
-        var cs = PT.TOWERS.chef.levels[o.level];
+        var cs = this.towerStats({ type: 'chef', level: o.level, spec: o.spec });
         if (dist2(o.x, o.y, t.x, t.y) <= cs.range * cs.range) { buff = Math.max(buff, cs.buff); rb = Math.max(rb, cs.rangeBuff); }
       }
     }
@@ -1756,7 +1903,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
         o = this.towers[i];
         if (o.id !== t.id && o.type === 'gardien' && dist2(o.x, o.y, t.x, t.y) <= 170 * 170) n++;
       }
-      s.patrol = Math.min(0.3, 0.1 * n) * m.synergy;
+      s.patrol = Math.min(0.3, 0.1 * n) * m.patrol * m.synergy;
       s.rate *= 1 + s.patrol;
     }
     return s;
@@ -1770,14 +1917,19 @@ img { -webkit-user-drag: none; pointer-events: none; }
     return null;
   };
 
+  G.towerCost = function (type) {
+    var m = this.mods;
+    return Math.round(PT.TOWERS[type].cost * m.towerCost * (type === 'gardien' ? m.guardCost : 1));
+  };
+
   G.build = function (spot, type) {
-    var def = PT.TOWERS[type];
-    if (!def || spot.tower || this.coins < def.cost || this.availableTowers.indexOf(type) < 0) return null;
-    this.coins -= def.cost;
+    var def = PT.TOWERS[type], cost = def && this.towerCost(type);
+    if (!def || spot.tower || this.coins < cost || this.availableTowers.indexOf(type) < 0) return null;
+    this.coins -= cost;
     var t = {
       id: this.nextId++, type: type, spot: spot, x: spot.x, y: spot.y, level: 0, cd: 0.2,
-      target: null, aim: 0, face: 1, spent: def.cost, disabledT: 0, fireT: 0, lungeT: 0, lx: 0, ly: 0,
-      beamOn: false, builtT: 0,
+      target: null, aim: 0, face: 1, spent: cost, disabledT: 0, fireT: 0, lungeT: 0, lx: 0, ly: 0,
+      beamOn: false, builtT: 0, spec: null, target2: null, rampT: 0, rampOn: null,
     };
     spot.tower = t;
     this.towers.push(t);
@@ -1790,10 +1942,11 @@ img { -webkit-user-drag: none; pointer-events: none; }
     return lv ? Math.round(lv.cost * this.mods.upgradeCost) : null;
   };
 
-  G.upgrade = function (t) {
+  G.upgrade = function (t, spec) {
     var c = this.upgradeCost(t);
     if (c == null || this.coins < c) return false;
     this.coins -= c; t.spent += c; t.level++; t.builtT = 0;
+    if (t.level === 2) t.spec = spec === 'b' ? 'b' : 'a';
     this.emit('upgrade', { x: t.x, y: t.y, tower: t.type, level: t.level });
     return true;
   };
@@ -1856,7 +2009,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
   /* ---------- Voleurs ---------- */
   G.spawnEnemy = function (s) {
     var def = PT.ENEMIES[s.type];
-    var hp = def.hp * this.level.hpMul * (1 + 0.06 * Math.max(0, this.waveIndex)) * (s.hp || 1);
+    var hp = def.hp * this.level.hpMul * (1 + 0.06 * Math.max(0, this.waveIndex)) * (s.hp || 1) * (this.relax ? PT.RELAX.hp : 1);
     var e = {
       id: this.nextId++, type: s.type, def: def, path: s.path, d: s.d || 0, dir: s.dir || 1,
       hp: hp, maxHp: hp, speed: def.speed * (0.94 + rand() * 0.12), lat: def.boss ? 0 : (rand() - 0.5) * 28,
@@ -1882,7 +2035,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
   G.isCamo = function (e) { return (e.def.camo || e.smokeT > 0 || (this.dark && !e.lit)) && !e.seen; };
 
   G.targetable = function (e) {
-    return e.alive && !e.def.innocent && !e.disguised && e.leapT <= 0 && e.burrowT <= 0 && !this.isCamo(e);
+    return e.alive && !e.def.innocent && !e.disguised && e.leapT <= 0 && (e.burrowT <= 0 || e.thermal) && !this.isCamo(e);
   };
 
   // Distance qu'il reste au voleur pour sortir du musée (plus c'est petit, plus il est dangereux).
@@ -1922,7 +2075,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
 
   G.catchEnemy = function (e) {
     e.alive = false;
-    var reward = Math.round(e.def.reward * this.mods.reward);
+    var reward = Math.round(e.def.reward * this.mods.reward * (e.def.boss || e.def.heavy ? this.mods.bigReward : 1));
     this.coins += reward;
     this.stats.caught++;
     this.stats.earned += reward;
@@ -2048,7 +2201,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
         var hitAny = false;
         for (var i = 0; i < this.towers.length; i++) {
           var t = this.towers[i];
-          if (PT.TOWERS[t.type].electric && dist2(t.x, t.y, e.x, e.y) < 130 * 130) { t.disabledT = 3; hitAny = true; }
+          if (PT.TOWERS[t.type].electric && dist2(t.x, t.y, e.x, e.y) < 130 * 130) { t.disabledT = this.mods.empDur; hitAny = true; }
         }
         if (hitAny) { this.emit('emp', { x: e.x, y: e.y }); e.empCD = 6; } else e.empCD = 0.4;
       }
@@ -2097,7 +2250,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
   /* ---------- Caméras ---------- */
   G.updateVision = function () {
     var es = this.enemies, i, j;
-    for (i = 0; i < es.length; i++) { es[i].seen = this.revealT > 0; es[i].mark = 0; }
+    for (i = 0; i < es.length; i++) { es[i].seen = this.revealT > 0; es[i].mark = 0; es[i].thermal = false; }
     if (this.dark) {
       for (i = 0; i < es.length; i++) {
         var en = es[i]; en.lit = false;
@@ -2114,6 +2267,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
         if (dist2(t.x, t.y, e.x, e.y) <= r2) {
           if (e.def.decoy) { this.shatter(e); continue; }
           e.seen = true;
+          if (st.thermal && e.burrowT > 0) e.thermal = true;
           if (st.mark > e.mark) e.mark = st.mark;
           if (e.disguised) { e.disguised = false; this.emit('reveal', { x: e.x, y: e.y }); }
         }
@@ -2122,11 +2276,12 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
 
   /* ---------- Tirs ---------- */
-  G.pickTarget = function (t, range, preferUnslowed) {
+  // skip : voleur à ignorer (pour une deuxième cible)
+  G.pickTarget = function (t, range, preferUnslowed, skip) {
     var best = null, bestR = Infinity, alt = null, altR = Infinity, r2 = range * range;
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
-      if (!this.targetable(e)) continue;
+      if (e === skip || !this.targetable(e)) continue;
       if (dist2(t.x, t.y, e.x, e.y) > r2) continue;
       var rem = this.remaining(e);
       if (preferUnslowed && e.gluT > 0.4 && !e.def.slowImmune) { if (rem < altR) { altR = rem; alt = e; } continue; }
@@ -2183,11 +2338,17 @@ img { -webkit-user-drag: none; pointer-events: none; }
 
     if (def.beam) {
       var bt = this.pickTarget(t, st.range);
-      t.target = bt;
+      t.target = bt; t.target2 = null;
       if (bt) {
         t.beamOn = true;
         t.aim = Math.atan2(bt.y - 20 - t.y, bt.x - t.x);
-        this.hit(bt, st.dps * rateMul * dt * (bt.wetT > 0 ? 1 + 0.6 * this.mods.synergy : 1), true);
+        if (st.ramp) { if (t.rampOn !== bt) { t.rampOn = bt; t.rampT = 0; } t.rampT += dt; }
+        var heat = st.ramp ? 1 + Math.min(1.5, t.rampT * 0.75) : 1;
+        this.hit(bt, st.dps * rateMul * dt * heat * (bt.wetT > 0 ? 1 + 0.6 * this.mods.synergy : 1), true);
+        if (st.beams === 2) {
+          var b2 = this.pickTarget(t, st.range, false, bt);
+          if (b2) { t.target2 = b2; this.hit(b2, st.dps * rateMul * dt * (b2.wetT > 0 ? 1 + 0.6 * this.mods.synergy : 1), true); }
+        }
       }
       return;
     }
@@ -2205,7 +2366,11 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (def.melee) {
       t.lungeT = 0.25; t.lx = target.x; t.ly = target.y;
       // Croc-en-filet : double dégâts sur un voleur pris dans un filet
-      this.hit(target, st.dmg * (target.netT > 0 ? 1 + this.mods.synergy : 1));
+      this.hit(target, st.dmg * (target.netT > 0 ? 1 + this.mods.netBite * this.mods.synergy : 1));
+      if (st.multi === 2) {
+        var t2 = this.pickTarget(t, st.range, false, target);
+        if (t2) { this.hit(t2, st.dmg * (t2.netT > 0 ? 1 + this.mods.netBite * this.mods.synergy : 1)); this.emit('bite', { x: t2.x, y: t2.y }); }
+      }
       this.emit('bite', { x: target.x, y: target.y });
       return;
     }
@@ -2214,6 +2379,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       var self = this;
       this.splashTargets(target.x, target.y, st.splash, function (e) {
         self.hit(e, st.dmg);
+        if (st.chill && e.alive) self.applySlow(e, st.chill, 2);
         if (!e.alive || e.def.heavy || e.def.boss) return;
         self.push(e, st.push * (e.wetT > 0 ? 1 + self.mods.synergy : 1));
       });
@@ -2222,7 +2388,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     }
     var sx = t.x, sy = t.y - 44;
     if (def.projectile === 'matraque') {
-      this.projectiles.push({ kind: 'matraque', x: sx, y: sy, target: target, tx: target.x, ty: target.y - 20, speed: def.projSpeed, dmg: st.dmg, rot: 0 });
+      this.projectiles.push({ kind: 'matraque', x: sx, y: sy, target: target, tx: target.x, ty: target.y - 20, speed: def.projSpeed, dmg: st.dmg, rot: 0, stunHit: st.stunHit || 0 });
       this.emit('shoot', { tower: t.type, x: sx, y: sy });
     } else {
       var dd = Math.sqrt(dist2(sx, sy, target.x, target.y));
@@ -2230,7 +2396,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       var aimAt = this.predict(target, dur);
       this.projectiles.push({
         kind: def.projectile, sx: sx, sy: sy, x: sx, y: sy, tx: aimAt.x, ty: aimAt.y, t: 0, dur: dur,
-        dmg: st.dmg, splash: st.splash, slow: st.slow, slowDur: st.slowDur, puddle: st.puddle, stun: st.stun, rot: 0, arc: def.arc || 70, pierce: !!def.pierce,
+        dmg: st.dmg, splash: st.splash, slow: st.slow, slowDur: st.slowDur, puddle: st.puddle, stun: st.stun, rot: 0, arc: def.arc || 70, pierce: !!def.pierce, heavyNet: !!st.heavyNet,
       });
       this.emit('shoot', { tower: t.type, x: sx, y: sy });
     }
@@ -2260,7 +2426,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var r2 = r * r;
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
-      if (!e.alive || e.def.innocent || e.disguised || e.leapT > 0 || e.burrowT > 0) continue;
+      if (!e.alive || e.def.innocent || e.disguised || e.leapT > 0 || (e.burrowT > 0 && !e.thermal)) continue;
       if (dist2(x, y, e.x, e.y) <= r2) fn(e);
     }
   };
@@ -2276,6 +2442,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
         if (d <= step + 6) {
           if (p.target && p.target.alive && this.targetable(p.target)) {
             this.hit(p.target, p.dmg);
+            if (p.stunHit) this.applyStun(p.target, p.stunHit);
             this.emit('hit', { x: p.tx, y: p.ty, kind: 'matraque' });
           }
           done = true;
@@ -2293,7 +2460,11 @@ img { -webkit-user-drag: none; pointer-events: none; }
             this.puddles.push({ x: p.tx, y: p.ty, r: p.splash * 0.85, slow: p.slow, t: p.puddle, max: p.puddle, seed: rand() * 10 });
             this.emit('splat', { x: p.tx, y: p.ty });
           } else if (p.kind === 'filet') {
-            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg); self.applyStun(e, p.stun, true); });
+            this.splashTargets(p.tx, p.ty, p.splash, function (e) {
+              self.hit(e, p.dmg);
+              if (p.heavyNet && e.alive && e.def.stunImmune && !e.def.boss && e.leapT <= 0) { e.stunT = Math.max(e.stunT, p.stun * 0.5); e.netT = Math.max(e.netT, p.stun * 0.5); }
+              else self.applyStun(e, p.stun, true);
+            });
             this.emit('net', { x: p.tx, y: p.ty, r: p.splash });
           } else if (p.kind === 'boulet') {
             this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg * (e.slowT > 0 ? 1 + 0.35 * self.mods.synergy : 1), p.pierce); });
@@ -2325,13 +2496,14 @@ img { -webkit-user-drag: none; pointer-events: none; }
   G.usePower = function (id, x, y) {
     var p = this.powers[id], def = PT.POWERS[id];
     if (!p || p.cd > 0 || this.state === 'won' || this.state === 'lost') return false;
-    p.cd = def.cd * this.mods.powerCd;
+    p.cd = def.cd * this.mods.powerCd * (id === 'cafe' ? this.mods.cafeCd : 1);
     p.max = p.cd;
     if (id === 'buste') {
       var m = this.mods, r = def.radius * m.bustRadius, dmg = def.dmg * m.bustDmg;
       var xs = m.bustDouble ? [x - r * 0.75, x + r * 0.75] : [x];
       for (var b = 0; b < xs.length; b++) {
-        this.drops.push({ x: xs[b], y: y, t: 0.6 + b * 0.12, max: 0.6 + b * 0.12, r: r, dmg: dmg });
+        var delay = m.bustDelay + b * 0.12;
+        this.drops.push({ x: xs[b], y: y, t: delay, max: delay, r: r, dmg: dmg });
         this.emit('bustFall', { x: xs[b], y: y });
       }
     } else if (id === 'alarme') {
@@ -2347,7 +2519,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       this.cafeT = def.dur + this.mods.cafePlus;
       this.emit('cafe', {});
     } else if (id === 'verrou') {
-      this.lockT = def.dur;
+      this.lockT = def.dur + this.mods.lockPlus;
       this.emit('lock', {});
     }
     return true;
@@ -2359,7 +2531,13 @@ img { -webkit-user-drag: none; pointer-events: none; }
       var d = this.drops[i];
       d.t -= dt;
       if (d.t <= 0) {
-        this.splashTargets(d.x, d.y, d.r || def.radius, function (e) { self.hit(e, d.dmg || def.dmg); self.applyStun(e, def.stun); });
+        var knock = self.mods.bustStun;
+        this.splashTargets(d.x, d.y, d.r || def.radius, function (e) {
+          self.hit(e, d.dmg || def.dmg);
+          // Buste assommant : même les Costauds restent sonnés (le boss un peu moins)
+          if (knock && e.alive) e.stunT = Math.max(e.stunT, e.def.boss ? 1 : knock);
+          else self.applyStun(e, def.stun);
+        });
         this.emit('bustImpact', { x: d.x, y: d.y, r: d.r || def.radius });
         this.drops.splice(i, 1);
       }
@@ -2420,7 +2598,8 @@ img { -webkit-user-drag: none; pointer-events: none; }
 
   G.computeStars = function () {
     var r = this.lives / this.maxLives;
-    return r >= 0.9 ? 3 : r >= 0.5 ? 2 : 1;
+    var st = r >= 1 ? 5 : r >= 0.85 ? 4 : r >= 0.65 ? 3 : r >= 0.4 ? 2 : 1;
+    return this.relax ? Math.min(st, PT.RELAX.maxStars) : st;
   };
 
   /* ---------- Mode démo (fond animé du menu) ---------- */
@@ -3604,8 +3783,10 @@ img { -webkit-user-drag: none; pointer-events: none; }
     });
   };
   A.powerIcon = function (id) {
-    return A.icon('p-' + id, 64, 64, function (c) {
-      c.translate(32, 32);
+    return A.icon('p-' + id, 64, 64, function (c) { c.translate(32, 32); A.drawPower(c, id); });
+  };
+  A.drawPower = function (c, id) {
+    {
       if (id === 'buste') { c.translate(0, 22); c.scale(0.95, 0.95); A.bust(c); }
       else if (id === 'alarme') {
         c.beginPath(); c.arc(0, 2, 18, Math.PI, 0); c.lineTo(18, 12); c.lineTo(-18, 12); c.closePath(); fs(c, '#ff3b3b');
@@ -3625,6 +3806,145 @@ img { -webkit-user-drag: none; pointer-events: none; }
         for (var i = 0; i < 2; i++) { c.beginPath(); c.moveTo(-7 + i * 8, -14); c.quadraticCurveTo(-11 + i * 8, -20, -6 + i * 8, -26); c.stroke(); }
         ell(c, -3, 18, 20, 4); fs(c, '#e2dccf', 2);
       }
+    }
+  };
+
+  /* ---------- Icônes des talents de l'Atelier ---------- */
+  function towerMini(c, type, lv, sc) {
+    c.save(); c.translate(0, 24); c.scale(sc || 0.56, sc || 0.56);
+    A.tower(c, type, { level: lv || 0, aim: -0.4, face: 1, time: 0.3, fireT: 0 }); c.restore();
+  }
+  function head(c, type, x, y, sc) {
+    c.save(); c.translate(x, y); c.scale(sc, sc); A.person(c, type, { face: 1, moving: false, t: 0.2, rank: 2, id: 1 }); c.restore();
+  }
+  function coin(c, x, y, r) {
+    circ(c, x, y, r); fs(c, '#f7c948', 2); circ(c, x, y, r * 0.66); c.lineWidth = 1.4; c.strokeStyle = '#c99a1e'; c.stroke();
+    starPath(c, x, y + 0.5, r * 0.4, r * 0.17); c.fillStyle = '#c99a1e'; c.fill();
+  }
+  function bustAt(c, x, y, sc, col) {
+    c.save(); c.translate(x, y); c.scale(sc, sc); A.bust(c);
+    if (col) { c.globalCompositeOperation = 'source-atop'; c.fillStyle = col; c.fillRect(-30, -60, 60, 70); }
+    c.restore();
+  }
+  function plusBadge(c, x, y, col) {
+    circ(c, x, y, 7); fs(c, col || '#3fae46', 1.6);
+    line(c, x - 3.5, y, x + 3.5, y, '#fff', 2.4); line(c, x, y - 3.5, x, y + 3.5, '#fff', 2.4);
+  }
+  var TALENT_DRAW = {
+    formation: function (c) { head(c, 'garde', 0, 38, 0.95); plusBadge(c, 17, -16); },
+    glu: function (c) { towerMini(c, 'glu', 1, 0.6); plusBadge(c, 17, -16); },
+    patrouille: function (c) { head(c, 'garde', -10, 34, 0.62); head(c, 'garde', 11, 38, 0.62); },
+    machoires: function (c) {
+      towerMini(c, 'chien', 2, 0.62);
+      c.fillStyle = '#fff'; for (var k = 0; k < 4; k++) { c.beginPath(); c.moveTo(4 + k * 5, -18); c.lineTo(6.5 + k * 5, -11); c.lineTo(9 + k * 5, -18); c.closePath(); c.fill(); c.lineWidth = 1; c.strokeStyle = INK; c.stroke(); }
+    },
+    brigade: function (c) { head(c, 'garde', -14, 36, 0.5); head(c, 'garde', 14, 36, 0.5); head(c, 'garde', 0, 42, 0.56); },
+    perfo: function (c) {
+      c.beginPath(); c.moveTo(-14, -16); c.lineTo(14, -16); c.lineTo(14, 2); c.quadraticCurveTo(14, 16, 0, 22); c.quadraticCurveTo(-14, 16, -14, 2); c.closePath(); fs(c, '#c3cad4', 2);
+      c.beginPath(); c.moveTo(-3, -16); c.lineTo(2, -4); c.lineTo(-2, 4); c.lineTo(3, 22); c.lineWidth = 1.6; c.strokeStyle = INK; c.stroke();
+      c.save(); c.rotate(-0.6); rr(c, -24, -3, 30, 6, 3); fs(c, '#f2c230', 1.6); c.beginPath(); c.moveTo(6, -6); c.lineTo(14, 0); c.lineTo(6, 6); c.closePath(); fs(c, '#596273', 1.6); c.restore();
+    },
+    optique: function (c) {
+      circ(c, 0, 0, 20); fs(c, '#3a3f55', 2); circ(c, 0, 0, 14); fs(c, '#69c9ff', 2); circ(c, 0, 0, 7); fs(c, '#2b5f73', 1.6);
+      circ(c, -5, -5, 3.5); c.fillStyle = 'rgba(255,255,255,0.85)'; c.fill();
+    },
+    surchauffe: function (c) {
+      towerMini(c, 'laser', 1, 0.6);
+      c.beginPath(); c.moveTo(8, -6); c.quadraticCurveTo(22, -16, 14, -26); c.quadraticCurveTo(12, -18, 6, -18); c.quadraticCurveTo(10, -24, 4, -28); c.quadraticCurveTo(-2, -14, 8, -6); fs(c, '#ff9f1c', 1.6);
+    },
+    blindage: function (c) {
+      c.beginPath(); c.moveTo(-18, 14); c.quadraticCurveTo(-10, -2, 0, 6); c.quadraticCurveTo(10, 14, 16, -4); c.lineWidth = 5; c.strokeStyle = INK; c.stroke(); c.lineWidth = 2.6; c.strokeStyle = '#596273'; c.stroke();
+      c.beginPath(); c.moveTo(2, -20); c.lineTo(18, -20); c.lineTo(18, -8); c.quadraticCurveTo(18, 2, 10, 6); c.quadraticCurveTo(2, 2, 2, -8); c.closePath(); fs(c, '#3d6fd6', 2);
+      c.beginPath(); c.moveTo(11, -17); c.lineTo(7, -9); c.lineTo(11, -9); c.lineTo(8, -1); c.lineWidth = 1.6; c.strokeStyle = '#fff'; c.stroke();
+    },
+    synergie: function (c) {
+      c.lineWidth = 5; c.strokeStyle = INK; c.beginPath(); c.arc(-7, 2, 11, 0, TAU); c.stroke(); c.beginPath(); c.arc(7, 2, 11, 0, TAU); c.stroke();
+      c.lineWidth = 2.6; c.strokeStyle = '#f2c230'; c.beginPath(); c.arc(-7, 2, 11, 0, TAU); c.stroke(); c.strokeStyle = '#ffd96a'; c.beginPath(); c.arc(7, 2, 11, 0, TAU); c.stroke();
+      starPath(c, 0, -16, 7, 3); fs(c, '#ffd447', 1.4);
+    },
+    recharge: function (c) {
+      rr(c, -14, -22, 28, 5, 2); fs(c, '#8a5a34', 1.6); rr(c, -14, 17, 28, 5, 2); fs(c, '#8a5a34', 1.6);
+      c.beginPath(); c.moveTo(-11, -17); c.lineTo(11, -17); c.quadraticCurveTo(10, -4, 2, 0); c.quadraticCurveTo(10, 4, 11, 17); c.lineTo(-11, 17); c.quadraticCurveTo(-10, 4, -2, 0); c.quadraticCurveTo(-10, -4, -11, -17); c.closePath(); fs(c, '#dff6ff', 1.8);
+      c.beginPath(); c.moveTo(-6, 15); c.lineTo(6, 15); c.lineTo(0, 7); c.closePath(); c.fillStyle = '#f2c230'; c.fill();
+      c.beginPath(); c.moveTo(-7, -12); c.lineTo(7, -12); c.lineTo(0, -4); c.closePath(); c.fill();
+    },
+    granit: function (c) { bustAt(c, 0, 24, 0.95, 'rgba(90,90,100,0.35)'); plusBadge(c, 17, -16); },
+    chute: function (c) {
+      bustAt(c, 3, 26, 0.85);
+      [-16, -10].forEach(function (x, k) { line(c, x, -24 + k * 6, x, -6 + k * 6, 'rgba(42,28,22,0.6)', 2); });
+      line(c, 18, -22, 18, -8, 'rgba(42,28,22,0.6)', 2);
+    },
+    doublebuste: function (c) { bustAt(c, -10, 26, 0.68); bustAt(c, 11, 26, 0.68); },
+    assomme: function (c) {
+      bustAt(c, 0, 28, 0.8);
+      [[-14, -18], [0, -24], [14, -18]].forEach(function (p) { starPath(c, p[0], p[1], 5, 2.2); fs(c, '#ffd447', 1.2); });
+    },
+    sirene: function (c) { c.scale(0.82, 0.82); A.drawPower(c, 'alarme'); },
+    expresso: function (c) { c.scale(0.82, 0.82); A.drawPower(c, 'cafe'); },
+    serrures: function (c) { c.scale(0.82, 0.82); A.drawPower(c, 'verrou'); plusBadge(c, 20, -20); },
+    machine: function (c) {
+      rr(c, -16, -22, 32, 40, 4); fs(c, '#596273', 2);
+      rr(c, -12, -18, 24, 9, 2); fs(c, '#2b2f3a', 1.4); circ(c, 7, -13.5, 2); c.fillStyle = '#ff3b3b'; c.fill();
+      rr(c, -4, -6, 8, 6, 1); fs(c, '#2b2f3a', 1.4);
+      rr(c, -7, 4, 14, 11, 3); fs(c, '#fff', 1.6); ell(c, 0, 4, 7, 2); c.fillStyle = '#6b4226'; c.fill();
+    },
+    budget: function (c) { coin(c, -8, 10, 11); coin(c, 8, 8, 11); coin(c, 0, -6, 12); },
+    assurance: function (c) {
+      c.save(); c.translate(-4, 18);
+      c.beginPath(); c.moveTo(-6, -36); c.lineTo(6, -36); c.lineTo(5, -30); c.quadraticCurveTo(16, -24, 13, -10); c.quadraticCurveTo(10, 0, 0, 0); c.quadraticCurveTo(-10, 0, -13, -10); c.quadraticCurveTo(-16, -24, -5, -30); c.closePath(); fs(c, '#3fa7a0', 2);
+      c.fillStyle = '#f2c230'; c.fillRect(-12, -20, 24, 4); c.restore();
+      c.beginPath(); c.moveTo(6, -2); c.lineTo(22, -2); c.lineTo(22, 8); c.quadraticCurveTo(22, 18, 14, 22); c.quadraticCurveTo(6, 18, 6, 8); c.closePath(); fs(c, '#3fae46', 1.8);
+      line(c, 10, 9, 13, 13, '#fff', 2.2); line(c, 13, 13, 19, 5, '#fff', 2.2);
+    },
+    recup: function (c) {
+      c.save(); c.rotate(-0.4);
+      c.beginPath(); c.moveTo(-18, -10); c.lineTo(8, -10); c.lineTo(18, 0); c.lineTo(8, 10); c.lineTo(-18, 10); c.closePath(); fs(c, '#f4efe4', 2);
+      circ(c, 9, 0, 2.6); c.fillStyle = INK; c.fill();
+      c.font = '13px ' + A.FONT; c.textAlign = 'center'; c.fillStyle = '#c0392b'; c.fillText('€', -5, 5);
+      c.restore();
+    },
+    atelier: function (c) {
+      c.save(); c.rotate(0.7);
+      rr(c, -4, -6, 8, 30, 3); fs(c, '#8a9099', 2);
+      c.beginPath(); c.arc(0, -12, 11, 0, TAU); fs(c, '#8a9099', 2);
+      rr(c, -4, -26, 8, 12, 1); c.fillStyle = '#fbf6ea'; c.fill();
+      c.restore();
+    },
+    soldes: function (c) {
+      starPath(c, 0, 0, 22, 17, 12); fs(c, '#e2405e', 2);
+      c.font = '13px ' + A.FONT; c.textAlign = 'center'; c.fillStyle = '#fff'; c.fillText('-10%', 0, 5);
+    },
+    interets: function (c) {
+      ell(c, 0, 4, 19, 14); fs(c, '#ff9fb5', 2);
+      ell(c, 17, 4, 5, 4.5); fs(c, '#ff8aa5', 1.6); circ(c, 16, 3, 0.9); circ(c, 18.5, 3, 0.9); c.fillStyle = INK; c.fill();
+      c.beginPath(); c.moveTo(-6, -9); c.lineTo(-2, -16); c.lineTo(2, -9); c.closePath(); fs(c, '#ff8aa5', 1.4);
+      rr(c, -10, 16, 5, 6, 1); fs(c, '#ff8aa5', 1.2); rr(c, 6, 16, 5, 6, 1); fs(c, '#ff8aa5', 1.2);
+      circ(c, 6, -1, 1.4); c.fillStyle = INK; c.fill(); rr(c, -6, -9, 10, 2.5, 1); c.fill();
+      coin(c, -1, -20, 7);
+    },
+    prime: function (c) { coin(c, 0, 2, 17); starPath(c, 16, -16, 6, 2.4, 4); c.fillStyle = '#fff6b0'; c.fill(); },
+    anticipe: function (c) {
+      circ(c, -2, 4, 17); fs(c, '#fff', 2); rr(c, -6, -18, 8, 5, 2); fs(c, '#596273', 1.4);
+      line(c, -2, 4, -2, -6, INK, 2.2); line(c, -2, 4, 6, 8, INK, 2.2);
+      c.beginPath(); c.moveTo(14, -10); c.lineTo(22, -4); c.lineTo(14, 2); c.closePath(); fs(c, '#3fae46', 1.4);
+    },
+    chasseur: function (c) {
+      ['#e2405e', '#fff', '#e2405e', '#fff'].forEach(function (col, k) { circ(c, 0, 0, 20 - k * 5); fs(c, col, 1.6); });
+      c.save(); c.rotate(-0.7); rr(c, -2, -30, 4, 26, 2); fs(c, '#8a5a34', 1.4); c.restore();
+      coin(c, 14, 14, 7);
+    },
+    mecene: function (c) {
+      c.beginPath(); c.moveTo(-8, -14); c.quadraticCurveTo(-20, 0, -16, 14); c.quadraticCurveTo(0, 22, 16, 14); c.quadraticCurveTo(20, 0, 8, -14); c.closePath(); fs(c, '#a8693b', 2);
+      rr(c, -9, -18, 18, 6, 2); fs(c, '#7a4b2a', 1.6);
+      c.beginPath(); c.moveTo(-10, -24); c.lineTo(-6, -18); c.lineTo(0, -26); c.lineTo(6, -18); c.lineTo(10, -24); c.lineTo(9, -16); c.lineTo(-9, -16); c.closePath(); fs(c, '#f2c230', 1.4);
+      coin(c, 0, 4, 8);
+    },
+  };
+  // Icône d'un talent (64 x 64, mise en cache)
+  A.talentIcon = function (id) {
+    return A.icon('tal-' + id, 64, 64, function (c) {
+      c.translate(32, 32);
+      if (TALENT_DRAW[id]) TALENT_DRAW[id](c);
     });
   };
   A.coinIcon = function () {
@@ -4405,7 +4725,11 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (game.lockT > 0) this.drawLocks(c, game, time);
 
     // Rayons laser
-    for (i = 0; i < game.towers.length; i++) { var t = game.towers[i]; if (t.beamOn && t.target) drawBeam(c, t, time); }
+    for (i = 0; i < game.towers.length; i++) {
+      var t = game.towers[i];
+      if (t.beamOn && t.target) drawBeam(c, t, time);
+      if (t.beamOn && t.target2) drawBeam(c, { x: t.x, y: t.y, aim: t.aim, target: t.target2 }, time + 0.5);
+    }
     // Projectiles
     for (i = 0; i < game.projectiles.length; i++) A.projectile(c, game.projectiles[i]);
     // Bustes qui tombent
@@ -4568,6 +4892,11 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (t.builtT < 0.3) { var k = 1 + Math.sin(t.builtT / 0.3 * Math.PI) * 0.18; c.scale(k, 1 / k); }
     if (ui && ui.selectedTower === t) { ell(c, 0, 6, 44, 18); c.fillStyle = 'rgba(255,212,71,0.45)'; c.fill(); }
     A.tower(c, t.type, { level: t.level, aim: t.aim, face: t.face, fireT: t.fireT, lungeT: t.lungeT, lx: t.lx, ly: t.ly, x: t.x, y: t.y, disabled: t.disabledT > 0, time: time + t.id, beamOn: t.beamOn });
+    if (t.spec && PT.SPECS[t.type]) {
+      var spc = PT.SPECS[t.type][t.spec];
+      A.line(c, -30, 4, -30, -26, A.INK, 2);
+      c.beginPath(); c.moveTo(-30, -26); c.lineTo(-16, -21); c.lineTo(-30, -16); c.closePath(); A.fs(c, spc.color, 1.6);
+    }
     if (t.type !== 'chef' && game.towerStats(t).chefBuff > 0) {
       A.starPath(c, 24, -16 - (Math.floor(time * 3 + t.id) % 2) * 2, 6, 2.6); A.fs(c, '#ffd447', 1.6);
     }
@@ -5112,7 +5441,6 @@ img { -webkit-user-drag: none; pointer-events: none; }
   var ICON_SOUND = '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#2a1c16"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="#2a1c16" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
   var ICON_MUTE = '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#2a1c16"/><path d="M16 9l5 6M21 9l-5 6" stroke="#2a1c16" stroke-width="2.4" stroke-linecap="round"/></svg>';
   var ICON_FULL = '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" stroke="#2a1c16" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  var ICON_BACK = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke="#2a1c16" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   /* ================= Écrans ================= */
   UI.closeScreens = function () { $('screens').innerHTML = ''; };
@@ -5144,7 +5472,9 @@ img { -webkit-user-drag: none; pointer-events: none; }
     click(b, function () { UI.showAtelier(back); });
     return b;
   }
-  function backBtn(fn) { var b = el('button', 'btn-round', ICON_BACK); b.setAttribute('aria-label', 'Retour'); click(b, fn); return b; }
+  // Croix rouge « Fermer », en haut à droite, là où on la cherche d'instinct
+  var ICON_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  function closeBtn(fn) { var b = el('button', 'btn-round btn-close', ICON_CLOSE); b.setAttribute('aria-label', 'Fermer'); click(b, fn); return b; }
 
   /* ---------- Titre ---------- */
   UI.showTitle = function () {
@@ -5205,11 +5535,11 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var a = App();
     var s = UI.screen('scr-levels');
     var head = el('div', 'screen-head');
-    head.appendChild(backBtn(UI.showTitle));
+    var left = el('div', 'head-right', starsBadge());
+    left.appendChild(shopBtn('l-shop', UI.showLevels));
+    head.appendChild(left);
     head.appendChild(el('h2', '', 'Choisissez une salle'));
-    var right = el('div', 'head-right', starsBadge());
-    right.appendChild(shopBtn('l-shop', UI.showLevels));
-    head.appendChild(right);
+    head.appendChild(closeBtn(UI.showTitle));
     s.appendChild(head);
     // Les salles sont rangées par ailes de 10 ; on ouvre celle de la dernière salle débloquée
     var nWings = Math.ceil(PT.LEVELS.length / 10), lastOpen = 0;
@@ -5220,7 +5550,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       var got = 0, open = a.isUnlocked(w * 10);
       PT.LEVELS.slice(w * 10, w * 10 + 10).forEach(function (lv) { got += a.save.stars[lv.id] || 0; });
       var tb = el('button', 'wing' + (w === UI.wing ? ' on' : '') + (open ? '' : ' locked'),
-        '<small>Aile ' + (w + 1) + '</small>' + esc(WINGS[w] || '') + '<span>' + got + '/' + Math.min(10, PT.LEVELS.length - w * 10) * 3 + ' ★</span>');
+        '<small>Aile ' + (w + 1) + '</small>' + esc(WINGS[w] || '') + '<span>' + got + '/' + Math.min(10, PT.LEVELS.length - w * 10) * PT.MAX_STARS + ' ★</span>');
       (function (w, open) {
         if (open) click(tb, function () { UI.wing = w; UI.showLevels(); });
         else tb.addEventListener('click', function () { PT.Audio.play('error'); UI.toast('Aile fermée', 'Terminez la salle ' + (w * 10) + ' pour l’ouvrir'); });
@@ -5234,7 +5564,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       var unlocked = a.isUnlocked(idx), stars = a.save.stars[lv.id] || 0;
       var b = el('button', 'lvl' + (unlocked ? '' : ' locked'));
       var st = '';
-      for (var k = 0; k < 3; k++) st += '<img alt="" src="' + A.starIcon(k < stars) + '">';
+      for (var k = 0; k < PT.MAX_STARS; k++) st += '<img alt="" src="' + A.starIcon(k < stars) + '">';
       var badge = lv.type === 'casse' ? '<span class="badge casse">CASSE</span>' : lv.variant ? '<span class="badge variante">' + VARIANTS[lv.variant] + '</span>' : '';
       b.innerHTML = badge + '<img class="thumb" alt="" src="' + thumb(lv) + '"><div class="body"><span class="num">SALLE ' + lv.id + '</span>' +
         '<span class="name">' + esc(lv.name) + '</span><span class="sub">' + esc(lv.subtitle) + '</span><span class="stars">' + st + '</span></div>';
@@ -5338,7 +5668,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var a = App(), lv = info.level, idx = a.levelIdx, next = PT.LEVELS[idx + 1];
     var s = UI.screen('scr-win');
     var stars = '';
-    for (var k = 0; k < 3; k++) stars += '<img alt="" class="' + (k < info.stars ? 'on' : '') + '" style="animation-delay:' + (0.25 + k * 0.3) + 's" src="' + A.starIcon(k < info.stars) + '">';
+    for (var k = 0; k < PT.MAX_STARS; k++) stars += '<img alt="" class="' + (k < info.stars ? 'on' : '') + '" style="animation-delay:' + (0.25 + k * 0.3) + 's" src="' + A.starIcon(k < info.stars) + '">';
     var unl = '';
     if (info.firstClear && next) {
       PT.TOWER_ORDER.forEach(function (t) { if (PT.TOWERS[t].unlock === next.id) unl += chip(A.towerIcon(t), PT.TOWERS[t].name, 'Défense'); });
@@ -5381,66 +5711,144 @@ img { -webkit-user-drag: none; pointer-events: none; }
     tips.push('Placez vos défenses près des virages : les voleurs y passent à l’aller ET au retour.');
     tips.push('Améliorer une défense coûte souvent moins cher que d’en construire une nouvelle.');
     tips.push('Dépensez vos étoiles à l’Atelier pour des bonus permanents.');
+    var canRelax = !a.relax && ((a.save.fails || {})[lv.id] || 0) >= PT.RELAX.after;
     var s = UI.screen('scr-lose');
     s.innerHTML = '<div class="frame result"><div class="eyebrow">Salle ' + lv.id + ' · vague ' + (info.game.waveIndex + 1) + '/' + lv.waves.length + '</div><h2>Cambriolé !</h2>' +
       '<div class="quote"><img alt="" src="' + A.portrait('gentleman') + '"><p>« ' + LOSE_QUOTES[(Math.random() * LOSE_QUOTES.length) | 0] + ' »</p></div>' +
       '<p><b>Astuce :</b> ' + tips[(Math.random() * Math.min(4, tips.length)) | 0] + '</p>' +
-      '<div class="actions"><button class="btn ghost small" id="l-menu">Salles</button><button class="btn ghost small" id="l-shop">Atelier</button><button class="btn big red" id="l-retry">Réessayer</button></div></div>';
+      (canRelax ? '<div class="relax"><b>Cette salle vous résiste ?</b> Rejouez-la en <b>mode détente</b> : les voleurs sont 25 % moins résistants, mais vous gagnerez ' + PT.RELAX.maxStars + ' étoiles au plus.</div>' : '') +
+      '<div class="actions"><button class="btn ghost small" id="l-menu">Salles</button><button class="btn ghost small" id="l-shop">Atelier</button>' +
+      (canRelax ? '<button class="btn green" id="l-relax">Mode détente</button>' : '') + '<button class="btn big red" id="l-retry">Réessayer</button></div></div>';
+    if (canRelax) click($('l-relax'), function () { a.startLevel(a.levelIdx, true); });
     click($('l-menu'), function () { a.quitToLevels(); });
     click($('l-shop'), function () { a.quitToLevels(); UI.showAtelier(UI.showLevels); });
-    click($('l-retry'), function () { a.startLevel(a.levelIdx); });
+    click($('l-retry'), function () { a.startLevel(a.levelIdx, a.relax); });
   };
 
   /* ---------- Atelier : arbre de talents ---------- */
-  UI.showAtelier = function (back, confirmReset) {
-    var a = App();
+  UI.atelierBranch = 'def';
+  UI.atelierSel = null;
+  function talentState(u, a) {
+    var r = a.save.upgrades[u.id] || 0, max = u.costs.length;
+    if (r >= max) return 'done';
+    if (u.excl && (a.save.upgrades[u.excl] || 0) > 0) return 'banned';
+    if (!PT.upgradeOpen(u.id, a.save.upgrades)) return 'locked';
+    return a.starsFree() >= u.costs[r] ? 'buy' : 'poor';
+  }
+  // Pastille compacte : nom, rangs, prix
+  // Talent = un rond avec son dessin, ses rangs en petits points, et son nom dessous.
+  function pillHtml(u, a) {
+    var r = a.save.upgrades[u.id] || 0, max = u.costs.length, st = talentState(u, a);
+    var badge = st === 'locked' ? '<span class="badge">🔒</span>' : st === 'banned' ? '<span class="badge no">✕</span>' : st === 'done' ? '<span class="badge ok">✓</span>' : '';
+    var pips = '';
+    for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
+    return '<button class="pill-node ' + st + (r > 0 ? ' owned' : '') + (UI.atelierSel === u.id ? ' sel' : '') + '" data-id="' + u.id + '"' + (u.req ? ' data-req="' + u.req + '"' : '') + '>' +
+      '<span class="dot"><img alt="" src="' + A.talentIcon(u.id) + '">' + badge + '</span><span class="pips">' + pips + '</span><span class="nm">' + esc(u.name) + '</span></button>';
+  }
+  function drawTreeLines(box, color) {
+    // Traits fins entre les ronds ; positions de mise en page (insensibles à l'animation du cadre)
+    var svg = box.querySelector('svg.links'), out = '';
+    function dot(n) { var d = n.querySelector('.dot'); return { x: n.offsetLeft + d.offsetLeft + d.offsetWidth / 2, top: n.offsetTop + d.offsetTop, bot: n.offsetTop + d.offsetTop + d.offsetHeight }; }
+    box.querySelectorAll('.pill-node[data-req]').forEach(function (n) {
+      var p = box.querySelector('.pill-node[data-id="' + n.getAttribute('data-req') + '"]');
+      if (!p) return;
+      var A1 = dot(p), B1 = dot(n), y1 = A1.bot, y2 = B1.top, my = (y1 + y2) / 2, on = p.classList.contains('owned');
+      // Le trait part du rond et contourne le nom du talent parent
+      var yl = p.offsetTop + p.offsetHeight + 2;
+      out += '<path d="M' + A1.x + ' ' + yl + ' C' + A1.x + ' ' + (yl + y2) / 2 + ' ' + B1.x + ' ' + (yl + y2) / 2 + ' ' + B1.x + ' ' + y2 + '" stroke="' + (on ? color : '#d6c9b3') + '"' + (on ? '' : ' stroke-dasharray="3 4"') + ' />';
+    });
+    svg.setAttribute('width', box.offsetWidth); svg.setAttribute('height', box.offsetHeight);
+    svg.innerHTML = out;
+  }
+  UI.showAtelier = function (back) {
     var s = UI.screen('scr-atelier');
     var head = el('div', 'screen-head');
-    head.appendChild(backBtn(back || UI.showTitle));
+    head.appendChild(el('div', 'a-stars', starsBadge()));
     head.appendChild(el('h2', '', 'L’Atelier'));
-    head.appendChild(el('div', '', starsBadge()));
+    head.appendChild(closeBtn(back || UI.showTitle));
     s.appendChild(head);
-    var f = el('div', 'frame shop');
+    var f = el('div', 'frame shop atelier');
     f.style.marginTop = 'calc(var(--u) * 56)';
-    var html = '<p>Gagnez jusqu’à 3 étoiles par salle et investissez-les dans vos talents. Dans chaque branche, un talent s’ouvre dès que celui du dessus a au moins un rang.</p><div class="tree">';
-    PT.BRANCHES.forEach(function (br) {
-      html += '<div class="branch" style="--bc:' + br.color + '"><h3>' + esc(br.name) + '</h3>';
-      PT.UPGRADES.filter(function (u) { return u.branch === br.id; }).forEach(function (u, i, list) {
-        var r = a.save.upgrades[u.id] || 0, max = u.costs.length, cost = u.costs[r];
-        var open = PT.upgradeOpen(u.id, a.save.upgrades);
-        var pips = '';
-        for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
-        var state = r >= max ? 'done' : !open ? 'locked' : a.starsFree() >= cost ? 'buy' : 'poor';
-        html += '<div class="node ' + state + '"><b>' + esc(u.name) + '</b><small>' + esc(u.desc(Math.max(1, r < max ? r + 1 : r))) + '</small>' +
-          (r > 0 && r < max ? '<small class="now">Actuel : ' + esc(u.desc(r)) + '</small>' : '') +
-          '<div class="pips">' + pips + '</div>' +
-          (r >= max ? '<span class="eyebrow">Maximum</span>' :
-            !open ? '<span class="eyebrow">Débloquez « ' + esc(list[i - 1].name) + ' »</span>' :
-            '<button class="btn small" data-up="' + u.id + '"' + (a.starsFree() < cost ? ' disabled' : '') + '><img alt="" src="' + A.starIcon(true) + '">' + cost + '</button>') + '</div>';
-      });
-      html += '</div>';
-    });
-    html += '</div><div class="actions">' + (confirmReset ? '<span class="confirm-line">Rembourser toutes les étoiles dépensées ?</span><button class="btn small ghost" id="a-no">Non</button><button class="btn small red" id="a-yes">Oui, rembourser</button>' : '<button class="btn small ghost" id="a-reset">Rembourser mes étoiles</button>') + '</div>';
-    f.innerHTML = html;
     s.appendChild(f);
-    f.querySelectorAll('[data-up]').forEach(function (b) {
-      click(b, function () {
-        if (a.buyUpgrade(b.getAttribute('data-up'))) { PT.Audio.play('upgrade'); UI.showAtelier(back); }
-        else PT.Audio.play('error');
-      });
-    });
-    if ($('a-reset')) click($('a-reset'), function () { UI.showAtelier(back, true); });
-    if ($('a-no')) click($('a-no'), function () { UI.showAtelier(back); });
-    if ($('a-yes')) click($('a-yes'), function () { a.save.upgrades = {}; a.persist(); UI.showAtelier(back); });
+    renderAtelier(f, false);
   };
+  // Redessine le contenu de l'Atelier sans rouvrir l'écran (garde la position de défilement)
+  function renderAtelier(f, confirmReset) {
+    var a = App();
+    var scroll = f.scrollTop;
+    var badge = document.querySelector('#scr-atelier .a-stars');
+    if (badge) badge.innerHTML = starsBadge();
+    var sel = PT.upgradeById(UI.atelierSel);
+    if (!sel) sel = PT.UPGRADES.filter(function (u) { return talentState(u, a) === 'buy'; })[0] || PT.UPGRADES.filter(function (u) { return talentState(u, a) !== 'done'; })[0] || PT.UPGRADES[0];
+    UI.atelierSel = sel.id;
+    var br = PT.BRANCHES.filter(function (x) { return x.id === sel.branch; })[0];
+    // Toute la marge de progression d'un coup d'œil
+    var html = '<div class="atelier-top"><span><b>' + a.starsTotal() + '</b> étoiles gagnées sur ' + PT.LEVELS.length * PT.MAX_STARS + '</span><span><b>' + a.starsSpent() + '</b> investies</span><span><b>' + a.starsFree() + '</b> à dépenser</span></div>';
+    html += '<div class="atelier-body" style="--bc:' + br.color + '"><div class="branches">';
+    PT.BRANCHES.forEach(function (x) {
+      var list = PT.UPGRADES.filter(function (u) { return u.branch === x.id; });
+      var spent = 0, cap = 0;
+      list.forEach(function (u) {
+        var r = a.save.upgrades[u.id] || 0;
+        for (var k = 0; k < u.costs.length; k++) { if (!u.excl || u.id < u.excl) cap += u.costs[k]; if (k < r) spent += u.costs[k]; }
+      });
+      html += '<div class="talent-tree" style="--bc:' + x.color + '"><svg class="links" aria-hidden="true"></svg>' +
+        '<div class="bhead"><b>' + esc(x.name) + '</b><span class="bar"><i style="width:' + Math.round(100 * spent / cap) + '%"></i></span></div>';
+      list.filter(function (u) { return u.path === 't'; }).forEach(function (u) { html += '<div class="trow">' + pillHtml(u, a) + '</div>'; });
+      var pa = list.filter(function (u) { return u.path === 'a' && !u.excl; }), pb = list.filter(function (u) { return u.path === 'b' && !u.excl; });
+      for (var i = 0; i < Math.max(pa.length, pb.length); i++) html += '<div class="trow two">' + (pa[i] ? pillHtml(pa[i], a) : '<span></span>') + (pb[i] ? pillHtml(pb[i], a) : '<span></span>') + '</div>';
+      html += '<div class="trow two">';
+      ['a', 'b'].forEach(function (p) {
+        var duo = list.filter(function (u) { return u.path === p && u.excl; });
+        html += '<div class="duo">' + pillHtml(duo[0], a) + pillHtml(duo[1], a) + '</div>';
+      });
+      html += '</div></div>';
+    });
+    html += '</div>';
+
+    // Panneau de détail
+    var r = a.save.upgrades[sel.id] || 0, max = sel.costs.length, st = talentState(sel, a);
+    var why = st === 'banned' ? 'Vous avez choisi l’autre option : remboursez vos étoiles pour changer d’avis.' :
+      st === 'locked' ? 'Achetez d’abord « ' + esc(PT.upgradeById(sel.req).name) + ' ».' : '';
+    html += '<div class="talent-detail"><small class="hint">Touchez un talent pour le voir ici</small><div class="td-head"><img alt="" src="' + A.talentIcon(sel.id) + '"><h3>' + esc(sel.name) + '</h3></div>' +
+      (sel.excl ? '<span class="excl-tag">Au choix avec « ' + esc(PT.upgradeById(sel.excl).name) + ' »</span>' : '') +
+      '<p class="rank">' + (sel.path === 't' ? 'Tronc commun' : 'Voie : ' + esc(br.paths[sel.path])) + ' · rang ' + r + ' / ' + max + '</p>' +
+      (r > 0 ? '<p class="now">Actuel : ' + esc(sel.desc(r)) + '</p>' : '') +
+      (r < max ? '<p class="next">' + (r > 0 ? 'Prochain : ' : '') + esc(sel.desc(r + 1)) + '</p>' : '<p class="next">Talent au maximum.</p>') +
+      (why ? '<p class="why">' + why + '</p>' : '') +
+      (r < max && (st === 'buy' || st === 'poor') ? '<button class="btn" id="a-buy"' + (st === 'poor' ? ' disabled' : '') + '><img alt="" src="' + A.starIcon(true) + '">Acheter · ' + sel.costs[r] + '</button>' +
+        (st === 'poor' ? '<p class="why">Il vous manque ' + (sel.costs[r] - a.starsFree()) + ' étoile' + (sel.costs[r] - a.starsFree() > 1 ? 's' : '') + '.</p>' : '') : '') +
+      '<div class="refund">' + (confirmReset ? '<span>Tout rembourser ?</span><button class="btn small ghost" id="a-no">Non</button><button class="btn small red" id="a-yes">Oui</button>' : '<button class="linkish" id="a-reset">Rembourser mes étoiles (gratuit)</button>') + '</div>' +
+      '</div></div>';
+    f.innerHTML = html;
+    f.scrollTop = scroll;
+    f.querySelectorAll('.talent-tree').forEach(function (box) { drawTreeLines(box, box.style.getPropertyValue('--bc')); });
+    f.querySelectorAll('.pill-node').forEach(function (n) {
+      click(n, function () { UI.atelierSel = n.getAttribute('data-id'); PT.Audio.play('click'); renderAtelier(f); });
+    });
+    if ($('a-buy')) click($('a-buy'), function () {
+      if (a.buyUpgrade(sel.id)) {
+        PT.Audio.play('upgrade'); renderAtelier(f);
+        var bought = f.querySelector('.pill-node[data-id="' + sel.id + '"] .dot');
+        if (bought) bought.classList.add('bought');
+      }
+      else PT.Audio.play('error');
+    });
+    if ($('a-reset')) click($('a-reset'), function () { renderAtelier(f, true); });
+    if ($('a-no')) click($('a-no'), function () { renderAtelier(f); });
+    if ($('a-yes')) click($('a-yes'), function () { a.save.upgrades = {}; a.persist(); PT.Audio.play('sell'); renderAtelier(f); });
+  }
+  window.addEventListener('resize', function () {
+    document.querySelectorAll('#scr-atelier .talent-tree').forEach(function (box) { drawTreeLines(box, box.style.getPropertyValue('--bc')); });
+  });
 
   UI.showSuspects = function (back) {
     var a = App();
     var s = UI.screen('scr-suspects');
     var head = el('div', 'screen-head');
-    head.appendChild(backBtn(back || UI.showTitle));
-    head.appendChild(el('h2', '', 'Fichier des suspects'));
     head.appendChild(el('div', ''));
+    head.appendChild(el('h2', '', 'Fichier des suspects'));
+    head.appendChild(closeBtn(back || UI.showTitle));
     s.appendChild(head);
     var f = el('div', 'frame shop');
     f.style.marginTop = 'calc(var(--u) * 56)';
@@ -5487,6 +5895,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       (confirmReset ? '<p class="confirm-line">Les étoiles, améliorations et suspects découverts seront effacés.</p>' : '') +
       '<p style="margin-top:12px;font-size:calc(var(--u) * 14)">Raccourcis clavier : <b>Espace</b> vague suivante, <b>1</b> à <b>4</b> pouvoirs, <b>V</b> vitesse, <b>Échap</b> pause.</p>' +
       '<div class="actions"><button class="btn" id="o-back">Retour</button></div></div>';
+    s.querySelector('.frame').appendChild(closeBtn(back || UI.showTitle)).classList.add('in-frame');
     bindToggles();
     click($('o-full'), function () { a.toggleFullscreen(); });
     click($('o-back'), back || UI.showTitle);
@@ -5691,26 +6100,26 @@ img { -webkit-user-drag: none; pointer-events: none; }
     ring.style.cssText = 'left:' + (L.cx - radius) + 'px;top:' + (L.cy - radius) + 'px;width:' + radius * 2 + 'px;height:' + radius * 2 + 'px';
     r.appendChild(ring);
     types.forEach(function (t, i) {
-      var d = PT.TOWERS[t];
-      var b = el('button', 'r-item', '<img alt="" src="' + A.towerIcon(t) + '"><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">' + d.cost + '</span>');
-      b.dataset.type = t; b.dataset.cost = d.cost;
-      b.setAttribute('aria-label', d.name + ', ' + d.cost + ' pièces');
+      var d = PT.TOWERS[t], cost = g.towerCost(t);
+      var b = el('button', 'r-item', '<img alt="" src="' + A.towerIcon(t) + '"><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">' + cost + '</span>');
+      b.dataset.type = t; b.dataset.cost = cost;
+      b.setAttribute('aria-label', d.name + ', ' + cost + ' pièces');
       b.style.left = L.pos[i].x + 'px'; b.style.top = L.pos[i].y + 'px';
       b.style.animationDelay = (i * 0.025) + 's';
       b.addEventListener('click', function (ev) {
         ev.stopPropagation(); PT.Audio.unlock();
         if (UI.radialSel === t) {
           if (g.build(spot, t)) { UI.closeRadial(); }
-          else { PT.Audio.play('error'); UI.toast('Pas assez de pièces', 'Il en faut ' + d.cost); }
+          else { PT.Audio.play('error'); UI.toast('Pas assez de pièces', 'Il en faut ' + cost); }
           return;
         }
         PT.Audio.play('click');
         UI.radialSel = t;
         r.querySelectorAll('.r-item').forEach(function (x) { x.classList.toggle('sel', x === b); });
         var st = statsFor(g, t, 0, { x: spot.x, y: spot.y, id: -1 });
-        UI.preview = { x: spot.x, y: spot.y - 10, range: st.range, ok: g.coins >= d.cost };
-        UI.showTip('<h4>' + esc(d.name) + ' · ' + d.cost + ' pièces</h4><p>' + esc(d.desc) + '</p>' + statLine(t, st) + synergiesOf(t) +
-          '<div class="hint">' + (g.coins >= d.cost ? 'Touchez à nouveau pour construire.' : 'Pas encore assez de pièces.') + '</div>');
+        UI.preview = { x: spot.x, y: spot.y - 10, range: st.range, ok: g.coins >= cost };
+        UI.showTip('<h4>' + esc(d.name) + ' · ' + cost + ' pièces</h4><p>' + esc(d.desc) + '</p>' + statLine(t, st) + synergiesOf(t) +
+          '<div class="hint">' + (g.coins >= cost ? 'Touchez à nouveau pour construire.' : 'Pas encore assez de pièces.') + '</div>');
       });
       r.appendChild(b);
     });
@@ -5728,46 +6137,60 @@ img { -webkit-user-drag: none; pointer-events: none; }
     UI.selectedTower = tower;
     UI.radialKind = 'tower';
     var d = PT.TOWERS[tower.type], st = g.towerStats(tower), cost = g.upgradeCost(tower), sell = g.sellValue(tower);
+    var specs = tower.level === 1 && PT.SPECS[tower.type];
     UI.preview = { x: tower.x, y: tower.y - 10, range: st.range };
-    var u = a.u, radius = 70 * u;
+    var u = a.u, radius = (specs ? 80 : 70) * u;
     var sp = a.renderer.toScreen(tower.x, tower.y - 30);
-    var L = layoutRadial(sp.x, sp.y, 2, radius);
+    var L = layoutRadial(sp.x, sp.y, specs ? 3 : 2, radius);
     UI.radialCx = L.cx; UI.radialCy = L.cy; UI.radialR = radius;
     r.innerHTML = '';
-    var up = el('button', 'r-item' + (cost == null ? ' max' : ''));
-    if (cost == null) up.innerHTML = '<span class="lbl">MAX</span>';
-    else {
-      up.innerHTML = '<img alt="" src="' + A.towerIcon(tower.type, tower.level + 1) + '"><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">' + cost + '</span>';
-      up.dataset.cost = cost;
-    }
-    up.setAttribute('aria-label', cost == null ? 'Niveau maximum' : 'Améliorer pour ' + cost + ' pièces');
-    up.style.left = L.pos[0].x + 'px'; up.style.top = L.pos[0].y + 'px';
-    var sl = el('button', 'r-item sell', '<span class="lbl">Vendre</span><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">+' + sell + '</span>');
-    sl.setAttribute('aria-label', 'Vendre pour ' + sell + ' pièces');
-    sl.style.left = L.pos[1].x + 'px'; sl.style.top = L.pos[1].y + 'px';
-    r.appendChild(up); r.appendChild(sl);
-    r.hidden = false;
-    var info = '<h4>' + esc(d.name) + ' · niveau ' + (tower.level + 1) + '/3</h4>' + statLine(tower.type, st) + synergiesOf(tower.type);
-    UI.showTip(info + '<div class="hint">Touchez l’amélioration ou la vente.</div>');
-    up.addEventListener('click', function (ev) {
-      ev.stopPropagation(); PT.Audio.unlock();
-      if (cost == null) { PT.Audio.play('error'); return; }
-      if (UI.radialSel === 'up') {
-        if (g.upgrade(tower)) UI.openTower(tower);
-        else { PT.Audio.play('error'); UI.toast('Pas assez de pièces', 'Il en faut ' + cost); }
-        return;
+    var coin = '<img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">';
+    var items = [];
+    function select(btn, key) { UI.radialSel = key; items.forEach(function (x) { x.classList.toggle('sel', x === btn); }); }
+    function upItem(spec, pos) {
+      var b = el('button', 'r-item' + (cost == null ? ' max' : '') + (spec ? ' spec' : ''));
+      if (cost == null) b.innerHTML = '<span class="lbl">MAX</span>';
+      else {
+        b.innerHTML = '<img alt="" src="' + A.towerIcon(tower.type, tower.level + 1) + '">' + (spec ? '<span class="spec-name" style="background:' + specs[spec].color + '">' + esc(specs[spec].name) + '</span>' : '') +
+          '<span class="price">' + coin + cost + '</span>';
+        b.dataset.cost = cost;
       }
-      PT.Audio.play('click');
-      UI.radialSel = 'up'; up.classList.add('sel'); sl.classList.remove('sel');
-      var nx = statsFor(g, tower.type, tower.level + 1, tower);
-      UI.preview = { x: tower.x, y: tower.y - 10, range: nx.range, ok: g.coins >= cost };
-      UI.showTip('<h4>Améliorer : niveau ' + (tower.level + 2) + ' · ' + cost + ' pièces</h4>' + statLine(tower.type, st, nx) + '<div class="hint">Touchez à nouveau pour confirmer.</div>');
-    });
+      b.setAttribute('aria-label', cost == null ? 'Niveau maximum' : (spec ? specs[spec].name + ', ' : 'Améliorer, ') + cost + ' pièces');
+      b.style.left = pos.x + 'px'; b.style.top = pos.y + 'px';
+      b.addEventListener('click', function (ev) {
+        ev.stopPropagation(); PT.Audio.unlock();
+        if (cost == null) { PT.Audio.play('error'); return; }
+        var key = 'up' + (spec || '');
+        if (UI.radialSel === key) {
+          if (g.upgrade(tower, spec)) UI.openTower(tower);
+          else { PT.Audio.play('error'); UI.toast('Pas assez de pièces', 'Il en faut ' + cost); }
+          return;
+        }
+        PT.Audio.play('click');
+        select(b, key);
+        var nx = g.towerStats({ type: tower.type, level: tower.level + 1, spec: spec, x: tower.x, y: tower.y, id: tower.id });
+        UI.preview = { x: tower.x, y: tower.y - 10, range: nx.range, ok: g.coins >= cost };
+        UI.showTip(spec ? '<h4>' + esc(specs[spec].name) + ' · ' + cost + ' pièces</h4><p>' + esc(specs[spec].desc) + '</p>' + statLine(tower.type, st, nx) +
+            '<div class="hint">Choix définitif pour cette défense. Touchez à nouveau pour confirmer.</div>'
+          : '<h4>Améliorer : niveau ' + (tower.level + 2) + ' · ' + cost + ' pièces</h4>' + statLine(tower.type, st, nx) + '<div class="hint">Touchez à nouveau pour confirmer.</div>');
+      });
+      items.push(b); r.appendChild(b);
+    }
+    if (specs) { upItem('a', L.pos[0]); upItem('b', L.pos[1]); } else upItem(null, L.pos[0]);
+    var slPos = L.pos[specs ? 2 : 1];
+    var sl = el('button', 'r-item sell', '<span class="lbl">Vendre</span><span class="price">' + coin + '+' + sell + '</span>');
+    sl.setAttribute('aria-label', 'Vendre pour ' + sell + ' pièces');
+    sl.style.left = slPos.x + 'px'; sl.style.top = slPos.y + 'px';
+    r.appendChild(sl); items.push(sl);
+    r.hidden = false;
+    var spName = tower.spec && PT.SPECS[tower.type] ? ' · ' + PT.SPECS[tower.type][tower.spec].name : '';
+    UI.showTip('<h4>' + esc(d.name) + esc(spName) + ' · niveau ' + (tower.level + 1) + '/3</h4>' + statLine(tower.type, st) + synergiesOf(tower.type) +
+      '<div class="hint">' + (specs ? 'Niveau 3 : choisissez une spécialisation.' : 'Touchez l’amélioration ou la vente.') + '</div>');
     sl.addEventListener('click', function (ev) {
       ev.stopPropagation(); PT.Audio.unlock();
       if (UI.radialSel === 'sell') { g.sell(tower); UI.closeRadial(); return; }
       PT.Audio.play('click');
-      UI.radialSel = 'sell'; sl.classList.add('sel'); up.classList.remove('sel');
+      select(sl, 'sell');
       UI.preview = { x: tower.x, y: tower.y - 10, range: st.range };
       UI.showTip('<h4>Vendre pour ' + sell + ' pièces ?</h4><p>Touchez à nouveau pour confirmer la vente.</p>');
     });
@@ -5798,7 +6221,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
 
   /* ---------- Sauvegarde ---------- */
-  function freshSave() { return { stars: {}, upgrades: {}, music: true, sfx: true, story: false, seen: {}, talents: 2 }; }
+  function freshSave() { return { stars: {}, upgrades: {}, music: true, sfx: true, story: false, seen: {}, talents: 3, starScale: 5, fails: {} }; }
   function loadSave() {
     var s = null;
     try { s = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { s = null; }
@@ -5819,12 +6242,12 @@ img { -webkit-user-drag: none; pointer-events: none; }
   App.starsTotal = function () { var t = 0; for (var k in App.save.stars) t += App.save.stars[k]; return t; };
   App.starsSpent = function () {
     var t = 0;
-    PT.UPGRADES.forEach(function (u) { var r = App.save.upgrades[u.id] || 0; for (var i = 0; i < r; i++) t += u.costs[i]; });
+    PT.UPGRADES.forEach(function (u) { var r = Math.min(App.save.upgrades[u.id] || 0, u.costs.length); for (var i = 0; i < r; i++) t += u.costs[i]; });
     return t;
   };
   App.starsFree = function () { return App.starsTotal() - App.starsSpent(); };
   App.buyUpgrade = function (id) {
-    var u = PT.UPGRADES.filter(function (x) { return x.id === id; })[0];
+    var u = PT.upgradeById(id);
     var r = App.save.upgrades[id] || 0;
     if (!u || r >= u.costs.length || App.starsFree() < u.costs[r] || !PT.upgradeOpen(id, App.save.upgrades)) return false;
     App.save.upgrades[id] = r + 1;
@@ -5877,11 +6300,12 @@ img { -webkit-user-drag: none; pointer-events: none; }
     App.renderer.setLevel(lv);
   }
 
-  App.startLevel = function (idx) {
+  App.startLevel = function (idx, relax) {
     clearTimeout(App.resultTimer);
     var lv = PT.LEVELS[idx];
     App.levelIdx = idx;
-    App.game = new PT.Game(lv, { upgrades: App.save.upgrades });
+    App.relax = !!relax;
+    App.game = new PT.Game(lv, { upgrades: App.save.upgrades, relax: relax });
     App.renderer.setLevel(lv);
     App.scene = 'game';
     App.paused = false;
@@ -5986,11 +6410,12 @@ img { -webkit-user-drag: none; pointer-events: none; }
         UI.toast('Bonus +' + ev.value, 'Vague appelée en avance');
         break;
       case 'lock':
-        UI.toast('Portes verrouillées !', 'Personne ne sort pendant ' + PT.POWERS.verrou.dur + ' secondes');
+        UI.toast('Portes verrouillées !', 'Personne ne sort pendant ' + Math.round(g.lockT) + ' secondes');
         break;
       case 'win': {
         var old = App.save.stars[lv.id] || 0, stars = g.stars;
         App.save.stars[lv.id] = Math.max(old, stars);
+        if (App.save.fails) delete App.save.fails[lv.id];
         if (!old) UI.wing = null; // une nouvelle aile a pu s'ouvrir : on y retournera
         App.persist();
         UI.closeRadial(); UI.stopAim();
@@ -6000,6 +6425,9 @@ img { -webkit-user-drag: none; pointer-events: none; }
         break;
       }
       case 'lose':
+        App.save.fails = App.save.fails || {};
+        App.save.fails[lv.id] = (App.save.fails[lv.id] || 0) + 1;
+        App.persist();
         UI.closeRadial(); UI.stopAim();
         App.resultTimer = setTimeout(function () { UI.showLose({ level: lv, game: g }); }, 1400);
         break;
@@ -6112,9 +6540,15 @@ img { -webkit-user-drag: none; pointer-events: none; }
     booted = true;
     App.save = loadSave();
     // Sauvegarde d’une ancienne version : si les talents coûtent plus que les étoiles gagnées, on rembourse tout
-    if (App.save.talents !== 2 || App.starsSpent() > App.starsTotal()) {
+    // Passage à 5 étoiles par salle : on convertit les anciennes notes sur 3
+    if (App.save.starScale !== 5) {
+      var conv = { 1: 1, 2: 3, 3: 5 };
+      for (var sid in App.save.stars) App.save.stars[sid] = conv[App.save.stars[sid]] || App.save.stars[sid];
+      App.save.starScale = 5; App.persist();
+    }
+    if (App.save.talents !== 3 || App.starsSpent() > App.starsTotal()) {
       var had = Object.keys(App.save.upgrades).length > 0;
-      App.save.upgrades = {}; App.save.talents = 2; App.persist();
+      App.save.upgrades = {}; App.save.talents = 3; App.persist();
       if (had) setTimeout(function () { UI.toast('Nouvel Atelier !', 'Vos étoiles vous sont rendues'); }, 800);
     }
     Au.musicOn = App.save.music; Au.sfxOn = App.save.sfx;
