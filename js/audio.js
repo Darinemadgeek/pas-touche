@@ -142,6 +142,9 @@
       case 'win': [60, 64, 67, 72, 76, 79, 84].forEach(function (n, i) { tone(midi(n), i === 6 ? 0.6 : 0.16, { type: 'triangle', vol: 0.22, at: t + i * 0.09 }); }); break;
       case 'lose': [67, 66, 65, 64].forEach(function (n, i) { tone(midi(n), i === 3 ? 0.8 : 0.3, { type: 'sawtooth', vol: 0.16, filter: 1100, vib: 5, at: t + i * 0.3 }); }); break;
       case 'unlock': [72, 76, 79, 84, 88].forEach(function (n, i) { tone(midi(n), 0.2, { type: 'sine', vol: 0.2, at: t + i * 0.07 }); }); break;
+      case 'gust': noise(0.4, { freq: 400, slide: 1800, vol: 0.2, q: 0.6 }); break;
+      case 'heal': [880, 1108, 1318].forEach(function (f, i) { tone(f, 0.12, { type: 'sine', vol: 0.12, at: t + i * 0.06 }); }); break;
+      case 'burrow': noise(0.3, { freq: 250, slide: 120, vol: 0.25, ftype: 'lowpass' }); break;
       case 'cannon': tone(70, 0.35, { type: 'sine', vol: 0.5, slide: 35 }); noise(0.3, { freq: 500, slide: 120, vol: 0.35, ftype: 'lowpass' }); break;
       case 'blast': noise(0.28, { freq: 700, slide: 150, vol: 0.3, ftype: 'lowpass' }); tone(90, 0.22, { type: 'sine', vol: 0.3, slide: 45 }); break;
       case 'clang': tone(1850 + Math.random() * 300, 0.16, { type: 'triangle', vol: 0.12 }); tone(2790, 0.1, { type: 'sine', vol: 0.06 }); break;

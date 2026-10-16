@@ -397,3 +397,39 @@ img { -webkit-user-drag: none; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
 }
+
+/* Atelier en arbre de talents */
+.tree { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(var(--u) * 12); }
+.branch { display: flex; flex-direction: column; gap: calc(var(--u) * 10); position: relative; }
+.branch h3 { margin: 0; text-align: center; color: var(--bc) !important; }
+.branch::before { content: ""; position: absolute; left: 50%; top: calc(var(--u) * 30); bottom: calc(var(--u) * 20); width: calc(var(--u) * 4); background: var(--bc); opacity: 0.35; transform: translateX(-50%); border-radius: 4px; }
+.node { position: relative; display: flex; flex-direction: column; gap: calc(var(--u) * 5); background: #fff; border: calc(var(--u) * 3) solid var(--ink); border-radius: calc(var(--u) * 12); padding: calc(var(--u) * 8) calc(var(--u) * 10); box-shadow: 0 calc(var(--u) * 4) 0 var(--bc); }
+.node b { font-family: var(--font-display); font-weight: normal; font-size: calc(var(--u) * 17); line-height: 1.05; }
+.node small { font-size: calc(var(--u) * 12.5); line-height: 1.25; font-weight: 700; color: #5a4636; }
+.node small.now { color: var(--green); }
+.node .pips { display: flex; gap: calc(var(--u) * 4); }
+.node .pips i { width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; border: 2px solid var(--ink); background: #e5dccb; }
+.node .pips i.on { background: var(--bc); }
+.node .btn { align-self: flex-start; }
+.node.locked { opacity: 0.55; filter: grayscale(0.6); }
+.node.done { background: #fff7dc; }
+.node .eyebrow { font-size: calc(var(--u) * 12); }
+@media (max-width: 720px) { .tree { grid-template-columns: 1fr; } }
+
+/* Ailes du musée (onglets du choix des salles) */
+.wings { display: flex; gap: calc(var(--u) * 8); justify-content: center; flex-wrap: wrap; padding: calc(var(--u) * 6) calc(var(--u) * 12) 0; }
+.wing { font-family: var(--font-display); font-size: calc(var(--u) * 15); line-height: 1.05; color: var(--ink); background: var(--paper); border: calc(var(--u) * 3) solid var(--ink); border-radius: calc(var(--u) * 12); padding: calc(var(--u) * 5) calc(var(--u) * 12); box-shadow: 0 calc(var(--u) * 4) 0 var(--ink); cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+.wing small { font-size: calc(var(--u) * 11); color: var(--velvet); letter-spacing: 0.06em; }
+.wing span { font-size: calc(var(--u) * 12); color: #8a6a3a; }
+.wing.on { background: var(--gold); transform: translateY(calc(var(--u) * -2)); }
+.wing.locked { filter: grayscale(0.9) brightness(0.75); cursor: not-allowed; }
+
+/* Synergies dans l'infobulle des défenses */
+#tip .syn { display: flex; flex-direction: column; gap: calc(var(--u) * 3); margin-top: calc(var(--u) * 6); }
+#tip .syn span { font-size: calc(var(--u) * 12.5); line-height: 1.25; background: #fff3c4; border-radius: calc(var(--u) * 8); padding: calc(var(--u) * 2) calc(var(--u) * 7); }
+#tip .syn b { color: #a8742f; }
+
+/* Pastille « talent à acheter » sur les boutons de l'Atelier */
+.head-right { display: flex; gap: calc(var(--u) * 8); align-items: center; }
+.btn.notify { position: relative; }
+.btn.notify::after { content: "!"; position: absolute; top: calc(var(--u) * -10); right: calc(var(--u) * -10); width: calc(var(--u) * 24); height: calc(var(--u) * 24); border-radius: 50%; background: var(--red); color: #fff; border: calc(var(--u) * 2) solid var(--ink); display: grid; place-items: center; font-family: var(--font-display); font-size: calc(var(--u) * 15); animation: ready 1.2s infinite; }

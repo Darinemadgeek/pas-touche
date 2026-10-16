@@ -86,12 +86,42 @@
   G.emit = function (type, data) { data = data || {}; data.type = type; this.events.push(data); };
 
   /* ---------- Défenses ---------- */
+  var TECH = { camera: 1, filet: 1, laser: 1, canon: 1, ventilo: 1 };
   G.towerStats = function (t) {
     var def = PT.TOWERS[t.type], base = def.levels[t.level], m = this.mods, s = {};
     for (var k in base) s[k] = base[k];
     if (t.type === 'gardien' || t.type === 'chien') s.dmg *= m.guardDmg;
-    if (t.type === 'camera' || t.type === 'filet' || t.type === 'laser' || t.type === 'canon') s.range *= m.techRange;
+    if (TECH[t.type]) s.range *= m.techRange;
     if (s.slowDur) s.slowDur *= m.slowDur;
+    if (s.wet) s.wet *= m.slowDur;
+    if (t.x == null) return s;
+    // Sous les ordres : le meilleur Chef à portée renforce la défense
+    var buff = 0, rb = 0, i, o;
+    if (!def.commander) {
+      for (i = 0; i < this.towers.length; i++) {
+        o = this.towers[i];
+        if (o.type !== 'chef' || o.disabledT > 0) continue;
+        var cs = PT.TOWERS.chef.levels[o.level];
+        if (dist2(o.x, o.y, t.x, t.y) <= cs.range * cs.range) { buff = Math.max(buff, cs.buff); rb = Math.max(rb, cs.rangeBuff); }
+      }
+    }
+    if (def.commander) s.buff *= m.synergy;
+    s.chefBuff = buff * m.synergy;
+    if (buff) {
+      if (s.dmg != null) s.dmg *= 1 + s.chefBuff;
+      if (s.dps != null) s.dps *= 1 + s.chefBuff;
+      s.range *= 1 + rb * m.synergy;
+    }
+    // Patrouille : les Gardiens proches les uns des autres tirent plus vite
+    if (t.type === 'gardien') {
+      var n = 0;
+      for (i = 0; i < this.towers.length; i++) {
+        o = this.towers[i];
+        if (o.id !== t.id && o.type === 'gardien' && dist2(o.x, o.y, t.x, t.y) <= 170 * 170) n++;
+      }
+      s.patrol = Math.min(0.3, 0.1 * n) * m.synergy;
+      s.rate *= 1 + s.patrol;
+    }
     return s;
   };
 
@@ -120,7 +150,7 @@
 
   G.upgradeCost = function (t) {
     var lv = PT.TOWERS[t.type].levels[t.level + 1];
-    return lv ? lv.cost : null;
+    return lv ? Math.round(lv.cost * this.mods.upgradeCost) : null;
   };
 
   G.upgrade = function (t) {
@@ -157,13 +187,17 @@
   };
 
   G.earlyBonus = function () {
-    return this.countdown != null && this.waveIndex >= 0 ? Math.round(this.countdown * 1.5) : 0;
+    return this.countdown != null && this.waveIndex >= 0 ? Math.round(this.countdown * 1.5 * this.mods.earlyMul) : 0;
   };
 
   G.startNextWave = function () {
     if (!this.canCallWave()) return false;
     var bonus = this.earlyBonus();
     if (bonus > 0) { this.coins += bonus; this.emit('bonus', { value: bonus }); }
+    if (this.mods.interest && this.waveIndex >= 0) {
+      var gain = Math.min(30, Math.floor(this.coins * this.mods.interest));
+      if (gain > 0) { this.coins += gain; this.emit('interest', { value: gain }); }
+    }
     this.waveIndex++;
     var w = this.level.waves[this.waveIndex], list = [], self = this, np = this.paths.length;
     w.groups.forEach(function (g) {
@@ -190,7 +224,7 @@
       id: this.nextId++, type: s.type, def: def, path: s.path, d: s.d || 0, dir: s.dir || 1,
       hp: hp, maxHp: hp, speed: def.speed * (0.94 + rand() * 0.12), lat: def.boss ? 0 : (rand() - 0.5) * 28,
       alive: true, stunT: 0, netT: 0, slowT: 0, slowF: 0, flashT: 0, pauseT: 0, grabbing: false, carrying: 0,
-      leapT: 0, leapCD: 2 + rand() * 2, empCD: 2, smokeCD: 5, smokeT: 0, summonCD: 9, mirrorCD: 2.5, clangCD: 0, lit: false, blocked: false, fake: 0,
+      leapT: 0, leapCD: 2 + rand() * 2, empCD: 2, burrowT: 0, burrowCD: 2.5 + rand() * 2, healCD: 1.5, wetT: 0, gluT: 0, healedT: 0, pushN: 0, smokeCD: 5, smokeT: 0, summonCD: 9, mirrorCD: 2.5, clangCD: 0, lit: false, blocked: false, fake: 0,
       disguised: !!def.disguise, seen: false, mark: 0, phase: rand() * 6, x: 0, y: 0, face: 1, curSpeed: 0, age: 0,
     };
     this.placeEnemy(e);
@@ -211,7 +245,7 @@
   G.isCamo = function (e) { return (e.def.camo || e.smokeT > 0 || (this.dark && !e.lit)) && !e.seen; };
 
   G.targetable = function (e) {
-    return e.alive && !e.def.innocent && !e.disguised && e.leapT <= 0 && !this.isCamo(e);
+    return e.alive && !e.def.innocent && !e.disguised && e.leapT <= 0 && e.burrowT <= 0 && !this.isCamo(e);
   };
 
   // Distance qu'il reste au voleur pour sortir du musée (plus c'est petit, plus il est dangereux).
@@ -221,7 +255,8 @@
   };
 
   G.applySlow = function (e, f, dur) {
-    if (e.def.slowImmune || e.leapT > 0) return;
+    if (e.def.slowImmune || e.leapT > 0 || e.burrowT > 0) return;
+    if (e.def.slick) f = Math.min(0.85, f * 1.8);
     if (e.slowT <= 0) e.slowF = 0;
     e.slowF = Math.max(e.slowF, f);
     e.slowT = Math.max(e.slowT, dur);
@@ -239,26 +274,27 @@
     if (e.def.decoy) { this.shatter(e); return; }
     var d = dmg * (1 + e.mark);
     if (e.def.armor && !pierce) {
-      var left = Math.max(d * 0.25, d - e.def.armor);
+      var left = Math.max(d * 0.25, d - e.def.armor * (1 - this.mods.armorPierce));
       if (d - left > 4 && e.clangCD <= 0) { e.clangCD = 0.7; this.emit('clang', { x: e.x, y: e.y }); }
       d = left;
     }
     e.hp -= d;
-    e.flashT = 0.08;
+    if (d > 2) e.flashT = 0.08; // le rayon continu du Laser ne fait pas clignoter
     if (e.hp <= 0) this.catchEnemy(e);
   };
 
   G.catchEnemy = function (e) {
     e.alive = false;
-    this.coins += e.def.reward;
+    var reward = Math.round(e.def.reward * this.mods.reward);
+    this.coins += reward;
     this.stats.caught++;
-    this.stats.earned += e.def.reward;
+    this.stats.earned += reward;
     if (e.carrying > 0) {
       this.inRoom += e.carrying;
       this.stats.returned += e.carrying;
       this.emit('return', { x: e.x, y: e.y, n: e.carrying });
     }
-    this.emit('catch', { x: e.x, y: e.y, enemy: e.type, reward: e.def.reward, boss: !!e.def.boss, face: e.face });
+    this.emit('catch', { x: e.x, y: e.y, enemy: e.type, reward: reward, boss: !!e.def.boss, face: e.face });
   };
 
   // Un reflet de l'Illusionniste éclate (touché, filmé, ou arrivé au bout du chemin).
@@ -272,6 +308,7 @@
     if (e.def.decoy) { this.shatter(e); return; }
     e.dir = -1;
     e.leapT = 0;
+    if (e.burrowT > 0) { e.burrowT = 0; e.burrowCD = 2.5; }
     if (e.def.innocent) {
       e.pauseT = 1.2;
       this.coins += 2;
@@ -313,6 +350,9 @@
     if (e.netT > 0) e.netT -= dt;
     if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 0; }
     if (e.smokeT > 0) e.smokeT -= dt;
+    if (e.wetT > 0) e.wetT -= dt;
+    if (e.gluT > 0) e.gluT -= dt;
+    if (e.healedT > 0) e.healedT -= dt;
     if (e.clangCD > 0) e.clangCD -= dt;
 
     var sp = e.speed;
@@ -337,6 +377,32 @@
           e.stunT = 0; e.slowT = 0; e.slowF = 0;
           this.emit('leap', { x: e.x, y: e.y });
         }
+      }
+    }
+    if (def.burrow) {
+      if (e.burrowT > 0) {
+        e.burrowT -= dt;
+        if (e.burrowT <= 0) { e.burrowCD = 3.2 + rand() * 1.2; this.emit('surface', { x: e.x, y: e.y }); }
+      } else if (!e.grabbing && e.pauseT <= 0 && sp > 0) {
+        e.burrowCD -= dt;
+        if (e.burrowCD <= 0) { e.burrowT = 1.7; e.stunT = 0; e.slowT = 0; e.slowF = 0; this.emit('burrow', { x: e.x, y: e.y }); }
+      }
+    }
+    if (def.heal && !this.demo) {
+      e.healCD -= dt;
+      if (e.healCD <= 0) {
+        e.healCD = 2.6;
+        var healed = 0;
+        for (var h = 0; h < this.enemies.length; h++) {
+          var o = this.enemies[h];
+          if (!o.alive || o.def.innocent || o.def.decoy || o.hp >= o.maxHp || o.healedT > 0) continue;
+          if (dist2(o.x, o.y, e.x, e.y) <= 115 * 115) {
+            o.healedT = 2.6; // les soins de plusieurs Soigneuses ne se cumulent pas
+            o.hp = Math.min(o.maxHp, o.hp + o.maxHp * (o === e ? 0.05 : o.def.boss ? 0.02 : 0.12));
+            healed++;
+          }
+        }
+        if (healed) this.emit('heal', { x: e.x, y: e.y });
       }
     }
     if (def.emp && !this.demo) {
@@ -426,7 +492,7 @@
       if (!this.targetable(e)) continue;
       if (dist2(t.x, t.y, e.x, e.y) > r2) continue;
       var rem = this.remaining(e);
-      if (preferUnslowed && e.slowT > 0.4 && !e.def.slowImmune) { if (rem < altR) { altR = rem; alt = e; } continue; }
+      if (preferUnslowed && e.gluT > 0.4 && !e.def.slowImmune) { if (rem < altR) { altR = rem; alt = e; } continue; }
       if (rem < bestR) { bestR = rem; best = e; }
     }
     return best || alt;
@@ -447,6 +513,24 @@
     var st = this.towerStats(t), def = PT.TOWERS[t.type];
     var rateMul = this.cafeT > 0 ? 1 + PT.POWERS.cafe.boost : 1;
 
+    if (def.aura) {
+      // Arroseur : mouille et ralentit tous les voleurs à portée, par petites giclées
+      t.cd -= dt;
+      var any = null, ar2 = st.range * st.range;
+      for (var ai = 0; ai < this.enemies.length; ai++) {
+        var ae = this.enemies[ai];
+        if (!ae.alive || ae.def.innocent || ae.burrowT > 0 || ae.leapT > 0) continue;
+        if (dist2(t.x, t.y, ae.x, ae.y) <= ar2) {
+          any = ae;
+          if (t.cd <= 0) { ae.wetT = Math.max(ae.wetT, st.wet); this.applySlow(ae, st.slow, 0.5); }
+        }
+      }
+      if (t.cd <= 0) t.cd = 0.25;
+      t.target = any;
+      if (any) { t.fireT = 0.25; t.aim += dt * 5; }
+      return;
+    }
+
     if (def.support) {
       // La caméra suit un voleur visible, sinon elle balaie la salle.
       var seen = null, r2 = st.range * st.range;
@@ -466,7 +550,7 @@
       if (bt) {
         t.beamOn = true;
         t.aim = Math.atan2(bt.y - 20 - t.y, bt.x - t.x);
-        this.hit(bt, st.dps * rateMul * dt, true);
+        this.hit(bt, st.dps * rateMul * dt * (bt.wetT > 0 ? 1 + 0.6 * this.mods.synergy : 1), true);
       }
       return;
     }
@@ -483,8 +567,20 @@
 
     if (def.melee) {
       t.lungeT = 0.25; t.lx = target.x; t.ly = target.y;
-      this.hit(target, st.dmg);
+      // Croc-en-filet : double dégâts sur un voleur pris dans un filet
+      this.hit(target, st.dmg * (target.netT > 0 ? 1 + this.mods.synergy : 1));
       this.emit('bite', { x: target.x, y: target.y });
+      return;
+    }
+    if (def.gust) {
+      // Ventilateur : rafale qui repousse tout le groupe autour de la cible
+      var self = this;
+      this.splashTargets(target.x, target.y, st.splash, function (e) {
+        self.hit(e, st.dmg);
+        if (!e.alive || e.def.heavy || e.def.boss) return;
+        self.push(e, st.push * (e.wetT > 0 ? 1 + self.mods.synergy : 1));
+      });
+      this.emit('gust', { x: t.x, y: t.y - 30, tx: target.x, ty: target.y });
       return;
     }
     var sx = t.x, sy = t.y - 44;
@@ -510,11 +606,24 @@
     return d;
   }
 
+  // Repousse un voleur en arrière sur son chemin (sans le faire ressortir ni dépasser le trésor)
+  G.push = function (e, dist) {
+    var L = this.paths[e.path].L, door = this.doorD[e.path];
+    if (e.grabbing || e.pauseT > 0) return;
+    // Chaque rafale porte moins sur un même voleur : il finit par s'accrocher (pas de blocage sans fin)
+    dist *= Math.max(0, 1 - 0.25 * e.pushN);
+    e.pushN++;
+    if (dist <= 0) return;
+    if (e.dir > 0) e.d = Math.max(Math.min(e.d, door), e.d - dist);
+    else e.d = Math.min(L - 4, e.d + dist);
+    this.placeEnemy(e);
+  };
+
   G.splashTargets = function (x, y, r, fn) {
     var r2 = r * r;
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
-      if (!e.alive || e.def.innocent || e.disguised || e.leapT > 0) continue;
+      if (!e.alive || e.def.innocent || e.disguised || e.leapT > 0 || e.burrowT > 0) continue;
       if (dist2(x, y, e.x, e.y) <= r2) fn(e);
     }
   };
@@ -543,14 +652,14 @@
         if (k >= 1) {
           done = true;
           if (p.kind === 'glu') {
-            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg); self.applySlow(e, p.slow, p.slowDur); });
+            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg); self.applySlow(e, p.slow, p.slowDur); e.gluT = Math.max(e.gluT, p.slowDur); });
             this.puddles.push({ x: p.tx, y: p.ty, r: p.splash * 0.85, slow: p.slow, t: p.puddle, max: p.puddle, seed: rand() * 10 });
             this.emit('splat', { x: p.tx, y: p.ty });
           } else if (p.kind === 'filet') {
             this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg); self.applyStun(e, p.stun, true); });
             this.emit('net', { x: p.tx, y: p.ty, r: p.splash });
           } else if (p.kind === 'boulet') {
-            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg, p.pierce); });
+            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg * (e.slowT > 0 ? 1 + 0.35 * self.mods.synergy : 1), p.pierce); });
             this.emit('blast', { x: p.tx, y: p.ty, r: p.splash });
           }
         }
@@ -568,7 +677,7 @@
       for (var j = 0; j < this.enemies.length; j++) {
         var e = this.enemies[j];
         if (!e.alive || e.def.innocent) continue;
-        if (dist2(p.x, p.y, e.x, e.y) <= r2) this.applySlow(e, p.slow, 0.3);
+        if (dist2(p.x, p.y, e.x, e.y) <= r2) { this.applySlow(e, p.slow, 0.3); e.gluT = Math.max(e.gluT, 0.3); }
       }
     }
   };
@@ -582,10 +691,14 @@
     p.cd = def.cd * this.mods.powerCd;
     p.max = p.cd;
     if (id === 'buste') {
-      this.drops.push({ x: x, y: y, t: 0.6, max: 0.6 });
-      this.emit('bustFall', { x: x, y: y });
+      var m = this.mods, r = def.radius * m.bustRadius, dmg = def.dmg * m.bustDmg;
+      var xs = m.bustDouble ? [x - r * 0.75, x + r * 0.75] : [x];
+      for (var b = 0; b < xs.length; b++) {
+        this.drops.push({ x: xs[b], y: y, t: 0.6 + b * 0.12, max: 0.6 + b * 0.12, r: r, dmg: dmg });
+        this.emit('bustFall', { x: xs[b], y: y });
+      }
     } else if (id === 'alarme') {
-      this.freezeT = def.freeze;
+      this.freezeT = def.freeze + this.mods.alarmPlus;
       this.revealT = def.reveal;
       for (var i = 0; i < this.enemies.length; i++) {
         var e = this.enemies[i];
@@ -594,7 +707,7 @@
       }
       this.emit('alarm', {});
     } else if (id === 'cafe') {
-      this.cafeT = def.dur;
+      this.cafeT = def.dur + this.mods.cafePlus;
       this.emit('cafe', {});
     } else if (id === 'verrou') {
       this.lockT = def.dur;
@@ -609,8 +722,8 @@
       var d = this.drops[i];
       d.t -= dt;
       if (d.t <= 0) {
-        this.splashTargets(d.x, d.y, def.radius, function (e) { self.hit(e, def.dmg); self.applyStun(e, def.stun); });
-        this.emit('bustImpact', { x: d.x, y: d.y, r: def.radius });
+        this.splashTargets(d.x, d.y, d.r || def.radius, function (e) { self.hit(e, d.dmg || def.dmg); self.applyStun(e, def.stun); });
+        this.emit('bustImpact', { x: d.x, y: d.y, r: d.r || def.radius });
         this.drops.splice(i, 1);
       }
     }

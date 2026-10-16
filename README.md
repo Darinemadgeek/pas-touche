@@ -1,6 +1,6 @@
 # Pas Touche ! — Défense du Musée
 
-Tower defense cartoon en HTML5 / Canvas 2D, sans dépendance. Pensé pour le mobile à l'horizontale, jouable aussi sur PC.
+Tower defense cartoon en HTML5 / Canvas 2D, sans dépendance, dessiné façon papier découpé. Pensé pour le mobile à l'horizontale, jouable aussi sur PC.
 
 Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traversent le musée jusqu'au trésor, prennent un objet, puis repartent par la porte d'entrée. Il faut les attraper avant qu'ils ressortent, à l'aller comme au retour.
 
@@ -13,7 +13,7 @@ Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traver
 
 ## Contenu
 
-- **10 salles**, de plus en plus difficiles :
+- **50 salles** rangées en 5 ailes, de plus en plus difficiles, avec un casse tous les 5 niveaux et des salles « respiration » plus calmes pour souffler. Les 10 premières sont dessinées à la main :
   1. Musée de Trouville-sur-Bof : tutoriel, hordes simples.
   2. Galerie d'Égypte : les Ombres invisibles et la Caméra.
   3. Aile des Dinosaures : deux entrées, Costauds et Acrobates.
@@ -24,10 +24,14 @@ Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traver
   8. Galerie des Glaces : un très long couloir, et l'Illusionniste qui sème des reflets pour gaspiller vos tirs.
   9. Réserve souterraine : la variante « panne de courant ». Les défenses ne voient que sous les lampes de secours ou grâce aux Caméras. Le Verrouillage arrive.
   10. Coffre-fort de la Banque de France : **2e niveau casse**, trois entrées (porte, verrière, égouts), neuf équipes et le Gentleman en finale.
-- **7 défenses** à 3 niveaux : Gardien, Pot de Glu, Caméra, Bouledogue, Lance-Filet, Laser, Canon de Marine.
+
+  Les salles 11 à 50 (Galerie des Impressionnistes, Musée de l'Espace, Salle des Pharaons, Musée du Fromage… jusqu'au Coffre du Gentleman) sont construites par `js/levels-gen.js` à partir de 12 plans de salle et de 19 thèmes.
+- **10 défenses** à 3 niveaux : Gardien, Pot de Glu, Caméra, Bouledogue, Lance-Filet, Laser, Canon de Marine, Ventilateur (repousse les voleurs), Arroseur (mouille et ralentit), Chef de la Sécurité (renforce les défenses voisines).
+- **7 synergies** : Filmé (Caméra), Patrouille (Gardiens groupés), Croc-en-filet (Bouledogue + Filet), Cible facile (Canon + Glu), Court-jus (Laser + Arroseur), Glissade (Ventilateur + Arroseur), Sous les ordres (Chef). Elles sont rappelées dans l'infobulle de chaque défense.
 - **4 pouvoirs** : Buste en marbre (zone ciblée), Alarme générale, Pause café, Verrouillage des portes.
-- **11 types de personnages** : 9 voleurs, le touriste innocent et le boss.
-- **Progression** : jusqu'à 3 étoiles par salle. Les étoiles se dépensent à l'**Atelier** (7 améliorations permanentes). Les défenses et pouvoirs se débloquent au fil des salles, et le **Fichier des suspects** se remplit à chaque nouvelle rencontre.
+- **15 types de personnages** : 13 voleurs (dont le Patineur, la Taupe qui creuse sous le tapis, la Soigneuse et le Déménageur), le touriste innocent et le boss.
+- **Progression** : jusqu'à 3 étoiles par salle. Les étoiles se dépensent dans l'**arbre de talents de l'Atelier** (3 branches : Défenses, Pouvoirs, Économie, 17 talents). Les défenses et pouvoirs se débloquent au fil des salles, et le **Fichier des suspects** se remplit à chaque nouvelle rencontre.
+- **Décor vivant** : le trait vibre comme dans un dessin animé en papier, les portraits et les armures suivent les voleurs des yeux, les torches crépitent, les plantes se balancent.
 - Musique et bruitages synthétisés en direct (Web Audio), sauvegarde locale, menus, pause, vitesse x2.
 
 ## Commandes
@@ -42,7 +46,8 @@ Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traver
 | Fichier | Rôle |
 |---|---|
 | `js/data.js` | Défenses, voleurs, pouvoirs, améliorations de l'Atelier |
-| `js/levels.js` | Les salles : décor, chemins, socles, vagues, répliques du Gentleman |
+| `js/levels.js` | Les salles 1 à 10 : décor, chemins, socles, vagues, répliques du Gentleman |
+| `js/levels-gen.js` | Les salles 11 à 50 : plans, thèmes, placement automatique des socles et du décor, vagues, table de difficulté |
 | `js/game.js` | Moteur de jeu pur (aucun DOM), testable sous Node |
 | `js/art.js` | Tous les dessins cartoon (personnages, défenses, décor, icônes) |
 | `js/render.js` | Rendu : décor en cache, tri en profondeur, effets visuels |
@@ -50,9 +55,17 @@ Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traver
 | `js/ui.js` | Écrans, HUD, menu radial |
 | `js/main.js` | Démarrage, sauvegarde, boucle de jeu, entrées |
 | `tools/sim.js` | Vérifie les niveaux et fait jouer un bot : `node tools/sim.js [parties] [niveau]` |
+| `tools/bot.js` | Joueur virtuel à trois profils (débutant, moyen, expert) |
+| `tools/campagne.js` | Fait jouer toute la campagne comme un vrai joueur (essais, étoiles, Atelier) et signale bugs et murs : `node tools/campagne.js [profil] [de] [à]` |
+| `tools/regler.js` | Règle la résistance des voleurs des salles 11 à 50 sur une courbe de difficulté |
+| `tools/planche.html`, `tools/decors.html` | Planches de développement : tous les personnages et défenses, pistes de décor |
 | `tools/build.js` | Assemble `dist/pas-touche.html` : `node tools/build.js` |
 
 ## Ajouter une salle
+
+Le plus simple : ajouter une ligne dans la liste `ROOMS` de `js/levels-gen.js` (nom, trésor, objet, thème, décor, plan, type, variante), puis relancer `node tools/regler.js` et recopier la table `HPMUL` affichée.
+
+Pour une salle dessinée à la main :
 
 1. Dans `js/levels.js`, copier un bloc de niveau et changer `id`, `name`, `theme`, `paths`, `spots`, `deco` et `waves`.
    - Le premier point d'un chemin est hors de la salle (porte, verrière ou égouts), le dernier est le trésor.

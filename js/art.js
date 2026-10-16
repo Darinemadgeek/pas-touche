@@ -115,6 +115,11 @@
     illusionniste: { shirt: '#3b2a7a', stars: '#f4d03f', pants: '#2a1d5a', hat: 'wizard', hatColor: '#5b3fa8', wand: true, mustache: '#efeff5', mitten: '#ffffff', lids: true },
     garde: { shirt: '#2f4fa8', pants: '#22346e', hat: 'kepi', hatColor: '#22346e', mustache: '#6b4226', baton: true, belt: true, skin: '#f1c39c', mitten: '#ffffff', brows: true },
   };
+  LOOKS.patineur = { shirt: '#ff7a1a', stripe: '#ffd23f', pants: '#2b5fb3', shorts: true, hat: 'cap', hatColor: '#e2405e', mask: true, skates: true, lids: true, small: true };
+  LOOKS.taupe = { shirt: '#8a5a32', pants: '#8a5a32', hat: 'miner', hatColor: '#f5c518', straps: '#5a3a1e', mitten: '#5a3a1e', glasses: true, dirt: true };
+  LOOKS.soigneuse = { shirt: '#f6f6f2', pants: '#e9e9e2', hat: 'nurse', hatColor: '#ffffff', cross: true, mask: true, mitten: '#9fd3ff', lids: true };
+  LOOKS.demenageur = { shirt: '#f4efe4', pants: '#2f6fb0', straps: '#2f6fb0', hat: 'cap', hatColor: '#e8b84a', mustache: '#3a2418', stubble: true, brows: true, big: true, mitten: '#c9a46a' };
+  LOOKS.chef = { shirt: '#1f2a5a', pants: '#161d40', hat: 'kepi', hatColor: '#161d40', mustache: '#9a9a9a', mitten: '#ffffff', sunglasses: true, megaphone: true, belt: true, skin: '#f1c39c' };
   LOOKS.reflet = LOOKS.illusionniste;
   A.LOOKS = LOOKS;
   // Position des pupilles d'un personnage standard (pour les faire briller dans le noir)
@@ -175,8 +180,16 @@
     if (L.shorts) { rr(c, -W * 0.44, bot - 2, W * 0.88, 5, 2); fs(c, col(L.pants), lw); }
     line(c, 0.5, bot + 2, 0.5, -2, INK, 1.2);
     var f = [0, 3, 0, -3][step];
-    ell(c, -W * 0.2 - f, -2, W * 0.22, 3.4); fs(c, col(L.shoes || '#2b2724'), lw);
-    ell(c, W * 0.22 + f, -2, W * 0.22, 3.4); fs(c, col(L.shoes || '#2b2724'), lw);
+    if (L.skates) {
+      [-1, 1].forEach(function (sd) {
+        var fx = sd * W * 0.21 + (sd < 0 ? -f : f);
+        circ(c, fx - 3.5, -1.2, 2); fs(c, col('#e2405e'), 1.2); circ(c, fx + 3.5, -1.2, 2); fs(c, col('#e2405e'), 1.2);
+        rr(c, fx - 6, -9, 12, 7, 3); fs(c, col('#f4efe4'), lw);
+      });
+    } else {
+      ell(c, -W * 0.2 - f, -2, W * 0.22, 3.4); fs(c, col(L.shoes || '#2b2724'), lw);
+      ell(c, W * 0.22 + f, -2, W * 0.22, 3.4); fs(c, col(L.shoes || '#2b2724'), lw);
+    }
 
     // Torse en trapèze
     var th = bot - top;
@@ -219,12 +232,15 @@
         c.fillStyle = L.vest; c.beginPath(); c.moveTo(-5, top); c.lineTo(6, top); c.lineTo(0.5, top + 13); c.fill();
         c.fillStyle = '#c0392b'; c.beginPath(); c.moveTo(-3.5, top + 1); c.lineTo(4.5, top + 5); c.lineTo(4.5, top + 1); c.lineTo(-3.5, top + 5); c.fill();
       }
+      if (L.straps) { c.fillStyle = L.straps; c.fillRect(-W * 0.32, top, 4, th); c.fillRect(W * 0.32 - 3, top, 4, th); c.fillRect(-W * 0.36, top + th * 0.45, W * 0.72, th * 0.55); }
+      if (L.cross) { c.fillStyle = '#e2342e'; c.fillRect(-2, top + 4, 5, 13); c.fillRect(-5.5, top + 8, 12, 5); }
+      if (L.dirt) { c.fillStyle = 'rgba(60,35,15,0.45)'; [[-6, 6], [5, 13], [-2, 17]].forEach(function (p) { circ(c, p[0], top + p[1], 2.4); c.fill(); }); }
       if (L.belt) { c.fillStyle = '#1d1b26'; c.fillRect(x0, bot - 5, W + 4, 3.5); c.fillStyle = '#c9c9c9'; c.fillRect(-2, bot - 5.5, 5, 4.5); }
       c.restore();
     }
     torso(); fs(c, null, lw);
-    if (!L.plates && !L.flowers && !L.vest && !L.harlequin) line(c, 0.5, top + 2, 0.5, bot - 1, 'rgba(0,0,0,0.3)', 1.2);
-    if (L.badge !== false && type === 'garde') {
+    if (!L.plates && !L.flowers && !L.vest && !L.harlequin && !L.cross && !L.straps) line(c, 0.5, top + 2, 0.5, bot - 1, 'rgba(0,0,0,0.3)', 1.2);
+    if (type === 'garde' || type === 'chef') {
       var rank = o.rank || 0;
       starPath(c, -5, top + 7, 3.8, 1.7); fs(c, col(rank >= 2 ? '#ffd447' : '#d9dde6'), 1.2);
       if (rank >= 2) { circ(c, 7, top + 8, 2.6); fs(c, col('#e74c3c'), 1.2); }
@@ -258,13 +274,19 @@
       c.restore();
     });
     if (L.plates) { ell(c, -W * 0.44, top + 3, 7, 5); fs(c, col(L.hatColor), lw); ell(c, W * 0.44, top + 3, 7, 5); fs(c, col(L.hatColor), lw); }
-    if (type === 'garde' && (o.rank || 0) >= 1) {
+    if ((type === 'garde' || type === 'chef') && (o.rank || 0) >= 1) {
       rr(c, -W * 0.56, top - 1, 9, 4.5, 2); fs(c, col('#ffd447'), 1.4); rr(c, W * 0.56 - 9, top - 1, 9, 4.5, 2); fs(c, col('#ffd447'), 1.4);
     }
     if (L.wand) {
       line(c, W * 0.5, top + 14, W * 0.5 + 10, top - 2, col(INK), 3);
       line(c, W * 0.5 + 8, top + 1, W * 0.5 + 10, top - 2, col('#ffffff'), 2.4);
       if (!flash) { starPath(c, W * 0.5 + 11, top - 4, Math.sin(t * 9) > 0 ? 5.5 : 4, 1.7, 4); fs(c, '#fff36b', 1.2); }
+    }
+    if (L.megaphone) {
+      c.save(); c.translate(W * 0.5 + 3, top + 10); c.rotate(-0.5);
+      c.beginPath(); c.moveTo(0, -3); c.lineTo(13, -8); c.lineTo(13, 8); c.lineTo(0, 3); c.closePath(); fs(c, col('#e2405e'), lw);
+      ell(c, 13, 0, 2.4, 8); fs(c, col('#f5c518'), 1.2);
+      c.restore();
     }
     if (L.cane) { line(c, W * 0.5 + 2, top + 14, W * 0.5 + 8, -1, col('#1b1b22'), 3); circ(c, W * 0.5 + 2, top + 13, 3); fs(c, col('#f2c14e'), 1.3); }
 
@@ -287,7 +309,7 @@
       if (!flash) { c.fillStyle = 'rgba(255,255,255,0.55)'; c.fillRect(hx - R + 3, hy - R * 0.7, 3, R * 0.9); }
     } else {
       head(); c.fillStyle = col(skin); c.fill();
-      if (L.hat === 'beanie' || L.hat === 'cap') capTop(L.hatColor, hy - R * 0.4);
+      if (L.hat === 'beanie' || L.hat === 'cap' || L.hat === 'miner') capTop(L.hatColor, hy - R * 0.4);
       if (L.hat === 'hood') capTop(L.hatColor, hy - R * 0.5);
       if (L.stubble && !flash) {
         c.save(); head(); c.clip(); c.fillStyle = 'rgba(40,30,30,0.18)'; ell(c, hx + 1, hy + R * 0.75, R * 0.85, R * 0.45); c.fill(); c.restore();
@@ -377,6 +399,13 @@
       ell(c, hx, hy - R * 0.72, R + 3, 3.6); fs(c, col(L.hatColor), lw);
       rr(c, hx - 9, hy - R * 0.72 - 18, 18, 18, 2); fs(c, col(L.hatColor), lw);
       c.fillStyle = col('#6b2d8f'); c.fillRect(hx - 9, hy - R * 0.72 - 6, 18, 3.5);
+    } else if (L.hat === 'miner') {
+      rr(c, hx - R - 2, hy - R * 0.48, R * 2 + 4, 4.5, 2); fs(c, col(shade(L.hatColor, -0.15)), lw);
+      rr(c, hx + R * 0.35, crown + 2, 8, 7, 2); fs(c, col('#7a7a7a'), 1.2);
+      circ(c, hx + R * 0.35 + 6, crown + 5.5, 3); fs(c, col('#fff6b0'), 1.2);
+    } else if (L.hat === 'nurse') {
+      rr(c, hx - 9, crown - 6, 18, 9, 2); fs(c, col('#ffffff'), lw);
+      c.fillStyle = col('#e2342e'); c.fillRect(hx - 1.5, crown - 5, 3, 7); c.fillRect(hx - 3.5, crown - 3, 7, 3);
     } else if (L.hat === 'kepi') {
       rr(c, hx - 12, crown - 5, 24, 11, 3); fs(c, col(L.hatColor), lw);
       c.fillStyle = col((o.rank || 0) >= 2 ? '#ffd447' : '#d9dde6'); c.fillRect(hx - 12, crown + 2, 24, 2.4);
@@ -413,6 +442,9 @@
     else if (type === 'filet') drawNetGun(c, t, lv, time);
     else if (type === 'laser') drawLaser(c, t, lv, time);
     else if (type === 'canon') drawCanon(c, t, lv, time);
+    else if (type === 'ventilo') drawFan(c, t, lv, time);
+    else if (type === 'arroseur') drawSprinkler(c, t, lv, time);
+    else if (type === 'chef') drawChief(c, t, lv, time);
     c.restore();
     if (t.disabled) {
       c.save();
@@ -436,6 +468,60 @@
       armRot: throwing ? -2.2 + (0.25 - t.fireT) * 8 : null,
     });
     c.restore();
+  }
+
+  // Ventilateur sur pied : les pales tournent par crans, plus vite quand il souffle
+  function drawFan(c, t, lv, time) {
+    var face = Math.cos(t.aim || 0) < 0 ? -1 : 1, blow = t.fireT > 0;
+    rr(c, -3, -40, 6, 40, 2); fs(c, '#8a9099', 2);
+    ell(c, 0, -2, 14, 5); fs(c, '#6f7680', 2);
+    c.save(); c.translate(0, -50); c.scale(face, 1);
+    circ(c, 0, 0, 22); fs(c, lv >= 2 ? '#2b5f73' : '#5fb8c9', 2.2);
+    var a = Math.floor(time * (blow ? 18 : 6)) * (Math.PI / 6);
+    for (var i = 0; i < 3; i++) {
+      c.save(); c.rotate(a + i * Math.PI * 2 / 3);
+      ell(c, 0, -10, 6, 10); fs(c, '#f4efe4', 1.6);
+      c.restore();
+    }
+    circ(c, 0, 0, 4.5); fs(c, lv >= 1 ? '#ffd447' : '#8a9099', 1.6);
+    c.strokeStyle = 'rgba(42,28,22,0.55)'; c.lineWidth = 1.1;
+    for (var k = 0; k < 6; k++) { var ka = k * Math.PI / 3; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(ka) * 22, Math.sin(ka) * 22); c.stroke(); }
+    circ(c, 0, 0, 22); fs(c, null, 2.2);
+    c.restore();
+  }
+
+  // Arroseur : une borne rouge avec une buse qui tourne et des jets d'eau
+  function drawSprinkler(c, t, lv, time) {
+    rr(c, -13, -34, 26, 34, 7); fs(c, lv >= 2 ? '#b8283a' : '#d8402f');
+    c.fillStyle = '#f4efe4'; c.fillRect(-13, -26, 26, 4);
+    rr(c, -17, -20, 6, 9, 2); fs(c, '#c9c9c9', 1.6); rr(c, 11, -20, 6, 9, 2); fs(c, '#c9c9c9', 1.6);
+    ell(c, 0, -36, 11, 4); fs(c, '#9a3a2a', 1.8);
+    var spin = Math.floor((t.aim || 0) * 2) * 0.6;
+    c.save(); c.translate(0, -42); c.rotate(spin);
+    rr(c, -14, -2.5, 28, 5, 2.5); fs(c, '#c9c9c9', 1.6);
+    c.restore();
+    if (t.fireT > 0) {
+      c.strokeStyle = 'rgba(90,170,255,0.85)'; c.lineWidth = 2.4; c.lineCap = 'round'; c.setLineDash([3, 5]);
+      for (var j = 0; j < 4; j++) {
+        var ja = spin + j * Math.PI / 2, dx = Math.cos(ja), dy = Math.sin(ja) * 0.5;
+        c.beginPath(); c.moveTo(dx * 14, -42 + dy * 14); c.quadraticCurveTo(dx * 40, -62 + dy * 30, dx * 62, -10 + dy * 40); c.stroke();
+      }
+      c.setLineDash([]);
+    }
+    if (lv >= 1) { circ(c, 0, -14, 4); fs(c, '#ffd447', 1.4); }
+  }
+
+  // Chef de la Sécurité : il commande au mégaphone
+  function drawChief(c, t, lv, time) {
+    var talk = Math.sin(time * 1.3) > 0.6;
+    c.save();
+    c.translate(0, talk ? -1 : 0);
+    A.person(c, 'chef', { face: t.face || 1, moving: false, t: time, rank: lv + 1 });
+    c.restore();
+    if (talk) {
+      c.font = '12px ' + A.FONT; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = INK; c.fillStyle = '#fff';
+      c.strokeText('!', 30, -70); c.fillText('!', 30, -70);
+    }
   }
 
   function drawGlue(c, t, lv, time) {
@@ -680,6 +766,44 @@
   };
 
   A.treasureItem = function (c, kind, time) {
+    // Trésors des salles 11 à 50
+    if (kind === 'diamant') {
+      c.beginPath(); c.moveTo(-18, -14); c.lineTo(-10, -24); c.lineTo(10, -24); c.lineTo(18, -14); c.lineTo(0, 8); c.closePath(); fs(c, '#9fe7ff');
+      c.beginPath(); c.moveTo(-18, -14); c.lineTo(18, -14); c.moveTo(-6, -24); c.lineTo(-8, -14); c.lineTo(0, 8); c.lineTo(8, -14); c.lineTo(6, -24); c.lineWidth = 1.4; c.strokeStyle = 'rgba(42,28,22,0.6)'; c.stroke();
+      if (Math.sin(time * 4) > 0.3) { starPath(c, 12, -22, 5, 1.5, 4); c.fillStyle = '#fff'; c.fill(); }
+      return;
+    }
+    if (kind === 'vase') {
+      c.beginPath(); c.moveTo(-6, -34); c.lineTo(6, -34); c.lineTo(5, -28); c.quadraticCurveTo(18, -20, 15, -4); c.quadraticCurveTo(12, 8, 0, 8); c.quadraticCurveTo(-12, 8, -15, -4); c.quadraticCurveTo(-18, -20, -5, -28); c.closePath();
+      fs(c, '#2f6fb0');
+      c.fillStyle = '#f4efe4'; c.fillRect(-14, -16, 28, 5); c.fillStyle = '#f5c518'; circ(c, 0, -2, 4); c.fill();
+      return;
+    }
+    if (kind === 'globe') {
+      rr(c, -3, -2, 6, 10, 2); fs(c, '#c9952e', 1.6); ell(c, 0, 8, 12, 3.5); fs(c, '#c9952e', 1.6);
+      circ(c, 0, -16, 15); fs(c, '#4fa3d8');
+      c.fillStyle = '#6cbf3a'; c.beginPath(); c.moveTo(-9, -24); c.quadraticCurveTo(-2, -28, 0, -20); c.quadraticCurveTo(-4, -12, -10, -14); c.fill();
+      c.beginPath(); c.moveTo(4, -12); c.quadraticCurveTo(12, -16, 10, -6); c.quadraticCurveTo(4, -4, 4, -12); c.fill();
+      circ(c, 0, -16, 15); fs(c, null, 2);
+      c.beginPath(); c.arc(0, -16, 19, -2.4, 0.8); c.lineWidth = 2.4; c.strokeStyle = '#c9952e'; c.stroke();
+      return;
+    }
+    if (kind === 'trophee') {
+      c.beginPath(); c.moveTo(-14, -30); c.lineTo(14, -30); c.quadraticCurveTo(14, -8, 0, -6); c.quadraticCurveTo(-14, -8, -14, -30); c.closePath(); fs(c, '#f2c230');
+      c.beginPath(); c.arc(-14, -22, 6, Math.PI * 0.5, Math.PI * 1.5); c.lineWidth = 3; c.strokeStyle = INK; c.stroke();
+      c.beginPath(); c.arc(14, -22, 6, -Math.PI * 0.5, Math.PI * 0.5); c.stroke();
+      rr(c, -3, -7, 6, 8, 1); fs(c, '#e0a91c', 1.6); rr(c, -10, 1, 20, 7, 2); fs(c, '#7a4b2a', 1.6);
+      starPath(c, 0, -20, 5, 2.2); c.fillStyle = '#fff6b0'; c.fill();
+      return;
+    }
+    if (kind === 'fusee') {
+      c.beginPath(); c.moveTo(0, -38); c.quadraticCurveTo(11, -26, 9, 0); c.lineTo(-9, 0); c.quadraticCurveTo(-11, -26, 0, -38); c.closePath(); fs(c, '#f4efe4');
+      c.beginPath(); c.moveTo(-9, -6); c.lineTo(-16, 6); c.lineTo(-9, 2); c.closePath(); fs(c, '#e2405e', 1.6);
+      c.beginPath(); c.moveTo(9, -6); c.lineTo(16, 6); c.lineTo(9, 2); c.closePath(); fs(c, '#e2405e', 1.6);
+      circ(c, 0, -20, 4.5); fs(c, '#4fa3d8', 1.6);
+      if (Math.floor(time * 8) % 2) { c.beginPath(); c.moveTo(-5, 1); c.lineTo(0, 12); c.lineTo(5, 1); c.closePath(); fs(c, '#ffb347', 1.2); }
+      return;
+    }
     if (kind === 'poule') {
       ell(c, -16, 4, 6, 7.5); fs(c, '#ffe27a', 2); ell(c, 15, 5, 5.5, 7); fs(c, '#ffe27a', 2);
       ell(c, 0, -6, 15, 12); fs(c, '#f2c230');

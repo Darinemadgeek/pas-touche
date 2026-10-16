@@ -12,7 +12,7 @@
 <script src="../js/art.js"></script>
 <script>
   var cv = document.getElementById('cv'), c = cv.getContext('2d');
-  var types = ['voleur', 'pickpocket', 'costaud', 'ombre', 'acrobate', 'hackeuse', 'touriste', 'faussaire', 'chevalier', 'illusionniste', 'gentleman'];
+  var types = ['voleur', 'pickpocket', 'costaud', 'ombre', 'acrobate', 'hackeuse', 'patineur', 'taupe', 'soigneuse', 'demenageur', 'chevalier', 'illusionniste', 'gentleman'];
   var towers = Object.keys(PT.TOWERS);
   function frame(ms) {
     var t = ms / 1000, W = innerWidth, H = innerHeight;
@@ -20,7 +20,7 @@
     c.fillStyle = '#e8dcc4'; c.fillRect(0, 0, W, H);
     var s = Math.min(W / 1100, H / 560) * (+location.hash.slice(1) || 1.6);
     types.forEach(function (ty, i) {
-      c.save(); c.translate(60 * s + (i % 6) * 110 * s, (i < 6 ? 120 : 250) * s); c.scale(s, s);
+      c.save(); c.translate(60 * s + (i % 7) * 100 * s, (i < 7 ? 120 : 250) * s); c.scale(s, s);
       PT.Art.person(c, ty, { phase: t * 6 + i, face: 1, moving: true, id: i, t: t, carrying: i === 2 ? 1 : 0, revealed: ty === 'faussaire' });
       c.restore();
     });

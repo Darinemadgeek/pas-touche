@@ -748,8 +748,12 @@
     // Visée du pouvoir
     if (ui && ui.aim) {
       c.save(); c.setLineDash([8, 8]); c.lineDashOffset = -time * 30;
-      circ(c, ui.aim.x, ui.aim.y, PT.POWERS.buste.radius); c.fillStyle = 'rgba(255,212,71,0.15)'; c.fill();
-      c.lineWidth = 3; c.strokeStyle = '#ffd447'; c.stroke(); c.restore();
+      var br = PT.POWERS.buste.radius * game.mods.bustRadius;
+      (game.mods.bustDouble ? [-br * 0.75, br * 0.75] : [0]).forEach(function (ox) {
+        circ(c, ui.aim.x + ox, ui.aim.y, br); c.fillStyle = 'rgba(255,212,71,0.15)'; c.fill();
+        c.lineWidth = 3; c.strokeStyle = '#ffd447'; c.stroke();
+      });
+      c.restore();
     }
 
     // Écran : flash rouge, alarme, café
@@ -883,7 +887,7 @@
     var k = 1 - d.t / d.max;
     c.save();
     A.shadow(c, d.x, d.y, 30 * k + 8, 10 * k + 3, 0.15 + 0.25 * k);
-    circ(c, d.x, d.y, PT.POWERS.buste.radius); c.setLineDash([6, 6]); c.lineWidth = 2.4; c.strokeStyle = 'rgba(255,80,60,0.8)'; c.stroke();
+    circ(c, d.x, d.y, d.r || PT.POWERS.buste.radius); c.setLineDash([6, 6]); c.lineWidth = 2.4; c.strokeStyle = 'rgba(255,80,60,0.8)'; c.stroke();
     c.translate(d.x, d.y - (1 - k * k) * 420);
     c.rotate((1 - k) * 0.6);
     c.scale(1.4, 1.4);
@@ -897,6 +901,9 @@
     if (t.builtT < 0.3) { var k = 1 + Math.sin(t.builtT / 0.3 * Math.PI) * 0.18; c.scale(k, 1 / k); }
     if (ui && ui.selectedTower === t) { ell(c, 0, 6, 44, 18); c.fillStyle = 'rgba(255,212,71,0.45)'; c.fill(); }
     A.tower(c, t.type, { level: t.level, aim: t.aim, face: t.face, fireT: t.fireT, lungeT: t.lungeT, lx: t.lx, ly: t.ly, x: t.x, y: t.y, disabled: t.disabledT > 0, time: time + t.id, beamOn: t.beamOn });
+    if (t.type !== 'chef' && game.towerStats(t).chefBuff > 0) {
+      A.starPath(c, 24, -16 - (Math.floor(time * 3 + t.id) % 2) * 2, 6, 2.6); A.fs(c, '#ffd447', 1.6);
+    }
     if (game.cafeT > 0) {
       c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 2.4; c.lineCap = 'round';
       for (var i = 0; i < 2; i++) {
@@ -910,6 +917,15 @@
   };
 
   R.drawEnemy = function (c, game, e, time) {
+    if (e.burrowT > 0) {
+      // La Taupe creuse : seul un monticule de terre avance sous le tapis
+      c.save(); c.translate(e.x, e.y);
+      var bump = Math.floor(time * 8 + e.id) % 2 ? 2 : 0;
+      A.ell(c, 0, -4 - bump, 17, 9 + bump); A.fs(c, '#7a5232', 2);
+      c.fillStyle = '#5a3a1e'; [[-8, -8], [6, -11], [1, -4]].forEach(function (p) { A.circ(c, p[0], p[1] - bump, 2.2); c.fill(); });
+      c.restore();
+      return;
+    }
     var camo = game.isCamo(e);
     var look = e.type === 'faussaire' && e.disguised ? 'touriste' : e.type;
     var decoy = !!e.def.decoy;
@@ -955,6 +971,13 @@
     }
     c.globalAlpha = 1;
     var top = -62 * size - (e.def.boss ? 16 : 0);
+    if (e.wetT > 0) {
+      c.fillStyle = 'rgba(90,170,255,0.9)';
+      for (var wd = 0; wd < 3; wd++) {
+        var wp = (time * 2 + wd * 0.33 + e.id * 0.1) % 1;
+        A.ell(c, (wd - 1) * 10 * size, -30 * size + wp * 26, 1.8, 2.8); c.fill();
+      }
+    }
     if (e.netT > 0) {
       c.save(); circ(c, 0, -28 * size, 26 * size); c.clip();
       c.strokeStyle = '#a9824a'; c.lineWidth = 2;
@@ -998,6 +1021,17 @@
         if (ev.boss) this.shake = 18;
         break;
       case 'hit': this.burst(x, y, 3, '#fff4b0', 0.6); break;
+      case 'gust':
+        this.addFx({ kind: 'gust', x: x, y: y, tx: ev.tx, ty: ev.ty, life: 0.45 });
+        this.addFx({ kind: 'comic', x: ev.tx, y: ev.ty - 70, text: 'FIOUU !', life: 0.6 });
+        break;
+      case 'heal':
+        for (i = 0; i < 5; i++) this.addFx({ kind: 'text', x: x + (Math.random() - 0.5) * 70, y: y - 30 - Math.random() * 40, text: '+', color: '#5fd35f', size: 18, life: 0.8 });
+        this.addFx({ kind: 'ring', x: x, y: y - 20, r0: 20, r1: 115, color: '#5fd35f', life: 0.5 });
+        break;
+      case 'burrow': this.addFx({ kind: 'poof', x: x, y: y - 6, r: 18, life: 0.4, grey: true }); this.addFx({ kind: 'comic', x: x, y: y - 60, text: 'GRAT GRAT', life: 0.6 }); break;
+      case 'surface': this.addFx({ kind: 'poof', x: x, y: y - 6, r: 22, life: 0.4, grey: true }); break;
+      case 'interest': this.addFx({ kind: 'text', x: W / 2, y: 200, text: 'Intérêts +' + ev.value, color: '#ffd447', size: 22, life: 1.2 }); break;
       case 'bite': this.addFx({ kind: 'text', x: x, y: y - 50, text: 'CRAC', color: '#fff', size: 15, life: 0.5 }); this.burst(x, y - 20, 4, '#fff'); break;
       case 'splat': this.burst(x, y, 7, '#7ed957'); break;
       case 'net': this.decals.push({ x: x, y: y, r: ev.r, t: 1.4 }); this.addFx({ kind: 'ring', x: x, y: y, r0: 10, r1: ev.r, color: '#c8a46a', life: 0.35 }); break;
@@ -1120,6 +1154,14 @@
         c.globalAlpha = 1 - k;
         if (f.star) { A.starPath(c, f.x, f.y, 5, 2.2); c.fillStyle = f.color; c.fill(); }
         else { circ(c, f.x, f.y, 3); c.fillStyle = f.color; c.fill(); }
+      } else if (f.kind === 'gust') {
+        // Rafale : traits de vent du ventilateur vers la cible
+        c.save(); c.globalAlpha = 1 - k; c.strokeStyle = '#e8f6ff'; c.lineWidth = 3; c.lineCap = 'round';
+        for (var gi = -1; gi <= 1; gi++) {
+          var gx = f.x + (f.tx - f.x) * (0.25 + k * 0.6), gy = f.y + (f.ty - 30 - f.y) * (0.25 + k * 0.6) + gi * 12;
+          c.beginPath(); c.moveTo(gx - (f.tx - f.x) * 0.18, gy - (f.ty - f.y) * 0.18); c.quadraticCurveTo(gx, gy - 6, gx + 10, gy + 2); c.stroke();
+        }
+        c.restore();
       } else if (f.kind === 'poof') {
         c.globalAlpha = (1 - k) * 0.9;
         for (var q = 0; q < 5; q++) {

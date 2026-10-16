@@ -77,8 +77,46 @@
         { dmg: 124, rate: 0.39, range: 270, splash: 74, cost: 200 },
       ],
     },
+    ventilo: {
+      name: 'Ventilateur', unlock: 12, cost: 110, color: '#5fb8c9', electric: true, gust: true,
+      desc: 'Une rafale qui repousse les voleurs en arrière sur le tapis. Les Costauds, les Déménageurs et les boss tiennent bon.',
+      levels: [
+        { dmg: 6, rate: 0.5, range: 130, push: 70, splash: 60 },
+        { dmg: 10, rate: 0.55, range: 140, push: 90, splash: 66, cost: 95 },
+        { dmg: 16, rate: 0.6, range: 150, push: 115, splash: 72, cost: 160 },
+      ],
+    },
+    arroseur: {
+      name: 'Arroseur', unlock: 16, cost: 90, color: '#3f7fd9', aura: true,
+      desc: 'Arrose les voleurs proches : trempés, ils glissent et ralentissent. Le Laser et le Ventilateur adorent les voleurs mouillés.',
+      levels: [
+        { range: 115, slow: 0.2, wet: 2.5 },
+        { range: 130, slow: 0.28, wet: 3, cost: 70 },
+        { range: 145, slow: 0.36, wet: 3.5, cost: 120 },
+      ],
+    },
+    chef: {
+      name: 'Chef de la Sécurité', unlock: 21, cost: 160, color: '#d9a440', support: true, commander: true,
+      desc: 'Il ne se bat pas, il commande : les défenses à sa portée font plus de dégâts et voient plus loin.',
+      levels: [
+        { range: 150, buff: 0.2, rangeBuff: 0.08 },
+        { range: 165, buff: 0.3, rangeBuff: 0.12, cost: 140 },
+        { range: 180, buff: 0.42, rangeBuff: 0.16, cost: 220 },
+      ],
+    },
   };
-  PT.TOWER_ORDER = ['gardien', 'glu', 'camera', 'chien', 'filet', 'laser', 'canon'];
+  PT.TOWER_ORDER = ['gardien', 'glu', 'camera', 'chien', 'filet', 'laser', 'canon', 'ventilo', 'arroseur', 'chef'];
+
+  /* ---------- Synergies entre défenses (affichées dans l'interface, appliquées par le moteur) ---------- */
+  PT.SYNERGIES = [
+    { id: 'camera', name: 'Filmé', towers: ['camera'], desc: 'Un voleur filmé par une Caméra prend plus de dégâts de toutes les défenses.' },
+    { id: 'patrouille', name: 'Patrouille', towers: ['gardien'], desc: 'Chaque autre Gardien à moins de 170 px donne +10 % de cadence (jusqu’à +30 %).' },
+    { id: 'croc', name: 'Croc-en-filet', towers: ['chien', 'filet'], desc: 'Le Bouledogue fait double dégâts aux voleurs pris dans un filet.' },
+    { id: 'cible', name: 'Cible facile', towers: ['canon', 'glu'], desc: 'Les boulets font +35 % de dégâts aux voleurs ralentis.' },
+    { id: 'courtjus', name: 'Court-jus', towers: ['laser', 'arroseur'], desc: 'Le Laser fait +60 % de dégâts aux voleurs mouillés.' },
+    { id: 'glissade', name: 'Glissade', towers: ['ventilo', 'arroseur'], desc: 'Le Ventilateur repousse deux fois plus loin les voleurs mouillés.' },
+    { id: 'ordres', name: 'Sous les ordres', towers: ['chef'], desc: 'Le Chef de la Sécurité renforce toutes les défenses à sa portée.' },
+  ];
 
   /* ---------- Voleurs ---------- */
   PT.ENEMIES = {
@@ -118,6 +156,22 @@
       name: 'L’Illusionniste', hp: 95, speed: 60, reward: 16, loot: 1, size: 1, mirror: true,
       desc: 'Abracadabra ! Il fait apparaître des reflets de lui-même qui attirent vos tirs. Une Caméra (ou l’alarme) fait éclater les reflets.',
     },
+    patineur: {
+      name: 'Le Patineur', hp: 34, speed: 128, reward: 7, loot: 1, size: 0.92, slick: true,
+      desc: 'Sur ses rollers, il file comme l’éclair… mais la glu et l’eau le ralentissent deux fois plus.',
+    },
+    taupe: {
+      name: 'La Taupe', hp: 95, speed: 54, reward: 15, loot: 1, size: 0.95, burrow: true,
+      desc: 'Creuse sous le tapis par moments : sous terre, impossible de la toucher. Visez-la quand elle ressort.',
+    },
+    soigneuse: {
+      name: 'La Soigneuse', hp: 80, speed: 56, reward: 16, loot: 1, size: 1, heal: true,
+      desc: 'Elle soigne les voleurs autour d’elle. À attraper en priorité !',
+    },
+    demenageur: {
+      name: 'Le Déménageur', hp: 460, speed: 30, reward: 45, loot: 3, size: 1.45, heavy: true, stunImmune: true, armor: 6,
+      desc: 'Une armoire à glace qui repart avec trois objets d’un coup. Lent, mais il faut tout lui envoyer.',
+    },
     // Reflet créé par l'Illusionniste : se brise au premier coup, ne vole rien. Absent du fichier des suspects.
     reflet: {
       name: 'Reflet', hp: 1, speed: 60, reward: 0, loot: 0, size: 1, decoy: true,
@@ -133,7 +187,8 @@
       desc: 'L’organisateur du Grand Concours. Fumigènes, complices… et il ne vole que le meilleur.',
     },
   };
-  PT.ENEMY_ORDER = ['voleur', 'pickpocket', 'ombre', 'costaud', 'acrobate', 'faussaire', 'hackeuse', 'chevalier', 'illusionniste', 'touriste', 'gentleman'];
+  PT.ENEMY_ORDER = ['voleur', 'pickpocket', 'ombre', 'costaud', 'acrobate', 'faussaire', 'hackeuse', 'chevalier', 'illusionniste',
+    'patineur', 'taupe', 'soigneuse', 'demenageur', 'touriste', 'gentleman'];
 
   /* ---------- Pouvoirs ---------- */
   PT.POWERS = {
@@ -156,16 +211,43 @@
   };
   PT.POWER_ORDER = ['buste', 'alarme', 'cafe', 'verrou'];
 
-  /* ---------- Atelier : améliorations permanentes payées en étoiles ---------- */
-  PT.UPGRADES = [
-    { id: 'budget', name: 'Budget municipal', costs: [1, 2, 2], desc: function (r) { return '+' + (30 * r) + ' pièces au début de chaque niveau'; } },
-    { id: 'formation', name: 'Formation des gardiens', costs: [1, 2], desc: function (r) { return '+' + (15 * r) + ' % de dégâts pour Gardiens et Bouledogues'; } },
-    { id: 'glu', name: 'Glu extra-forte', costs: [1, 2], desc: function (r) { return '+' + (25 * r) + ' % de durée de ralentissement'; } },
-    { id: 'optique', name: 'Optique HD', costs: [1, 2], desc: function (r) { return '+' + (12 * r) + ' % de portée pour Caméras, Filets, Lasers et Canons'; } },
-    { id: 'assurance', name: 'Assurance tous risques', costs: [1, 2], desc: function (r) { return '+' + (3 * r) + ' objets dans la collection'; } },
-    { id: 'recup', name: 'Brocante', costs: [1, 1], desc: function (r) { return 'Revente des défenses à ' + (60 + 15 * r) + ' %'; } },
-    { id: 'recharge', name: 'Recharge express', costs: [1, 2], desc: function (r) { return '-' + (15 * r) + ' % de temps de recharge des pouvoirs'; } },
+  /* ---------- Atelier : arbre de talents payé en étoiles ----------
+     Trois branches. Dans une branche, un talent s'ouvre dès que le précédent a au moins un rang. */
+  PT.BRANCHES = [
+    { id: 'def', name: 'Défenses', color: '#3d6fd6' },
+    { id: 'pow', name: 'Pouvoirs', color: '#d8402f' },
+    { id: 'eco', name: 'Économie', color: '#c9952e' },
   ];
+  PT.UPGRADES = [
+    { id: 'formation', branch: 'def', name: 'Formation des gardiens', costs: [1, 2, 3], desc: function (r) { return '+' + (15 * r) + ' % de dégâts pour Gardiens et Bouledogues'; } },
+    { id: 'optique', branch: 'def', name: 'Optique HD', costs: [2, 2, 3], desc: function (r) { return '+' + (10 * r) + ' % de portée pour Caméras, Filets, Lasers, Canons et Ventilateurs'; } },
+    { id: 'glu', branch: 'def', name: 'Glu extra-forte', costs: [2, 3], desc: function (r) { return '+' + (25 * r) + ' % de durée de ralentissement et de mouillage'; } },
+    { id: 'perfo', branch: 'def', name: 'Munitions perforantes', costs: [4], desc: function () { return 'Les armures n’arrêtent plus que la moitié des coups'; } },
+    { id: 'atelier', branch: 'def', name: 'Atelier de réparation', costs: [3, 4], desc: function (r) { return 'Améliorations des défenses ' + (12 * r) + ' % moins chères'; } },
+    { id: 'synergie', branch: 'def', name: 'Esprit d’équipe', costs: [6], desc: function () { return 'Les bonus de synergie sont 50 % plus forts'; } },
+
+    { id: 'recharge', branch: 'pow', name: 'Recharge express', costs: [1, 2, 3], desc: function (r) { return '-' + (10 * r) + ' % de temps de recharge des pouvoirs'; } },
+    { id: 'granit', branch: 'pow', name: 'Buste en granit', costs: [2, 3], desc: function (r) { return 'Buste : +' + (40 * r) + ' % de dégâts et +' + (15 * r) + ' % de zone'; } },
+    { id: 'sirene', branch: 'pow', name: 'Sirène longue durée', costs: [2, 3], desc: function (r) { return 'Alarme : +' + r + ' s de gel'; } },
+    { id: 'expresso', branch: 'pow', name: 'Double expresso', costs: [3, 4], desc: function (r) { return 'Pause café : +' + (3 * r) + ' s'; } },
+    { id: 'doublebuste', branch: 'pow', name: 'Collection de bustes', costs: [6], desc: function () { return 'Le buste tombe en double, côte à côte'; } },
+
+    { id: 'budget', branch: 'eco', name: 'Budget municipal', costs: [1, 2, 2], desc: function (r) { return '+' + (30 * r) + ' pièces au début de chaque salle'; } },
+    { id: 'assurance', branch: 'eco', name: 'Assurance tous risques', costs: [1, 2, 3], desc: function (r) { return '+' + (2 * r) + ' objets dans la collection'; } },
+    { id: 'recup', branch: 'eco', name: 'Brocante', costs: [1, 2], desc: function (r) { return 'Revente des défenses à ' + (60 + 15 * r) + ' %'; } },
+    { id: 'prime', branch: 'eco', name: 'Prime de capture', costs: [3, 4], desc: function (r) { return '+' + (10 * r) + ' % de pièces par voleur attrapé'; } },
+    { id: 'anticipe', branch: 'eco', name: 'Zèle', costs: [3], desc: function () { return 'Bonus doublé quand vous appelez une vague en avance'; } },
+    { id: 'interets', branch: 'eco', name: 'Placement prudent', costs: [5], desc: function () { return 'À chaque vague, +4 % de vos pièces en intérêts (30 au plus)'; } },
+  ];
+
+  // Un talent est accessible si le talent précédent de sa branche a au moins un rang.
+  PT.upgradeOpen = function (id, upgrades) {
+    var u = PT.UPGRADES.filter(function (x) { return x.id === id; })[0];
+    if (!u) return false;
+    var same = PT.UPGRADES.filter(function (x) { return x.branch === u.branch; });
+    var i = same.indexOf(u);
+    return i === 0 || (upgrades[same[i - 1].id] || 0) > 0;
+  };
 
   // Traduit les rangs achetés en modificateurs utilisés par le moteur.
   PT.computeMods = function (upgrades) {
@@ -175,10 +257,21 @@
       startCoins: 30 * r('budget'),
       guardDmg: 1 + 0.15 * r('formation'),
       slowDur: 1 + 0.25 * r('glu'),
-      techRange: 1 + 0.12 * r('optique'),
-      lives: 3 * r('assurance'),
+      techRange: 1 + 0.1 * r('optique'),
+      lives: 2 * r('assurance'),
       sell: 0.6 + 0.15 * r('recup'),
-      powerCd: 1 - 0.15 * r('recharge'),
+      powerCd: 1 - 0.1 * r('recharge'),
+      armorPierce: r('perfo') ? 0.5 : 0,
+      upgradeCost: 1 - 0.12 * r('atelier'),
+      synergy: r('synergie') ? 1.5 : 1,
+      bustDmg: 1 + 0.4 * r('granit'),
+      bustRadius: 1 + 0.15 * r('granit'),
+      bustDouble: r('doublebuste') > 0,
+      alarmPlus: r('sirene'),
+      cafePlus: 3 * r('expresso'),
+      reward: 1 + 0.1 * r('prime'),
+      earlyMul: r('anticipe') ? 2 : 1,
+      interest: r('interets') ? 0.04 : 0,
     };
   };
 })(globalThis.PT = globalThis.PT || {});

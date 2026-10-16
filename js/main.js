@@ -12,7 +12,7 @@
   };
 
   /* ---------- Sauvegarde ---------- */
-  function freshSave() { return { stars: {}, upgrades: {}, music: true, sfx: true, story: false, seen: {} }; }
+  function freshSave() { return { stars: {}, upgrades: {}, music: true, sfx: true, story: false, seen: {}, talents: 2 }; }
   function loadSave() {
     var s = null;
     try { s = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { s = null; }
@@ -26,6 +26,7 @@
     var keep = { music: App.save.music, sfx: App.save.sfx };
     App.save = freshSave();
     App.save.music = keep.music; App.save.sfx = keep.sfx;
+    UI.wing = null;
     App.persist();
   };
 
@@ -39,7 +40,7 @@
   App.buyUpgrade = function (id) {
     var u = PT.UPGRADES.filter(function (x) { return x.id === id; })[0];
     var r = App.save.upgrades[id] || 0;
-    if (!u || r >= u.costs.length || App.starsFree() < u.costs[r]) return false;
+    if (!u || r >= u.costs.length || App.starsFree() < u.costs[r] || !PT.upgradeOpen(id, App.save.upgrades)) return false;
     App.save.upgrades[id] = r + 1;
     App.persist();
     return true;
@@ -128,7 +129,7 @@
   App.resume = function () { App.paused = false; UI.closeScreens(); };
 
   App.toggleSpeed = function () {
-    App.speed = App.speed === 1 ? 2 : 1;
+    App.speed = App.speed >= 3 ? 1 : App.speed + 1;
     UI.updateSpeed(App.speed);
   };
 
@@ -156,6 +157,7 @@
     build: 'build', upgrade: 'upgrade', sell: 'sell', bite: 'bite', splat: 'splat', net: 'net', hit: 'hit',
     catch: 'catch', escape: 'escape', grab: 'grab', return: 'coin', reveal: 'reveal', emp: 'emp', leap: 'leap',
     smoke: 'smoke', summon: 'summon', waveStart: 'whistle', bustFall: 'bustFall', bustImpact: 'boom',
+    gust: 'gust', heal: 'heal', burrow: 'burrow', interest: 'coin',
     alarm: 'alarm', cafe: 'cafe', ticket: 'ticket', bonus: 'coin', win: 'win', lose: 'lose',
     clang: 'clang', shatter: 'shatter', mirror: 'mirror', blast: 'blast', lock: 'lock', unlock: 'unlock',
   };
@@ -203,6 +205,7 @@
       case 'win': {
         var old = App.save.stars[lv.id] || 0, stars = g.stars;
         App.save.stars[lv.id] = Math.max(old, stars);
+        if (!old) UI.wing = null; // une nouvelle aile a pu s'ouvrir : on y retournera
         App.persist();
         UI.closeRadial(); UI.stopAim();
         App.resultTimer = setTimeout(function () {
@@ -322,6 +325,12 @@
     if (booted) return;
     booted = true;
     App.save = loadSave();
+    // Sauvegarde d’une ancienne version : si les talents coûtent plus que les étoiles gagnées, on rembourse tout
+    if (App.save.talents !== 2 || App.starsSpent() > App.starsTotal()) {
+      var had = Object.keys(App.save.upgrades).length > 0;
+      App.save.upgrades = {}; App.save.talents = 2; App.persist();
+      if (had) setTimeout(function () { UI.toast('Nouvel Atelier !', 'Vos étoiles vous sont rendues'); }, 800);
+    }
     Au.musicOn = App.save.music; Au.sfxOn = App.save.sfx;
     App.renderer = new PT.Renderer(document.getElementById('game'));
     resize();

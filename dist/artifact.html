@@ -403,6 +403,42 @@ img { -webkit-user-drag: none; pointer-events: none; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
 }
 
+/* Atelier en arbre de talents */
+.tree { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(var(--u) * 12); }
+.branch { display: flex; flex-direction: column; gap: calc(var(--u) * 10); position: relative; }
+.branch h3 { margin: 0; text-align: center; color: var(--bc) !important; }
+.branch::before { content: ""; position: absolute; left: 50%; top: calc(var(--u) * 30); bottom: calc(var(--u) * 20); width: calc(var(--u) * 4); background: var(--bc); opacity: 0.35; transform: translateX(-50%); border-radius: 4px; }
+.node { position: relative; display: flex; flex-direction: column; gap: calc(var(--u) * 5); background: #fff; border: calc(var(--u) * 3) solid var(--ink); border-radius: calc(var(--u) * 12); padding: calc(var(--u) * 8) calc(var(--u) * 10); box-shadow: 0 calc(var(--u) * 4) 0 var(--bc); }
+.node b { font-family: var(--font-display); font-weight: normal; font-size: calc(var(--u) * 17); line-height: 1.05; }
+.node small { font-size: calc(var(--u) * 12.5); line-height: 1.25; font-weight: 700; color: #5a4636; }
+.node small.now { color: var(--green); }
+.node .pips { display: flex; gap: calc(var(--u) * 4); }
+.node .pips i { width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; border: 2px solid var(--ink); background: #e5dccb; }
+.node .pips i.on { background: var(--bc); }
+.node .btn { align-self: flex-start; }
+.node.locked { opacity: 0.55; filter: grayscale(0.6); }
+.node.done { background: #fff7dc; }
+.node .eyebrow { font-size: calc(var(--u) * 12); }
+@media (max-width: 720px) { .tree { grid-template-columns: 1fr; } }
+
+/* Ailes du musée (onglets du choix des salles) */
+.wings { display: flex; gap: calc(var(--u) * 8); justify-content: center; flex-wrap: wrap; padding: calc(var(--u) * 6) calc(var(--u) * 12) 0; }
+.wing { font-family: var(--font-display); font-size: calc(var(--u) * 15); line-height: 1.05; color: var(--ink); background: var(--paper); border: calc(var(--u) * 3) solid var(--ink); border-radius: calc(var(--u) * 12); padding: calc(var(--u) * 5) calc(var(--u) * 12); box-shadow: 0 calc(var(--u) * 4) 0 var(--ink); cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+.wing small { font-size: calc(var(--u) * 11); color: var(--velvet); letter-spacing: 0.06em; }
+.wing span { font-size: calc(var(--u) * 12); color: #8a6a3a; }
+.wing.on { background: var(--gold); transform: translateY(calc(var(--u) * -2)); }
+.wing.locked { filter: grayscale(0.9) brightness(0.75); cursor: not-allowed; }
+
+/* Synergies dans l'infobulle des défenses */
+#tip .syn { display: flex; flex-direction: column; gap: calc(var(--u) * 3); margin-top: calc(var(--u) * 6); }
+#tip .syn span { font-size: calc(var(--u) * 12.5); line-height: 1.25; background: #fff3c4; border-radius: calc(var(--u) * 8); padding: calc(var(--u) * 2) calc(var(--u) * 7); }
+#tip .syn b { color: #a8742f; }
+
+/* Pastille « talent à acheter » sur les boutons de l'Atelier */
+.head-right { display: flex; gap: calc(var(--u) * 8); align-items: center; }
+.btn.notify { position: relative; }
+.btn.notify::after { content: "!"; position: absolute; top: calc(var(--u) * -10); right: calc(var(--u) * -10); width: calc(var(--u) * 24); height: calc(var(--u) * 24); border-radius: 50%; background: var(--red); color: #fff; border: calc(var(--u) * 2) solid var(--ink); display: grid; place-items: center; font-family: var(--font-display); font-size: calc(var(--u) * 15); animation: ready 1.2s infinite; }
+
 </style>
 
 <div id="app">
@@ -515,8 +551,46 @@ img { -webkit-user-drag: none; pointer-events: none; }
         { dmg: 124, rate: 0.39, range: 270, splash: 74, cost: 200 },
       ],
     },
+    ventilo: {
+      name: 'Ventilateur', unlock: 12, cost: 110, color: '#5fb8c9', electric: true, gust: true,
+      desc: 'Une rafale qui repousse les voleurs en arrière sur le tapis. Les Costauds, les Déménageurs et les boss tiennent bon.',
+      levels: [
+        { dmg: 6, rate: 0.5, range: 130, push: 70, splash: 60 },
+        { dmg: 10, rate: 0.55, range: 140, push: 90, splash: 66, cost: 95 },
+        { dmg: 16, rate: 0.6, range: 150, push: 115, splash: 72, cost: 160 },
+      ],
+    },
+    arroseur: {
+      name: 'Arroseur', unlock: 16, cost: 90, color: '#3f7fd9', aura: true,
+      desc: 'Arrose les voleurs proches : trempés, ils glissent et ralentissent. Le Laser et le Ventilateur adorent les voleurs mouillés.',
+      levels: [
+        { range: 115, slow: 0.2, wet: 2.5 },
+        { range: 130, slow: 0.28, wet: 3, cost: 70 },
+        { range: 145, slow: 0.36, wet: 3.5, cost: 120 },
+      ],
+    },
+    chef: {
+      name: 'Chef de la Sécurité', unlock: 21, cost: 160, color: '#d9a440', support: true, commander: true,
+      desc: 'Il ne se bat pas, il commande : les défenses à sa portée font plus de dégâts et voient plus loin.',
+      levels: [
+        { range: 150, buff: 0.2, rangeBuff: 0.08 },
+        { range: 165, buff: 0.3, rangeBuff: 0.12, cost: 140 },
+        { range: 180, buff: 0.42, rangeBuff: 0.16, cost: 220 },
+      ],
+    },
   };
-  PT.TOWER_ORDER = ['gardien', 'glu', 'camera', 'chien', 'filet', 'laser', 'canon'];
+  PT.TOWER_ORDER = ['gardien', 'glu', 'camera', 'chien', 'filet', 'laser', 'canon', 'ventilo', 'arroseur', 'chef'];
+
+  /* ---------- Synergies entre défenses (affichées dans l'interface, appliquées par le moteur) ---------- */
+  PT.SYNERGIES = [
+    { id: 'camera', name: 'Filmé', towers: ['camera'], desc: 'Un voleur filmé par une Caméra prend plus de dégâts de toutes les défenses.' },
+    { id: 'patrouille', name: 'Patrouille', towers: ['gardien'], desc: 'Chaque autre Gardien à moins de 170 px donne +10 % de cadence (jusqu’à +30 %).' },
+    { id: 'croc', name: 'Croc-en-filet', towers: ['chien', 'filet'], desc: 'Le Bouledogue fait double dégâts aux voleurs pris dans un filet.' },
+    { id: 'cible', name: 'Cible facile', towers: ['canon', 'glu'], desc: 'Les boulets font +35 % de dégâts aux voleurs ralentis.' },
+    { id: 'courtjus', name: 'Court-jus', towers: ['laser', 'arroseur'], desc: 'Le Laser fait +60 % de dégâts aux voleurs mouillés.' },
+    { id: 'glissade', name: 'Glissade', towers: ['ventilo', 'arroseur'], desc: 'Le Ventilateur repousse deux fois plus loin les voleurs mouillés.' },
+    { id: 'ordres', name: 'Sous les ordres', towers: ['chef'], desc: 'Le Chef de la Sécurité renforce toutes les défenses à sa portée.' },
+  ];
 
   /* ---------- Voleurs ---------- */
   PT.ENEMIES = {
@@ -556,6 +630,22 @@ img { -webkit-user-drag: none; pointer-events: none; }
       name: 'L’Illusionniste', hp: 95, speed: 60, reward: 16, loot: 1, size: 1, mirror: true,
       desc: 'Abracadabra ! Il fait apparaître des reflets de lui-même qui attirent vos tirs. Une Caméra (ou l’alarme) fait éclater les reflets.',
     },
+    patineur: {
+      name: 'Le Patineur', hp: 34, speed: 128, reward: 7, loot: 1, size: 0.92, slick: true,
+      desc: 'Sur ses rollers, il file comme l’éclair… mais la glu et l’eau le ralentissent deux fois plus.',
+    },
+    taupe: {
+      name: 'La Taupe', hp: 95, speed: 54, reward: 15, loot: 1, size: 0.95, burrow: true,
+      desc: 'Creuse sous le tapis par moments : sous terre, impossible de la toucher. Visez-la quand elle ressort.',
+    },
+    soigneuse: {
+      name: 'La Soigneuse', hp: 80, speed: 56, reward: 16, loot: 1, size: 1, heal: true,
+      desc: 'Elle soigne les voleurs autour d’elle. À attraper en priorité !',
+    },
+    demenageur: {
+      name: 'Le Déménageur', hp: 460, speed: 30, reward: 45, loot: 3, size: 1.45, heavy: true, stunImmune: true, armor: 6,
+      desc: 'Une armoire à glace qui repart avec trois objets d’un coup. Lent, mais il faut tout lui envoyer.',
+    },
     // Reflet créé par l'Illusionniste : se brise au premier coup, ne vole rien. Absent du fichier des suspects.
     reflet: {
       name: 'Reflet', hp: 1, speed: 60, reward: 0, loot: 0, size: 1, decoy: true,
@@ -571,7 +661,8 @@ img { -webkit-user-drag: none; pointer-events: none; }
       desc: 'L’organisateur du Grand Concours. Fumigènes, complices… et il ne vole que le meilleur.',
     },
   };
-  PT.ENEMY_ORDER = ['voleur', 'pickpocket', 'ombre', 'costaud', 'acrobate', 'faussaire', 'hackeuse', 'chevalier', 'illusionniste', 'touriste', 'gentleman'];
+  PT.ENEMY_ORDER = ['voleur', 'pickpocket', 'ombre', 'costaud', 'acrobate', 'faussaire', 'hackeuse', 'chevalier', 'illusionniste',
+    'patineur', 'taupe', 'soigneuse', 'demenageur', 'touriste', 'gentleman'];
 
   /* ---------- Pouvoirs ---------- */
   PT.POWERS = {
@@ -594,16 +685,43 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
   PT.POWER_ORDER = ['buste', 'alarme', 'cafe', 'verrou'];
 
-  /* ---------- Atelier : améliorations permanentes payées en étoiles ---------- */
-  PT.UPGRADES = [
-    { id: 'budget', name: 'Budget municipal', costs: [1, 2, 2], desc: function (r) { return '+' + (30 * r) + ' pièces au début de chaque niveau'; } },
-    { id: 'formation', name: 'Formation des gardiens', costs: [1, 2], desc: function (r) { return '+' + (15 * r) + ' % de dégâts pour Gardiens et Bouledogues'; } },
-    { id: 'glu', name: 'Glu extra-forte', costs: [1, 2], desc: function (r) { return '+' + (25 * r) + ' % de durée de ralentissement'; } },
-    { id: 'optique', name: 'Optique HD', costs: [1, 2], desc: function (r) { return '+' + (12 * r) + ' % de portée pour Caméras, Filets, Lasers et Canons'; } },
-    { id: 'assurance', name: 'Assurance tous risques', costs: [1, 2], desc: function (r) { return '+' + (3 * r) + ' objets dans la collection'; } },
-    { id: 'recup', name: 'Brocante', costs: [1, 1], desc: function (r) { return 'Revente des défenses à ' + (60 + 15 * r) + ' %'; } },
-    { id: 'recharge', name: 'Recharge express', costs: [1, 2], desc: function (r) { return '-' + (15 * r) + ' % de temps de recharge des pouvoirs'; } },
+  /* ---------- Atelier : arbre de talents payé en étoiles ----------
+     Trois branches. Dans une branche, un talent s'ouvre dès que le précédent a au moins un rang. */
+  PT.BRANCHES = [
+    { id: 'def', name: 'Défenses', color: '#3d6fd6' },
+    { id: 'pow', name: 'Pouvoirs', color: '#d8402f' },
+    { id: 'eco', name: 'Économie', color: '#c9952e' },
   ];
+  PT.UPGRADES = [
+    { id: 'formation', branch: 'def', name: 'Formation des gardiens', costs: [1, 2, 3], desc: function (r) { return '+' + (15 * r) + ' % de dégâts pour Gardiens et Bouledogues'; } },
+    { id: 'optique', branch: 'def', name: 'Optique HD', costs: [2, 2, 3], desc: function (r) { return '+' + (10 * r) + ' % de portée pour Caméras, Filets, Lasers, Canons et Ventilateurs'; } },
+    { id: 'glu', branch: 'def', name: 'Glu extra-forte', costs: [2, 3], desc: function (r) { return '+' + (25 * r) + ' % de durée de ralentissement et de mouillage'; } },
+    { id: 'perfo', branch: 'def', name: 'Munitions perforantes', costs: [4], desc: function () { return 'Les armures n’arrêtent plus que la moitié des coups'; } },
+    { id: 'atelier', branch: 'def', name: 'Atelier de réparation', costs: [3, 4], desc: function (r) { return 'Améliorations des défenses ' + (12 * r) + ' % moins chères'; } },
+    { id: 'synergie', branch: 'def', name: 'Esprit d’équipe', costs: [6], desc: function () { return 'Les bonus de synergie sont 50 % plus forts'; } },
+
+    { id: 'recharge', branch: 'pow', name: 'Recharge express', costs: [1, 2, 3], desc: function (r) { return '-' + (10 * r) + ' % de temps de recharge des pouvoirs'; } },
+    { id: 'granit', branch: 'pow', name: 'Buste en granit', costs: [2, 3], desc: function (r) { return 'Buste : +' + (40 * r) + ' % de dégâts et +' + (15 * r) + ' % de zone'; } },
+    { id: 'sirene', branch: 'pow', name: 'Sirène longue durée', costs: [2, 3], desc: function (r) { return 'Alarme : +' + r + ' s de gel'; } },
+    { id: 'expresso', branch: 'pow', name: 'Double expresso', costs: [3, 4], desc: function (r) { return 'Pause café : +' + (3 * r) + ' s'; } },
+    { id: 'doublebuste', branch: 'pow', name: 'Collection de bustes', costs: [6], desc: function () { return 'Le buste tombe en double, côte à côte'; } },
+
+    { id: 'budget', branch: 'eco', name: 'Budget municipal', costs: [1, 2, 2], desc: function (r) { return '+' + (30 * r) + ' pièces au début de chaque salle'; } },
+    { id: 'assurance', branch: 'eco', name: 'Assurance tous risques', costs: [1, 2, 3], desc: function (r) { return '+' + (2 * r) + ' objets dans la collection'; } },
+    { id: 'recup', branch: 'eco', name: 'Brocante', costs: [1, 2], desc: function (r) { return 'Revente des défenses à ' + (60 + 15 * r) + ' %'; } },
+    { id: 'prime', branch: 'eco', name: 'Prime de capture', costs: [3, 4], desc: function (r) { return '+' + (10 * r) + ' % de pièces par voleur attrapé'; } },
+    { id: 'anticipe', branch: 'eco', name: 'Zèle', costs: [3], desc: function () { return 'Bonus doublé quand vous appelez une vague en avance'; } },
+    { id: 'interets', branch: 'eco', name: 'Placement prudent', costs: [5], desc: function () { return 'À chaque vague, +4 % de vos pièces en intérêts (30 au plus)'; } },
+  ];
+
+  // Un talent est accessible si le talent précédent de sa branche a au moins un rang.
+  PT.upgradeOpen = function (id, upgrades) {
+    var u = PT.UPGRADES.filter(function (x) { return x.id === id; })[0];
+    if (!u) return false;
+    var same = PT.UPGRADES.filter(function (x) { return x.branch === u.branch; });
+    var i = same.indexOf(u);
+    return i === 0 || (upgrades[same[i - 1].id] || 0) > 0;
+  };
 
   // Traduit les rangs achetés en modificateurs utilisés par le moteur.
   PT.computeMods = function (upgrades) {
@@ -613,10 +731,21 @@ img { -webkit-user-drag: none; pointer-events: none; }
       startCoins: 30 * r('budget'),
       guardDmg: 1 + 0.15 * r('formation'),
       slowDur: 1 + 0.25 * r('glu'),
-      techRange: 1 + 0.12 * r('optique'),
-      lives: 3 * r('assurance'),
+      techRange: 1 + 0.1 * r('optique'),
+      lives: 2 * r('assurance'),
       sell: 0.6 + 0.15 * r('recup'),
-      powerCd: 1 - 0.15 * r('recharge'),
+      powerCd: 1 - 0.1 * r('recharge'),
+      armorPierce: r('perfo') ? 0.5 : 0,
+      upgradeCost: 1 - 0.12 * r('atelier'),
+      synergy: r('synergie') ? 1.5 : 1,
+      bustDmg: 1 + 0.4 * r('granit'),
+      bustRadius: 1 + 0.15 * r('granit'),
+      bustDouble: r('doublebuste') > 0,
+      alarmPlus: r('sirene'),
+      cafePlus: 3 * r('expresso'),
+      reward: 1 + 0.1 * r('prime'),
+      earlyMul: r('anticipe') ? 2 : 1,
+      interest: r('interets') ? 0.04 : 0,
     };
   };
 })(globalThis.PT = globalThis.PT || {});
@@ -1075,6 +1204,429 @@ img { -webkit-user-drag: none; pointer-events: none; }
   ];
 })(globalThis.PT = globalThis.PT || {});
 
+/* js/levels-gen.js */
+/* Pas Touche ! — salles 11 à 50.
+   Chaque salle est construite à partir d'un plan (chemins), d'un thème et d'un barème de difficulté.
+   Les socles, le décor et les vagues sont placés automatiquement, de façon déterministe :
+   la même salle sort toujours à l'identique. La résistance des voleurs (hpMul) a été réglée
+   en faisant jouer toute la campagne par le bot de tools/campagne.js. */
+(function (PT) {
+  'use strict';
+
+  var WD = PT.WORLD, W = WD.W, H = WD.H, WALL = WD.WALL;
+  var rng = function (seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  };
+
+  /* ---------- Plans de salle ----------
+     Premier point hors de la salle (porte à gauche/droite, verrière en haut, égouts en bas), dernier point sur le trésor. */
+  var PLANS = {
+    serpent: [[[-60, 190], [1060, 190], [1060, 410], [220, 410], [220, 620], [1150, 620]]],
+    spirale: [[[-60, 180], [1160, 180], [1160, 620], [160, 620], [160, 390], [880, 390]]],
+    zigzag: [[[-60, 420], [210, 420], [210, 190], [470, 190], [470, 620], [730, 620], [730, 190], [990, 190], [990, 450], [1150, 450]]],
+    escalier: [[[-60, 190], [330, 190], [330, 350], [640, 350], [640, 510], [950, 510], [950, 640], [1160, 640]]],
+    boucle: [[[-60, 620], [260, 620], [260, 200], [1020, 200], [1020, 560], [640, 560]]],
+    grandtour: [[[-60, 180], [1170, 180], [1170, 400], [130, 400], [130, 630], [940, 630]]],
+    face: [[[-60, 250], [420, 250], [420, 470], [640, 470]], [[1340, 620], [860, 620], [860, 470], [640, 470]]],
+    fourche: [[[-60, 410], [300, 410], [300, 190], [760, 190], [760, 410], [1090, 410]], [[-60, 410], [300, 410], [300, 630], [760, 630], [760, 410], [1090, 410]]],
+    verriere: [[[-60, 560], [330, 560], [330, 250], [700, 250], [700, 520], [1100, 520]], [[960, -60], [960, 170], [1180, 170], [1180, 520], [1100, 520]]],
+    double: [[[-60, 200], [540, 200], [540, 400], [800, 400]], [[-60, 600], [1100, 600], [1100, 400], [800, 400]]],
+    trois: [[[-60, 220], [480, 220], [480, 430], [740, 430]], [[1340, 220], [1000, 220], [1000, 430], [740, 430]], [[300, 780], [300, 640], [740, 640], [740, 430]]],
+    toit: [[[-60, 620], [420, 620], [420, 380], [760, 380]], [[760, -60], [760, 150], [1120, 150], [1120, 380], [760, 380]]],
+  };
+  // Symétries : gauche-droite toujours possible ; haut-bas seulement sans verrière
+  function transform(paths, mx, my) {
+    return paths.map(function (p) {
+      return p.map(function (pt) { return [mx ? W - pt[0] : pt[0], my ? (WALL + H) - pt[1] : pt[1]]; });
+    });
+  }
+  function hasSkylight(paths) { return paths.some(function (p) { return p[0][1] < 0; }); }
+
+  /* ---------- Géométrie ---------- */
+  function segDist(px, py, a, b) {
+    var dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy;
+    var t = Math.max(0, Math.min(1, ((px - a[0]) * dx + (py - a[1]) * dy) / l2));
+    return Math.hypot(px - (a[0] + t * dx), py - (a[1] + t * dy));
+  }
+  function pathDist(paths, x, y) {
+    var m = Infinity;
+    paths.forEach(function (p) { for (var i = 0; i < p.length - 1; i++) m = Math.min(m, segDist(x, y, p[i], p[i + 1])); });
+    return m;
+  }
+  // Longueur de tapis à portée d'un point : plus elle est grande, meilleur est le socle
+  function coverage(paths, x, y, r) {
+    var c = 0;
+    paths.forEach(function (p) {
+      for (var i = 0; i < p.length - 1; i++) {
+        var a = p[i], b = p[i + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        for (var d = 0; d < len; d += 12) {
+          var qx = a[0] + (b[0] - a[0]) * d / len, qy = a[1] + (b[1] - a[1]) * d / len;
+          if (qy < WALL || qx < 0 || qx > W || qy > H) continue;
+          if ((qx - x) * (qx - x) + (qy - y) * (qy - y) <= r * r) c += 12;
+        }
+      }
+    });
+    return c;
+  }
+
+  // Socles : à 72 px du tapis, là où ils couvrent le plus de chemin, assez espacés
+  function makeSpots(paths, count) {
+    var cands = [], tr = paths[0][paths[0].length - 1];
+    paths.forEach(function (p) {
+      for (var i = 0; i < p.length - 1; i++) {
+        var a = p[i], b = p[i + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        var ux = (b[0] - a[0]) / len, uy = (b[1] - a[1]) / len;
+        for (var d = 30; d < len - 10; d += 26) {
+          [-1, 1].forEach(function (sd) {
+            cands.push([a[0] + ux * d - uy * 72 * sd, a[1] + uy * d + ux * 72 * sd]);
+          });
+        }
+        if (i > 0) {
+          // coin extérieur du virage
+          var pa = p[i - 1], vx = (pa[0] - a[0]), vy = (pa[1] - a[1]), vl = Math.hypot(vx, vy);
+          var bx = -(vx / vl + ux), by = -(vy / vl + uy), bl = Math.hypot(bx, by) || 1;
+          cands.push([a[0] + bx / bl * 80, a[1] + by / bl * 80]);
+          cands.push([a[0] - bx / bl * 80, a[1] - by / bl * 80]);
+        }
+      }
+    });
+    var scored = [];
+    cands.forEach(function (c) {
+      var x = Math.round(c[0]), y = Math.round(c[1]);
+      if (x < 60 || x > W - 60 || y < 150 || y > H - 28) return;
+      if (pathDist(paths, x, y) < 68) return;
+      if (Math.hypot(x - tr[0], y - tr[1]) < 100) return;
+      scored.push({ x: x, y: y, s: coverage(paths, x, y, 150) + coverage(paths, x, y, 100) * 0.6 });
+    });
+    scored.sort(function (a, b) { return b.s - a.s; });
+    var out = [];
+    for (var i = 0; i < scored.length && out.length < count; i++) {
+      var c = scored[i];
+      if (out.every(function (o) { return Math.hypot(o[0] - c.x, o[1] - c.y) >= 96; })) out.push([c.x, c.y]);
+    }
+    return out;
+  }
+
+  // Décor : dans les espaces libres, loin du tapis, des socles et du trésor
+  function makeDeco(paths, spots, list, r, n, lamps) {
+    var tr = paths[0][paths[0].length - 1], out = [], i;
+    function free(x, y, minPath) {
+      if (pathDist(paths, x, y) < minPath) return false;
+      if (Math.hypot(x - tr[0], y - tr[1]) < 110) return false;
+      for (i = 0; i < spots.length; i++) if (Math.hypot(spots[i][0] - x, spots[i][1] - y) < 74) return false;
+      for (i = 0; i < out.length; i++) if (Math.hypot(out[i].x - x, out[i].y - y) < 96) return false;
+      return true;
+    }
+    // Lampes de secours (variante panne) : près du tapis, bien réparties
+    if (lamps) {
+      var tries = 0;
+      while (out.length < lamps && tries++ < 4000) {
+        var lx = 80 + r() * (W - 160), ly = 150 + r() * (H - 200);
+        var pd = pathDist(paths, lx, ly);
+        if (pd < 62 || pd > 120 || !free(lx, ly, 62)) continue;
+        if (out.some(function (o) { return Math.hypot(o.x - lx, o.y - ly) < 300; })) continue;
+        out.push({ t: 'lampe', x: Math.round(lx), y: Math.round(ly) });
+      }
+    }
+    var cells = [];
+    for (var y = 140; y < H - 20; y += 30) for (var x = 40; x < W - 30; x += 30) cells.push([x + (r() - 0.5) * 20, y + (r() - 0.5) * 16]);
+    for (var k = cells.length - 1; k > 0; k--) { var j = (r() * (k + 1)) | 0, tmp = cells[k]; cells[k] = cells[j]; cells[j] = tmp; }
+    var want = out.length + n;
+    for (k = 0; k < cells.length && out.length < want; k++) {
+      var cx = cells[k][0], cy = cells[k][1];
+      if (!free(cx, cy, 78)) continue;
+      out.push({ t: list[(out.length * 7 + (r() * list.length | 0)) % list.length], x: Math.round(cx), y: Math.round(cy) });
+    }
+    return out;
+  }
+
+  /* ---------- Thèmes ---------- */
+  var THEMES = {
+    parquetRouge: { floor: 'parquet', floorA: '#c98d55', floorB: '#b97c47', wall: '#7d3b3b', wallDark: '#4e2326', trim: '#e8b84a', carpet: '#b8283a' },
+    parquetVert: { floor: 'parquet', floorA: '#c49a62', floorB: '#b48852', wall: '#2f5a46', wallDark: '#1a3328', trim: '#e8b84a', carpet: '#8f1d2c' },
+    chocolat: { floor: 'parquet', floorA: '#8a5a3a', floorB: '#7a4d30', wall: '#5a2e1e', wallDark: '#2e160d', trim: '#f2c14e', carpet: '#d9a35a' },
+    jouets: { floor: 'gallery', floorA: '#e8c890', floorB: '#dcbc84', wall: '#3fa7a0', wallDark: '#1f5a56', trim: '#f5c518', carpet: '#e2405e' },
+    galerieNuit: { floor: 'gallery', floorA: '#5b6378', floorB: '#525a6e', wall: '#262b45', wallDark: '#14172a', trim: '#f04f8a', carpet: '#232733', night: true },
+    cinema: { floor: 'gallery', floorA: '#4a3f52', floorB: '#42384a', wall: '#7a1f2b', wallDark: '#3a0d14', trim: '#f5c518', carpet: '#b8283a', night: true },
+    royal: { floor: 'royal', floorA: '#8e2b3d', floorB: '#7a2233', wall: '#2c1a4a', wallDark: '#170c2b', trim: '#f2c14e', carpet: '#1f3f8f' },
+    versailles: { floor: 'versailles', floorA: '#c98f52', floorB: '#b77f45', wall: '#b89a5e', wallDark: '#3e2f1c', trim: '#f2c14e', carpet: '#2c4a9a' },
+    musique: { floor: 'versailles', floorA: '#b98048', floorB: '#a8713e', wall: '#3b1f5a', wallDark: '#1d0f2e', trim: '#f2c14e', carpet: '#8f1d2c' },
+    marine: { floor: 'pont', floorA: '#9c7b55', floorB: '#8f6f4b', wall: '#2a4d72', wallDark: '#14273d', trim: '#e3c06a', carpet: '#1d5f8a' },
+    egypte: { floor: 'stone', floorA: '#e2c48a', floorB: '#d3b273', wall: '#a8742f', wallDark: '#5e3f1a', trim: '#3fa7a0', carpet: '#2f6f8f' },
+    antique: { floor: 'stone', floorA: '#e6dcc4', floorB: '#d8cbb0', wall: '#c9b28a', wallDark: '#6a5a3a', trim: '#3d6fa8', carpet: '#2f4f9a' },
+    marbre: { floor: 'marble', floorA: '#e9e4d6', floorB: '#cfc8b4', wall: '#3f6b4a', wallDark: '#223d2a', trim: '#e0a33a', carpet: '#7c3a8f' },
+    ocean: { floor: 'marble', floorA: '#d6ecf0', floorB: '#bcdbe2', wall: '#1d5f8a', wallDark: '#0e2f45', trim: '#f2c14e', carpet: '#2f4f9a' },
+    chateau: { floor: 'dalles', floorA: '#a3a7ad', floorB: '#92979e', wall: '#3d4f6b', wallDark: '#1f2a3b', trim: '#d9a440', carpet: '#8f1d2c' },
+    mines: { floor: 'beton', floorA: '#7c7166', floorB: '#71665b', wall: '#4a3a2e', wallDark: '#231a12', trim: '#e8b923', carpet: '#8f1d2c', night: true },
+    sciences: { floor: 'acier', floorA: '#b9c2cc', floorB: '#adb6c0', wall: '#2f6f5a', wallDark: '#173a2f', trim: '#f5c518', carpet: '#2b5fb3' },
+    espace: { floor: 'acier', floorA: '#5a6a8a', floorB: '#4f5e7c', wall: '#1d2240', wallDark: '#0d1022', trim: '#9fe7ff', carpet: '#3a2a7a' },
+    coffre: { floor: 'acier', floorA: '#6f7a86', floorB: '#66717d', wall: '#2f3b4a', wallDark: '#161e28', trim: '#d4a72c', carpet: '#8f1d2c' },
+  };
+  var DECOS = {
+    galerie: ['plante', 'banc', 'statue', 'colonne', 'vitrine', 'oranger', 'sculpture', 'candelabre', 'plante', 'mobile'],
+    antique: ['colonne', 'statue', 'obelisque', 'sarcophage', 'vitrine', 'brasero', 'armure', 'fossile', 'colonne'],
+    marine: ['ancre', 'gouvernail', 'maquette', 'caisses', 'sacs', 'plante', 'banc'],
+    reserve: ['caisses', 'bache', 'sacs', 'caisses', 'vitrine', 'statue'],
+    coffre: ['coffret', 'sacs', 'caisses', 'trophee', 'colonne', 'vitrine'],
+    chateau: ['armure', 'brasero', 'candelabre', 'colonne', 'armure', 'trophee'],
+  };
+
+  /* ---------- Les 40 salles ---------- */
+  // [nom, trésor, objet, thème, décor, plan, type ('casse'), variante]
+  var ROOMS = [
+    ['Galerie des Impressionnistes', 'Les Nénuphars Mouillés', 'tableau', 'parquetVert', 'galerie', 'serpent'],
+    ['Salle des Globes', 'Le Globe de Mercator', 'globe', 'marbre', 'antique', 'escalier'],
+    ['Musée des Jouets', 'Le Trophée du Meilleur Jouet', 'trophee', 'jouets', 'galerie', 'boucle', '', 'visiteurs'],
+    ['Galerie des Minéraux', 'Le Diamant Bleu Pâle', 'diamant', 'mines', 'reserve', 'zigzag'],
+    ['L’Hôtel des Ventes', 'Le Vase de Soissons (recollé)', 'vase', 'royal', 'galerie', 'face', 'casse'],
+    ['Musée du Chocolat', 'La Poule en Chocolat Noir', 'poule', 'chocolat', 'galerie', 'grandtour'],
+    ['Salle de la Marine Royale', 'Le Trésor de l’Amiral Pinson', 'coffre', 'marine', 'marine', 'fourche'],
+    ['Les Catacombes', 'Le Masque du Fantôme', 'masque', 'mines', 'reserve', 'spirale', '', 'panne'],
+    ['Musée de l’Espace', 'La Fusée Lune-Express', 'fusee', 'espace', 'coffre', 'verriere'],
+    ['Le Palais Doré', 'La Tiare de l’Impératrice', 'couronne', 'versailles', 'galerie', 'trois', 'casse'],
+
+    ['Pavillon Japonais', 'Le Vase aux Mille Grues', 'vase', 'parquetRouge', 'galerie', 'escalier'],
+    ['Musée du Cinéma', 'La Statuette Dorée', 'trophee', 'cinema', 'galerie', 'double'],
+    ['Musée Océanographique', 'La Perle Géante', 'diamant', 'ocean', 'marine', 'serpent'],
+    ['Salle des Pharaons', 'Le Masque d’Akhénatonton', 'masque', 'egypte', 'antique', 'toit'],
+    ['Le Musée de Cire', 'La Joconde en Cire', 'joconde', 'royal', 'galerie', 'fourche', 'casse'],
+    ['Le Jardin d’Hiver', 'L’Œuf de Pâques Impérial', 'oeuf', 'parquetVert', 'galerie', 'boucle'],
+    ['Musée de la Musique', 'Le Diapason d’Or', 'trophee', 'musique', 'galerie', 'zigzag'],
+    ['Musée des Sciences', 'Le Premier Satellite', 'fusee', 'sciences', 'coffre', 'face', '', 'visiteurs'],
+    ['Galerie des Rois', 'La Couronne de Pépin le Bref', 'couronne', 'royal', 'chateau', 'spirale'],
+    ['Le Coffre de la Monnaie', 'Les Lingots de la Monnaie', 'lingots', 'coffre', 'coffre', 'trois', 'casse'],
+
+    ['Atelier de Restauration', 'Le Tableau Pas Fini', 'tableau', 'parquetRouge', 'galerie', 'grandtour'],
+    ['Salle des Géants', 'L’Œuf de T-Rex', 'oeuf', 'marbre', 'antique', 'verriere'],
+    ['Réserve des Momies', 'Le Masque Maudit', 'masque', 'mines', 'reserve', 'double', '', 'panne'],
+    ['Musée de l’Aviation', 'La Fusée de Papier', 'fusee', 'sciences', 'coffre', 'serpent'],
+    ['La Chambre des Bijoux', 'Le Diamant du Régent Distrait', 'diamant', 'royal', 'chateau', 'toit', 'casse'],
+    ['Musée du Fromage', 'La Meule d’Or', 'trophee', 'chocolat', 'galerie', 'escalier'],
+    ['Salle des Miroirs', 'La Perruque de la Reine', 'perruque', 'versailles', 'galerie', 'fourche'],
+    ['Musée d’Art Moderne', 'Le Rond Presque Rouge', 'tableau', 'galerieNuit', 'galerie', 'zigzag', '', 'visiteurs'],
+    ['L’Arsenal', 'L’Épée du Mousquetaire', 'epee', 'chateau', 'chateau', 'spirale'],
+    ['Le Musée National', 'La Joconde (la vraie de vraie)', 'joconde', 'royal', 'galerie', 'trois', 'casse'],
+
+    ['Musée des Arts Forains', 'Le Cheval de Bois Doré', 'trophee', 'jouets', 'galerie', 'boucle'],
+    ['Salle des Cartes', 'La Mappemonde du Capitaine', 'globe', 'marine', 'marine', 'double'],
+    ['Les Égouts du Musée', 'Le Coffre Perdu', 'coffre', 'mines', 'reserve', 'serpent', '', 'panne'],
+    ['Temple d’Angkor-sur-Loire', 'L’Amphore de Marseille', 'vase', 'antique', 'antique', 'face'],
+    ['Le Musée Ferroviaire', 'L’Or du Train Postal', 'lingots', 'coffre', 'coffre', 'verriere', 'casse'],
+    ['Musée de la Poule', 'La Poule aux Œufs de Platine', 'poule', 'parquetRouge', 'galerie', 'grandtour'],
+    ['Le Grand Louvre-sur-Mer', 'Le Radeau de la Méduse en Pédalo', 'tableau', 'galerieNuit', 'galerie', 'fourche', '', 'visiteurs'],
+    ['L’Observatoire', 'La Lunette de Galilée', 'globe', 'espace', 'coffre', 'zigzag'],
+    ['Le Trésor des Rois', 'La Couronne des Couronnes', 'couronne', 'royal', 'chateau', 'toit'],
+    ['Le Coffre du Gentleman', 'Le Cœur du Musée', 'diamant', 'coffre', 'coffre', 'trois', 'casse'],
+  ];
+
+  /* ---------- Voleurs et barème ---------- */
+  var INTRO = { voleur: 1, pickpocket: 1, ombre: 2, costaud: 3, acrobate: 3, faussaire: 4, hackeuse: 4, chevalier: 6, illusionniste: 8, patineur: 11, taupe: 14, soigneuse: 19, demenageur: 24 };
+  var THREAT = { voleur: 1, pickpocket: 0.75, ombre: 1.5, costaud: 4.5, acrobate: 1.5, faussaire: 1.7, hackeuse: 1.8, chevalier: 3.4, illusionniste: 2.3, patineur: 1, taupe: 2.2, soigneuse: 3, demenageur: 12 };
+  var GAP = { voleur: 0.85, pickpocket: 0.5, ombre: 0.75, costaud: 1.6, acrobate: 0.75, faussaire: 0.9, hackeuse: 1.3, chevalier: 1.15, illusionniste: 1.2, patineur: 0.45, taupe: 1, soigneuse: 1.7, demenageur: 3.2 };
+  // Les salles « respiration » sont plus faciles, pour souffler entre deux gros morceaux.
+  var BREATHER = { 16: 1, 21: 1, 26: 1, 31: 1, 36: 1, 41: 1, 46: 1 };
+  // Résistance des voleurs, réglée salle par salle par le bot de campagne (tools/campagne.js).
+  var HPMUL = {
+    11: 5.76, 12: 4.05, 13: 5.65, 14: 5.65, 15: 3.94, 16: 5.24, 17: 6.23, 18: 5.5, 19: 2.59, 20: 5,
+    21: 4.02, 22: 4.92, 23: 5.26, 24: 3.04, 25: 5.97, 26: 5.29, 27: 5.05, 28: 4.6, 29: 5.84, 30: 4.73,
+    31: 4.92, 32: 2.55, 33: 3.41, 34: 7.4, 35: 5.58, 36: 6.42, 37: 7.63, 38: 7.71, 39: 5.34, 40: 5.58,
+    41: 6.29, 42: 7.74, 43: 8.12, 44: 6, 45: 3.05, 46: 7, 47: 8.45, 48: 6.7, 49: 4.47, 50: 7.26,
+  };
+  // Coefficient par aile, réglé sur la campagne complète du joueur moyen (tools/campagne.js) :
+  // chaque aile doit être un peu plus exigeante que la précédente.
+  var WING_MUL = [1, 1, 1.06, 1.16, 1.04];
+  PT.HPMUL = HPMUL;
+
+  var CREW_NAMES = {
+    voleur: ['Les Marinières', 'Le Gang des Bonnets', 'Les Monte-en-l’air Associés'],
+    pickpocket: ['Les Mille Mains', 'Les Doigts de Fée', 'La Bande à Filou'],
+    ombre: ['Le Réseau Fantôme', 'Les Ombres Chinoises', 'Les Silencieux'],
+    costaud: ['Les Frères Pinces', 'Les Gros Bras', 'La Division Lourde'],
+    acrobate: ['Le Cirque Volant', 'Les Trapézistes', 'La Troupe Élastique'],
+    faussaire: ['Opération Touristes', 'Le Club Bermuda', 'Les Faux Visiteurs'],
+    hackeuse: ['Les Courts-Circuits', 'Le Club des Câbles', 'Panne Organisée'],
+    chevalier: ['La Table Pas Ronde', 'Les Boîtes de Conserve', 'L’Ordre du Coffre'],
+    illusionniste: ['Les Prestidigitateurs', 'Le Cabinet des Illusions', 'Abracadabra & Cie'],
+    patineur: ['Les Roulettes Russes', 'Le Roller Derby', 'Les Glisseurs'],
+    taupe: ['Les Terrassiers', 'Le Tunnel du Siècle', 'Les Taupes Modèles'],
+    soigneuse: ['La Croix Rouge-Gorge', 'Les Infirmières de Garde', 'Le Service des Urgences'],
+    demenageur: ['Déménagements Express', 'Les Armoires à Glace', 'Transports Pas Discrets'],
+  };
+  var PLAN_TIPS = {
+    voleur: 'Du classique, mais en nombre.',
+    pickpocket: 'Ils misent sur la vitesse : ralentissez-les vite.',
+    ombre: 'Invisibles sans caméra !',
+    costaud: 'Ils encaissent tout et repartent avec deux objets chacun.',
+    acrobate: 'La glu ne les arrête pas et ils sautent par-dessus vos défenses.',
+    faussaire: 'Démasquez-les avec une Caméra.',
+    hackeuse: 'Elles coupent les Caméras et les Lasers.',
+    chevalier: 'Les petits coups rebondissent sur leur armure.',
+    illusionniste: 'Leurs reflets vont gaspiller vos tirs.',
+    patineur: 'Ultra rapides, mais la glu et l’eau les font déraper.',
+    taupe: 'Elles creusent sous le tapis : visez-les quand elles ressortent.',
+    soigneuse: 'Elles soignent leurs complices : attrapez-les d’abord.',
+    demenageur: 'Trois objets chacun : il ne faut pas les laisser sortir.',
+  };
+  var NAMES = {
+    voleur: 'Monte-en-l’air', pickpocket: 'Pickpockets', ombre: 'Ombres', costaud: 'Costauds', acrobate: 'Acrobates', faussaire: 'Faux Touristes',
+    hackeuse: 'Hackeuses', chevalier: 'Chevaliers', illusionniste: 'Illusionnistes', patineur: 'Patineurs', taupe: 'Taupes', soigneuse: 'Soigneuses', demenageur: 'Déménageurs',
+  };
+  var TAUNTS = {
+    voleur: 'Mes Monte-en-l’air connaissent ce musée par cœur.',
+    pickpocket: 'Vous avez vu passer quelque chose ? Mes pickpockets, peut-être.',
+    ombre: 'Vous ne verrez même pas mes Ombres arriver.',
+    costaud: 'Mes Costauds ont fait de la musculation tout l’hiver.',
+    acrobate: 'Hop là ! Mes Acrobates adorent vos plafonds.',
+    faussaire: 'Que de touristes ce soir… Êtes-vous sûr qu’ils sont tous vrais ?',
+    hackeuse: 'Vos caméras ? Clic. Plus de caméras.',
+    chevalier: 'Mes Chevaliers ont poli leur armure rien que pour vous.',
+    illusionniste: 'Un voleur, deux voleurs, trois voleurs… lequel est le vrai ?',
+    patineur: 'Mes Patineurs ont huilé leurs roulettes. Bonne chance !',
+    taupe: 'Regardez bien sous vos pieds, gardien.',
+    soigneuse: 'Mes Soigneuses remettent mes hommes sur pied en un clin d’œil.',
+    demenageur: 'J’ai réservé un camion. Un très, très grand camion.',
+  };
+
+  // Mélange déterministe
+  function pick(r, list) { return list[(r() * list.length) | 0]; }
+
+  function buildWaves(n, r, room, nPaths, intro) {
+    var casse = room[6] === 'casse', variant = room[7] || null;
+    var pool = Object.keys(INTRO).filter(function (t) { return INTRO[t] <= n; });
+    // Les petits voleurs servent de remplissage ; le Déménageur reste une menace rare
+    var recent = pool.filter(function (t) { return INTRO[t] >= n - 8 && t !== 'demenageur'; });
+    var star = pool.filter(function (t) { return t !== 'demenageur' && (n < 20 || (t !== 'voleur' && t !== 'pickpocket')); });
+    var featured = [];
+    if (intro) featured.push(intro);
+    while (featured.length < 3) {
+      var cand = r() < 0.55 && recent.length ? pick(r, recent) : pick(r, star);
+      if (featured.indexOf(cand) < 0) featured.push(cand);
+    }
+    if (variant === 'panne' && featured.indexOf('ombre') < 0) featured[2] = 'ombre';
+    if (variant === 'visiteurs' && featured.indexOf('faussaire') < 0) featured[2] = 'faussaire';
+    var nWaves = casse ? 9 : 8 + Math.floor((n - 11) / 10);
+    var base = 10 + n * 0.45;
+    var heavyUsed = 0;
+    var waves = [];
+    for (var w = 0; w < nWaves; w++) {
+      var last = w === nWaves - 1;
+      var budget = base * (1 + 0.2 * w) * (last ? 1.3 : 1) * (intro && w < 2 ? 0.8 : 1);
+      var types;
+      if (intro && w < 2) types = w === 0 ? [intro] : [intro, 'voleur'];
+      else {
+        var k = 1 + (r() < 0.6 ? 1 : 0) + (w >= nWaves / 2 && r() < 0.5 ? 1 : 0);
+        types = [];
+        while (types.length < k) {
+          var t = r() < 0.65 ? pick(r, featured) : pick(r, pool);
+          if (t === 'demenageur' && (w < 2 || heavyUsed >= 2 || r() < 0.6)) t = pick(r, star);
+          if (t === 'demenageur') heavyUsed++;
+          if (types.indexOf(t) < 0) types.push(t);
+        }
+      }
+      var groups = [], at = 0, share = budget / types.length;
+      types.forEach(function (t, gi) {
+        // pas de vague géante trop tôt : le plafond monte avec le numéro de vague
+        var cnt = Math.max(2, Math.min(40, 12 + 4 * w, Math.round(share / THREAT[t])));
+        if (t === 'demenageur') cnt = Math.min(cnt, 1 + Math.floor((n - 22) / 10));
+        var gap = +(GAP[t] * Math.max(0.6, 1.05 - n / 110)).toFixed(2);
+        var g = { t: t, n: cnt, gap: gap };
+        if (at) g.at = +at.toFixed(1);
+        if (nPaths > 1) g.p = casse ? (gi + w) % nPaths : 'alt';
+        if (!intro || w >= 2) { if (w >= nWaves / 2 && r() < 0.3 && THREAT[t] <= 1.5) g.hp = 1.5; }
+        groups.push(g);
+        at += Math.min(8, cnt * gap * 0.45) + 1;
+      });
+      if (variant === 'visiteurs') groups.push({ t: 'touriste', n: 6 + Math.floor(w * 0.8), gap: 1, p: nPaths > 1 ? 'alt' : 0 });
+      var wave = { groups: groups };
+      if (casse) {
+        var main = types[0];
+        var parts = groups.filter(function (g) { return g.t !== 'touriste'; }).map(function (g) { return g.n + ' ' + NAMES[g.t]; });
+        wave.crew = {
+          name: pick(r, CREW_NAMES[main]),
+          plan: 'Au programme : ' + parts.join(', ') + '. ' + PLAN_TIPS[main] + (types[1] ? ' ' + PLAN_TIPS[types[1]] : ''),
+        };
+      }
+      waves.push(wave);
+    }
+    if (casse) {
+      // Le Gentleman en personne pour clore chaque casse
+      var esc = featured.filter(function (t) { return t !== 'demenageur'; }).slice(0, 2);
+      var fin = [{ t: 'gentleman', n: 1, gap: 1, at: 3, hp: +(1 + (n - 10) / 30).toFixed(2), p: 0 }];
+      esc.forEach(function (t, i) { fin.push({ t: t, n: Math.max(4, Math.round(base * 0.9 / THREAT[t])), gap: GAP[t], at: i * 6, p: nPaths > 1 ? (i + 1) % nPaths : 0 }); });
+      if (n === 50) fin.push({ t: 'demenageur', n: 3, gap: 4, at: 10, p: 0 }, { t: 'soigneuse', n: 4, gap: 2, at: 8, p: nPaths > 1 ? 1 : 0 });
+      waves.push({
+        crew: { name: n === 50 ? 'Le Gentleman, tout ou rien' : 'Le Gentleman en personne', plan: n === 50 ? 'La dernière nuit du Grand Concours. Le Gentleman vient chercher le Cœur du Musée avec toute sa troupe. C’est maintenant ou jamais.' : 'Le maître lui-même, avec sa garde rapprochée. Fumigènes et complices à volonté.' },
+        groups: fin,
+      });
+    }
+    return { waves: waves, featured: featured };
+  }
+
+  var DOOR_TXT = { 1: 'une porte', 2: 'deux entrées', 3: 'trois entrées' };
+  function blurbFor(room, n, nPaths, featured, intro) {
+    var bits = [];
+    if (room[6] === 'casse') bits.push('NIVEAU CASSE : des équipes de professionnels, chacune avec son plan. Lisez les briefings ! Le Gentleman viendra en personne.');
+    else bits.push('Une salle avec ' + DOOR_TXT[nPaths] + '.');
+    if (room[7] === 'visiteurs') bits.push('Portes ouvertes : de vrais touristes se mêlent aux Faux Touristes. Une Caméra fera le tri.');
+    if (room[7] === 'panne') bits.push('Panne de courant : vos défenses ne voient que sous les lampes de secours ou grâce aux Caméras.');
+    if (intro) bits.push('Nouveau suspect : ' + PT.ENEMIES[intro].name + '. ' + PLAN_TIPS[intro]);
+    if (BREATHER[n]) bits.push('Une soirée plutôt calme… profitez-en pour tester de nouvelles combinaisons.');
+    else if (!intro) bits.push('Attendez-vous surtout à des ' + featured.slice(0, 2).map(function (t) { return NAMES[t]; }).join(' et des ') + '.');
+    return bits.join(' ');
+  }
+
+  var introAt = {};
+  Object.keys(INTRO).forEach(function (t) { if (INTRO[t] > 10) introAt[INTRO[t]] = t; });
+
+  ROOMS.forEach(function (room, i) {
+    var n = 11 + i, r = rng(n * 7919 + 77);
+    var plan = PLANS[room[5]];
+    var my = !hasSkylight(plan) && !plan.some(function (p) { return p[0][1] > H; }) && r() < 0.5;
+    var paths = transform(plan, r() < 0.5, my);
+    var casse = room[6] === 'casse', variant = room[7] || null;
+    var theme = {};
+    var src = THEMES[room[3]];
+    for (var k in src) theme[k] = src[k];
+    theme.night = !!src.night || variant === 'panne';
+    var spots = makeSpots(paths, casse ? 14 : 12);
+    var deco = makeDeco(paths, spots, DECOS[room[4]], r, 7, variant === 'panne' ? 5 : 0);
+    var intro = introAt[n] || null;
+    var built = buildWaves(n, r, room, paths.length, intro);
+    var feat = built.featured;
+    var next = ROOMS[i + 1];
+    var level = {
+      id: n, type: casse ? 'casse' : 'horde',
+      name: room[0], subtitle: room[1],
+      blurb: blurbFor(room, n, paths.length, feat, intro),
+      theme: theme,
+      treasure: { kind: room[2], name: room[1] },
+      startCoins: 300 + n * 5 + (casse ? 140 : 0) + (paths.length - 1) * 40,
+      lives: 20,
+      hpMul: +((HPMUL[n] || 3) * WING_MUL[Math.floor((n - 1) / 10)]).toFixed(2),
+      paths: paths, spots: spots, deco: deco,
+      taunts: [
+        { wave: 0, text: n === 50 ? 'Nous y voilà, gardien. La dernière salle. Le Cœur du Musée sera à moi.' : TAUNTS[feat[0]] },
+        { wave: Math.floor(built.waves.length / 2), text: TAUNTS[feat[1]] },
+        { wave: built.waves.length - 1, text: casse ? 'Assez joué. Je viens le chercher moi-même !' : 'Dernière vague ! Mes meilleurs éléments arrivent.' },
+      ],
+      outro: next ? 'Vous avez gagné cette manche… Rendez-vous à « ' + next[0] + ' ». Le Grand Concours n’est pas fini !' :
+        'Impossible ! Le Gentleman est battu, le Grand Concours est terminé et le musée est sauvé. Bravo, gardien !',
+      waves: built.waves,
+    };
+    if (variant) level.variant = variant;
+    PT.LEVELS.push(level);
+  });
+
+  PT.LEVEL_PLANS = PLANS;
+})(globalThis.PT = globalThis.PT || {});
+
 /* js/game.js */
 /* Pas Touche ! — moteur de jeu (logique pure, sans DOM ni canvas).
    Le rendu, l'interface et le son lisent l'état et consomment `game.events`. */
@@ -1164,12 +1716,42 @@ img { -webkit-user-drag: none; pointer-events: none; }
   G.emit = function (type, data) { data = data || {}; data.type = type; this.events.push(data); };
 
   /* ---------- Défenses ---------- */
+  var TECH = { camera: 1, filet: 1, laser: 1, canon: 1, ventilo: 1 };
   G.towerStats = function (t) {
     var def = PT.TOWERS[t.type], base = def.levels[t.level], m = this.mods, s = {};
     for (var k in base) s[k] = base[k];
     if (t.type === 'gardien' || t.type === 'chien') s.dmg *= m.guardDmg;
-    if (t.type === 'camera' || t.type === 'filet' || t.type === 'laser' || t.type === 'canon') s.range *= m.techRange;
+    if (TECH[t.type]) s.range *= m.techRange;
     if (s.slowDur) s.slowDur *= m.slowDur;
+    if (s.wet) s.wet *= m.slowDur;
+    if (t.x == null) return s;
+    // Sous les ordres : le meilleur Chef à portée renforce la défense
+    var buff = 0, rb = 0, i, o;
+    if (!def.commander) {
+      for (i = 0; i < this.towers.length; i++) {
+        o = this.towers[i];
+        if (o.type !== 'chef' || o.disabledT > 0) continue;
+        var cs = PT.TOWERS.chef.levels[o.level];
+        if (dist2(o.x, o.y, t.x, t.y) <= cs.range * cs.range) { buff = Math.max(buff, cs.buff); rb = Math.max(rb, cs.rangeBuff); }
+      }
+    }
+    if (def.commander) s.buff *= m.synergy;
+    s.chefBuff = buff * m.synergy;
+    if (buff) {
+      if (s.dmg != null) s.dmg *= 1 + s.chefBuff;
+      if (s.dps != null) s.dps *= 1 + s.chefBuff;
+      s.range *= 1 + rb * m.synergy;
+    }
+    // Patrouille : les Gardiens proches les uns des autres tirent plus vite
+    if (t.type === 'gardien') {
+      var n = 0;
+      for (i = 0; i < this.towers.length; i++) {
+        o = this.towers[i];
+        if (o.id !== t.id && o.type === 'gardien' && dist2(o.x, o.y, t.x, t.y) <= 170 * 170) n++;
+      }
+      s.patrol = Math.min(0.3, 0.1 * n) * m.synergy;
+      s.rate *= 1 + s.patrol;
+    }
     return s;
   };
 
@@ -1198,7 +1780,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
 
   G.upgradeCost = function (t) {
     var lv = PT.TOWERS[t.type].levels[t.level + 1];
-    return lv ? lv.cost : null;
+    return lv ? Math.round(lv.cost * this.mods.upgradeCost) : null;
   };
 
   G.upgrade = function (t) {
@@ -1235,13 +1817,17 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
 
   G.earlyBonus = function () {
-    return this.countdown != null && this.waveIndex >= 0 ? Math.round(this.countdown * 1.5) : 0;
+    return this.countdown != null && this.waveIndex >= 0 ? Math.round(this.countdown * 1.5 * this.mods.earlyMul) : 0;
   };
 
   G.startNextWave = function () {
     if (!this.canCallWave()) return false;
     var bonus = this.earlyBonus();
     if (bonus > 0) { this.coins += bonus; this.emit('bonus', { value: bonus }); }
+    if (this.mods.interest && this.waveIndex >= 0) {
+      var gain = Math.min(30, Math.floor(this.coins * this.mods.interest));
+      if (gain > 0) { this.coins += gain; this.emit('interest', { value: gain }); }
+    }
     this.waveIndex++;
     var w = this.level.waves[this.waveIndex], list = [], self = this, np = this.paths.length;
     w.groups.forEach(function (g) {
@@ -1268,7 +1854,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       id: this.nextId++, type: s.type, def: def, path: s.path, d: s.d || 0, dir: s.dir || 1,
       hp: hp, maxHp: hp, speed: def.speed * (0.94 + rand() * 0.12), lat: def.boss ? 0 : (rand() - 0.5) * 28,
       alive: true, stunT: 0, netT: 0, slowT: 0, slowF: 0, flashT: 0, pauseT: 0, grabbing: false, carrying: 0,
-      leapT: 0, leapCD: 2 + rand() * 2, empCD: 2, smokeCD: 5, smokeT: 0, summonCD: 9, mirrorCD: 2.5, clangCD: 0, lit: false, blocked: false, fake: 0,
+      leapT: 0, leapCD: 2 + rand() * 2, empCD: 2, burrowT: 0, burrowCD: 2.5 + rand() * 2, healCD: 1.5, wetT: 0, gluT: 0, healedT: 0, pushN: 0, smokeCD: 5, smokeT: 0, summonCD: 9, mirrorCD: 2.5, clangCD: 0, lit: false, blocked: false, fake: 0,
       disguised: !!def.disguise, seen: false, mark: 0, phase: rand() * 6, x: 0, y: 0, face: 1, curSpeed: 0, age: 0,
     };
     this.placeEnemy(e);
@@ -1289,7 +1875,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
   G.isCamo = function (e) { return (e.def.camo || e.smokeT > 0 || (this.dark && !e.lit)) && !e.seen; };
 
   G.targetable = function (e) {
-    return e.alive && !e.def.innocent && !e.disguised && e.leapT <= 0 && !this.isCamo(e);
+    return e.alive && !e.def.innocent && !e.disguised && e.leapT <= 0 && e.burrowT <= 0 && !this.isCamo(e);
   };
 
   // Distance qu'il reste au voleur pour sortir du musée (plus c'est petit, plus il est dangereux).
@@ -1299,7 +1885,8 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
 
   G.applySlow = function (e, f, dur) {
-    if (e.def.slowImmune || e.leapT > 0) return;
+    if (e.def.slowImmune || e.leapT > 0 || e.burrowT > 0) return;
+    if (e.def.slick) f = Math.min(0.85, f * 1.8);
     if (e.slowT <= 0) e.slowF = 0;
     e.slowF = Math.max(e.slowF, f);
     e.slowT = Math.max(e.slowT, dur);
@@ -1317,26 +1904,27 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (e.def.decoy) { this.shatter(e); return; }
     var d = dmg * (1 + e.mark);
     if (e.def.armor && !pierce) {
-      var left = Math.max(d * 0.25, d - e.def.armor);
+      var left = Math.max(d * 0.25, d - e.def.armor * (1 - this.mods.armorPierce));
       if (d - left > 4 && e.clangCD <= 0) { e.clangCD = 0.7; this.emit('clang', { x: e.x, y: e.y }); }
       d = left;
     }
     e.hp -= d;
-    e.flashT = 0.08;
+    if (d > 2) e.flashT = 0.08; // le rayon continu du Laser ne fait pas clignoter
     if (e.hp <= 0) this.catchEnemy(e);
   };
 
   G.catchEnemy = function (e) {
     e.alive = false;
-    this.coins += e.def.reward;
+    var reward = Math.round(e.def.reward * this.mods.reward);
+    this.coins += reward;
     this.stats.caught++;
-    this.stats.earned += e.def.reward;
+    this.stats.earned += reward;
     if (e.carrying > 0) {
       this.inRoom += e.carrying;
       this.stats.returned += e.carrying;
       this.emit('return', { x: e.x, y: e.y, n: e.carrying });
     }
-    this.emit('catch', { x: e.x, y: e.y, enemy: e.type, reward: e.def.reward, boss: !!e.def.boss, face: e.face });
+    this.emit('catch', { x: e.x, y: e.y, enemy: e.type, reward: reward, boss: !!e.def.boss, face: e.face });
   };
 
   // Un reflet de l'Illusionniste éclate (touché, filmé, ou arrivé au bout du chemin).
@@ -1350,6 +1938,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (e.def.decoy) { this.shatter(e); return; }
     e.dir = -1;
     e.leapT = 0;
+    if (e.burrowT > 0) { e.burrowT = 0; e.burrowCD = 2.5; }
     if (e.def.innocent) {
       e.pauseT = 1.2;
       this.coins += 2;
@@ -1391,6 +1980,9 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (e.netT > 0) e.netT -= dt;
     if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 0; }
     if (e.smokeT > 0) e.smokeT -= dt;
+    if (e.wetT > 0) e.wetT -= dt;
+    if (e.gluT > 0) e.gluT -= dt;
+    if (e.healedT > 0) e.healedT -= dt;
     if (e.clangCD > 0) e.clangCD -= dt;
 
     var sp = e.speed;
@@ -1415,6 +2007,32 @@ img { -webkit-user-drag: none; pointer-events: none; }
           e.stunT = 0; e.slowT = 0; e.slowF = 0;
           this.emit('leap', { x: e.x, y: e.y });
         }
+      }
+    }
+    if (def.burrow) {
+      if (e.burrowT > 0) {
+        e.burrowT -= dt;
+        if (e.burrowT <= 0) { e.burrowCD = 3.2 + rand() * 1.2; this.emit('surface', { x: e.x, y: e.y }); }
+      } else if (!e.grabbing && e.pauseT <= 0 && sp > 0) {
+        e.burrowCD -= dt;
+        if (e.burrowCD <= 0) { e.burrowT = 1.7; e.stunT = 0; e.slowT = 0; e.slowF = 0; this.emit('burrow', { x: e.x, y: e.y }); }
+      }
+    }
+    if (def.heal && !this.demo) {
+      e.healCD -= dt;
+      if (e.healCD <= 0) {
+        e.healCD = 2.6;
+        var healed = 0;
+        for (var h = 0; h < this.enemies.length; h++) {
+          var o = this.enemies[h];
+          if (!o.alive || o.def.innocent || o.def.decoy || o.hp >= o.maxHp || o.healedT > 0) continue;
+          if (dist2(o.x, o.y, e.x, e.y) <= 115 * 115) {
+            o.healedT = 2.6; // les soins de plusieurs Soigneuses ne se cumulent pas
+            o.hp = Math.min(o.maxHp, o.hp + o.maxHp * (o === e ? 0.05 : o.def.boss ? 0.02 : 0.12));
+            healed++;
+          }
+        }
+        if (healed) this.emit('heal', { x: e.x, y: e.y });
       }
     }
     if (def.emp && !this.demo) {
@@ -1504,7 +2122,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       if (!this.targetable(e)) continue;
       if (dist2(t.x, t.y, e.x, e.y) > r2) continue;
       var rem = this.remaining(e);
-      if (preferUnslowed && e.slowT > 0.4 && !e.def.slowImmune) { if (rem < altR) { altR = rem; alt = e; } continue; }
+      if (preferUnslowed && e.gluT > 0.4 && !e.def.slowImmune) { if (rem < altR) { altR = rem; alt = e; } continue; }
       if (rem < bestR) { bestR = rem; best = e; }
     }
     return best || alt;
@@ -1525,6 +2143,24 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var st = this.towerStats(t), def = PT.TOWERS[t.type];
     var rateMul = this.cafeT > 0 ? 1 + PT.POWERS.cafe.boost : 1;
 
+    if (def.aura) {
+      // Arroseur : mouille et ralentit tous les voleurs à portée, par petites giclées
+      t.cd -= dt;
+      var any = null, ar2 = st.range * st.range;
+      for (var ai = 0; ai < this.enemies.length; ai++) {
+        var ae = this.enemies[ai];
+        if (!ae.alive || ae.def.innocent || ae.burrowT > 0 || ae.leapT > 0) continue;
+        if (dist2(t.x, t.y, ae.x, ae.y) <= ar2) {
+          any = ae;
+          if (t.cd <= 0) { ae.wetT = Math.max(ae.wetT, st.wet); this.applySlow(ae, st.slow, 0.5); }
+        }
+      }
+      if (t.cd <= 0) t.cd = 0.25;
+      t.target = any;
+      if (any) { t.fireT = 0.25; t.aim += dt * 5; }
+      return;
+    }
+
     if (def.support) {
       // La caméra suit un voleur visible, sinon elle balaie la salle.
       var seen = null, r2 = st.range * st.range;
@@ -1544,7 +2180,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       if (bt) {
         t.beamOn = true;
         t.aim = Math.atan2(bt.y - 20 - t.y, bt.x - t.x);
-        this.hit(bt, st.dps * rateMul * dt, true);
+        this.hit(bt, st.dps * rateMul * dt * (bt.wetT > 0 ? 1 + 0.6 * this.mods.synergy : 1), true);
       }
       return;
     }
@@ -1561,8 +2197,20 @@ img { -webkit-user-drag: none; pointer-events: none; }
 
     if (def.melee) {
       t.lungeT = 0.25; t.lx = target.x; t.ly = target.y;
-      this.hit(target, st.dmg);
+      // Croc-en-filet : double dégâts sur un voleur pris dans un filet
+      this.hit(target, st.dmg * (target.netT > 0 ? 1 + this.mods.synergy : 1));
       this.emit('bite', { x: target.x, y: target.y });
+      return;
+    }
+    if (def.gust) {
+      // Ventilateur : rafale qui repousse tout le groupe autour de la cible
+      var self = this;
+      this.splashTargets(target.x, target.y, st.splash, function (e) {
+        self.hit(e, st.dmg);
+        if (!e.alive || e.def.heavy || e.def.boss) return;
+        self.push(e, st.push * (e.wetT > 0 ? 1 + self.mods.synergy : 1));
+      });
+      this.emit('gust', { x: t.x, y: t.y - 30, tx: target.x, ty: target.y });
       return;
     }
     var sx = t.x, sy = t.y - 44;
@@ -1588,11 +2236,24 @@ img { -webkit-user-drag: none; pointer-events: none; }
     return d;
   }
 
+  // Repousse un voleur en arrière sur son chemin (sans le faire ressortir ni dépasser le trésor)
+  G.push = function (e, dist) {
+    var L = this.paths[e.path].L, door = this.doorD[e.path];
+    if (e.grabbing || e.pauseT > 0) return;
+    // Chaque rafale porte moins sur un même voleur : il finit par s'accrocher (pas de blocage sans fin)
+    dist *= Math.max(0, 1 - 0.25 * e.pushN);
+    e.pushN++;
+    if (dist <= 0) return;
+    if (e.dir > 0) e.d = Math.max(Math.min(e.d, door), e.d - dist);
+    else e.d = Math.min(L - 4, e.d + dist);
+    this.placeEnemy(e);
+  };
+
   G.splashTargets = function (x, y, r, fn) {
     var r2 = r * r;
     for (var i = 0; i < this.enemies.length; i++) {
       var e = this.enemies[i];
-      if (!e.alive || e.def.innocent || e.disguised || e.leapT > 0) continue;
+      if (!e.alive || e.def.innocent || e.disguised || e.leapT > 0 || e.burrowT > 0) continue;
       if (dist2(x, y, e.x, e.y) <= r2) fn(e);
     }
   };
@@ -1621,14 +2282,14 @@ img { -webkit-user-drag: none; pointer-events: none; }
         if (k >= 1) {
           done = true;
           if (p.kind === 'glu') {
-            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg); self.applySlow(e, p.slow, p.slowDur); });
+            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg); self.applySlow(e, p.slow, p.slowDur); e.gluT = Math.max(e.gluT, p.slowDur); });
             this.puddles.push({ x: p.tx, y: p.ty, r: p.splash * 0.85, slow: p.slow, t: p.puddle, max: p.puddle, seed: rand() * 10 });
             this.emit('splat', { x: p.tx, y: p.ty });
           } else if (p.kind === 'filet') {
             this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg); self.applyStun(e, p.stun, true); });
             this.emit('net', { x: p.tx, y: p.ty, r: p.splash });
           } else if (p.kind === 'boulet') {
-            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg, p.pierce); });
+            this.splashTargets(p.tx, p.ty, p.splash, function (e) { self.hit(e, p.dmg * (e.slowT > 0 ? 1 + 0.35 * self.mods.synergy : 1), p.pierce); });
             this.emit('blast', { x: p.tx, y: p.ty, r: p.splash });
           }
         }
@@ -1646,7 +2307,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       for (var j = 0; j < this.enemies.length; j++) {
         var e = this.enemies[j];
         if (!e.alive || e.def.innocent) continue;
-        if (dist2(p.x, p.y, e.x, e.y) <= r2) this.applySlow(e, p.slow, 0.3);
+        if (dist2(p.x, p.y, e.x, e.y) <= r2) { this.applySlow(e, p.slow, 0.3); e.gluT = Math.max(e.gluT, 0.3); }
       }
     }
   };
@@ -1660,10 +2321,14 @@ img { -webkit-user-drag: none; pointer-events: none; }
     p.cd = def.cd * this.mods.powerCd;
     p.max = p.cd;
     if (id === 'buste') {
-      this.drops.push({ x: x, y: y, t: 0.6, max: 0.6 });
-      this.emit('bustFall', { x: x, y: y });
+      var m = this.mods, r = def.radius * m.bustRadius, dmg = def.dmg * m.bustDmg;
+      var xs = m.bustDouble ? [x - r * 0.75, x + r * 0.75] : [x];
+      for (var b = 0; b < xs.length; b++) {
+        this.drops.push({ x: xs[b], y: y, t: 0.6 + b * 0.12, max: 0.6 + b * 0.12, r: r, dmg: dmg });
+        this.emit('bustFall', { x: xs[b], y: y });
+      }
     } else if (id === 'alarme') {
-      this.freezeT = def.freeze;
+      this.freezeT = def.freeze + this.mods.alarmPlus;
       this.revealT = def.reveal;
       for (var i = 0; i < this.enemies.length; i++) {
         var e = this.enemies[i];
@@ -1672,7 +2337,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       }
       this.emit('alarm', {});
     } else if (id === 'cafe') {
-      this.cafeT = def.dur;
+      this.cafeT = def.dur + this.mods.cafePlus;
       this.emit('cafe', {});
     } else if (id === 'verrou') {
       this.lockT = def.dur;
@@ -1687,8 +2352,8 @@ img { -webkit-user-drag: none; pointer-events: none; }
       var d = this.drops[i];
       d.t -= dt;
       if (d.t <= 0) {
-        this.splashTargets(d.x, d.y, def.radius, function (e) { self.hit(e, def.dmg); self.applyStun(e, def.stun); });
-        this.emit('bustImpact', { x: d.x, y: d.y, r: def.radius });
+        this.splashTargets(d.x, d.y, d.r || def.radius, function (e) { self.hit(e, d.dmg || def.dmg); self.applyStun(e, def.stun); });
+        this.emit('bustImpact', { x: d.x, y: d.y, r: d.r || def.radius });
         this.drops.splice(i, 1);
       }
     }
@@ -1880,6 +2545,11 @@ img { -webkit-user-drag: none; pointer-events: none; }
     illusionniste: { shirt: '#3b2a7a', stars: '#f4d03f', pants: '#2a1d5a', hat: 'wizard', hatColor: '#5b3fa8', wand: true, mustache: '#efeff5', mitten: '#ffffff', lids: true },
     garde: { shirt: '#2f4fa8', pants: '#22346e', hat: 'kepi', hatColor: '#22346e', mustache: '#6b4226', baton: true, belt: true, skin: '#f1c39c', mitten: '#ffffff', brows: true },
   };
+  LOOKS.patineur = { shirt: '#ff7a1a', stripe: '#ffd23f', pants: '#2b5fb3', shorts: true, hat: 'cap', hatColor: '#e2405e', mask: true, skates: true, lids: true, small: true };
+  LOOKS.taupe = { shirt: '#8a5a32', pants: '#8a5a32', hat: 'miner', hatColor: '#f5c518', straps: '#5a3a1e', mitten: '#5a3a1e', glasses: true, dirt: true };
+  LOOKS.soigneuse = { shirt: '#f6f6f2', pants: '#e9e9e2', hat: 'nurse', hatColor: '#ffffff', cross: true, mask: true, mitten: '#9fd3ff', lids: true };
+  LOOKS.demenageur = { shirt: '#f4efe4', pants: '#2f6fb0', straps: '#2f6fb0', hat: 'cap', hatColor: '#e8b84a', mustache: '#3a2418', stubble: true, brows: true, big: true, mitten: '#c9a46a' };
+  LOOKS.chef = { shirt: '#1f2a5a', pants: '#161d40', hat: 'kepi', hatColor: '#161d40', mustache: '#9a9a9a', mitten: '#ffffff', sunglasses: true, megaphone: true, belt: true, skin: '#f1c39c' };
   LOOKS.reflet = LOOKS.illusionniste;
   A.LOOKS = LOOKS;
   // Position des pupilles d'un personnage standard (pour les faire briller dans le noir)
@@ -1940,8 +2610,16 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (L.shorts) { rr(c, -W * 0.44, bot - 2, W * 0.88, 5, 2); fs(c, col(L.pants), lw); }
     line(c, 0.5, bot + 2, 0.5, -2, INK, 1.2);
     var f = [0, 3, 0, -3][step];
-    ell(c, -W * 0.2 - f, -2, W * 0.22, 3.4); fs(c, col(L.shoes || '#2b2724'), lw);
-    ell(c, W * 0.22 + f, -2, W * 0.22, 3.4); fs(c, col(L.shoes || '#2b2724'), lw);
+    if (L.skates) {
+      [-1, 1].forEach(function (sd) {
+        var fx = sd * W * 0.21 + (sd < 0 ? -f : f);
+        circ(c, fx - 3.5, -1.2, 2); fs(c, col('#e2405e'), 1.2); circ(c, fx + 3.5, -1.2, 2); fs(c, col('#e2405e'), 1.2);
+        rr(c, fx - 6, -9, 12, 7, 3); fs(c, col('#f4efe4'), lw);
+      });
+    } else {
+      ell(c, -W * 0.2 - f, -2, W * 0.22, 3.4); fs(c, col(L.shoes || '#2b2724'), lw);
+      ell(c, W * 0.22 + f, -2, W * 0.22, 3.4); fs(c, col(L.shoes || '#2b2724'), lw);
+    }
 
     // Torse en trapèze
     var th = bot - top;
@@ -1984,12 +2662,15 @@ img { -webkit-user-drag: none; pointer-events: none; }
         c.fillStyle = L.vest; c.beginPath(); c.moveTo(-5, top); c.lineTo(6, top); c.lineTo(0.5, top + 13); c.fill();
         c.fillStyle = '#c0392b'; c.beginPath(); c.moveTo(-3.5, top + 1); c.lineTo(4.5, top + 5); c.lineTo(4.5, top + 1); c.lineTo(-3.5, top + 5); c.fill();
       }
+      if (L.straps) { c.fillStyle = L.straps; c.fillRect(-W * 0.32, top, 4, th); c.fillRect(W * 0.32 - 3, top, 4, th); c.fillRect(-W * 0.36, top + th * 0.45, W * 0.72, th * 0.55); }
+      if (L.cross) { c.fillStyle = '#e2342e'; c.fillRect(-2, top + 4, 5, 13); c.fillRect(-5.5, top + 8, 12, 5); }
+      if (L.dirt) { c.fillStyle = 'rgba(60,35,15,0.45)'; [[-6, 6], [5, 13], [-2, 17]].forEach(function (p) { circ(c, p[0], top + p[1], 2.4); c.fill(); }); }
       if (L.belt) { c.fillStyle = '#1d1b26'; c.fillRect(x0, bot - 5, W + 4, 3.5); c.fillStyle = '#c9c9c9'; c.fillRect(-2, bot - 5.5, 5, 4.5); }
       c.restore();
     }
     torso(); fs(c, null, lw);
-    if (!L.plates && !L.flowers && !L.vest && !L.harlequin) line(c, 0.5, top + 2, 0.5, bot - 1, 'rgba(0,0,0,0.3)', 1.2);
-    if (L.badge !== false && type === 'garde') {
+    if (!L.plates && !L.flowers && !L.vest && !L.harlequin && !L.cross && !L.straps) line(c, 0.5, top + 2, 0.5, bot - 1, 'rgba(0,0,0,0.3)', 1.2);
+    if (type === 'garde' || type === 'chef') {
       var rank = o.rank || 0;
       starPath(c, -5, top + 7, 3.8, 1.7); fs(c, col(rank >= 2 ? '#ffd447' : '#d9dde6'), 1.2);
       if (rank >= 2) { circ(c, 7, top + 8, 2.6); fs(c, col('#e74c3c'), 1.2); }
@@ -2023,13 +2704,19 @@ img { -webkit-user-drag: none; pointer-events: none; }
       c.restore();
     });
     if (L.plates) { ell(c, -W * 0.44, top + 3, 7, 5); fs(c, col(L.hatColor), lw); ell(c, W * 0.44, top + 3, 7, 5); fs(c, col(L.hatColor), lw); }
-    if (type === 'garde' && (o.rank || 0) >= 1) {
+    if ((type === 'garde' || type === 'chef') && (o.rank || 0) >= 1) {
       rr(c, -W * 0.56, top - 1, 9, 4.5, 2); fs(c, col('#ffd447'), 1.4); rr(c, W * 0.56 - 9, top - 1, 9, 4.5, 2); fs(c, col('#ffd447'), 1.4);
     }
     if (L.wand) {
       line(c, W * 0.5, top + 14, W * 0.5 + 10, top - 2, col(INK), 3);
       line(c, W * 0.5 + 8, top + 1, W * 0.5 + 10, top - 2, col('#ffffff'), 2.4);
       if (!flash) { starPath(c, W * 0.5 + 11, top - 4, Math.sin(t * 9) > 0 ? 5.5 : 4, 1.7, 4); fs(c, '#fff36b', 1.2); }
+    }
+    if (L.megaphone) {
+      c.save(); c.translate(W * 0.5 + 3, top + 10); c.rotate(-0.5);
+      c.beginPath(); c.moveTo(0, -3); c.lineTo(13, -8); c.lineTo(13, 8); c.lineTo(0, 3); c.closePath(); fs(c, col('#e2405e'), lw);
+      ell(c, 13, 0, 2.4, 8); fs(c, col('#f5c518'), 1.2);
+      c.restore();
     }
     if (L.cane) { line(c, W * 0.5 + 2, top + 14, W * 0.5 + 8, -1, col('#1b1b22'), 3); circ(c, W * 0.5 + 2, top + 13, 3); fs(c, col('#f2c14e'), 1.3); }
 
@@ -2052,7 +2739,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       if (!flash) { c.fillStyle = 'rgba(255,255,255,0.55)'; c.fillRect(hx - R + 3, hy - R * 0.7, 3, R * 0.9); }
     } else {
       head(); c.fillStyle = col(skin); c.fill();
-      if (L.hat === 'beanie' || L.hat === 'cap') capTop(L.hatColor, hy - R * 0.4);
+      if (L.hat === 'beanie' || L.hat === 'cap' || L.hat === 'miner') capTop(L.hatColor, hy - R * 0.4);
       if (L.hat === 'hood') capTop(L.hatColor, hy - R * 0.5);
       if (L.stubble && !flash) {
         c.save(); head(); c.clip(); c.fillStyle = 'rgba(40,30,30,0.18)'; ell(c, hx + 1, hy + R * 0.75, R * 0.85, R * 0.45); c.fill(); c.restore();
@@ -2142,6 +2829,13 @@ img { -webkit-user-drag: none; pointer-events: none; }
       ell(c, hx, hy - R * 0.72, R + 3, 3.6); fs(c, col(L.hatColor), lw);
       rr(c, hx - 9, hy - R * 0.72 - 18, 18, 18, 2); fs(c, col(L.hatColor), lw);
       c.fillStyle = col('#6b2d8f'); c.fillRect(hx - 9, hy - R * 0.72 - 6, 18, 3.5);
+    } else if (L.hat === 'miner') {
+      rr(c, hx - R - 2, hy - R * 0.48, R * 2 + 4, 4.5, 2); fs(c, col(shade(L.hatColor, -0.15)), lw);
+      rr(c, hx + R * 0.35, crown + 2, 8, 7, 2); fs(c, col('#7a7a7a'), 1.2);
+      circ(c, hx + R * 0.35 + 6, crown + 5.5, 3); fs(c, col('#fff6b0'), 1.2);
+    } else if (L.hat === 'nurse') {
+      rr(c, hx - 9, crown - 6, 18, 9, 2); fs(c, col('#ffffff'), lw);
+      c.fillStyle = col('#e2342e'); c.fillRect(hx - 1.5, crown - 5, 3, 7); c.fillRect(hx - 3.5, crown - 3, 7, 3);
     } else if (L.hat === 'kepi') {
       rr(c, hx - 12, crown - 5, 24, 11, 3); fs(c, col(L.hatColor), lw);
       c.fillStyle = col((o.rank || 0) >= 2 ? '#ffd447' : '#d9dde6'); c.fillRect(hx - 12, crown + 2, 24, 2.4);
@@ -2178,6 +2872,9 @@ img { -webkit-user-drag: none; pointer-events: none; }
     else if (type === 'filet') drawNetGun(c, t, lv, time);
     else if (type === 'laser') drawLaser(c, t, lv, time);
     else if (type === 'canon') drawCanon(c, t, lv, time);
+    else if (type === 'ventilo') drawFan(c, t, lv, time);
+    else if (type === 'arroseur') drawSprinkler(c, t, lv, time);
+    else if (type === 'chef') drawChief(c, t, lv, time);
     c.restore();
     if (t.disabled) {
       c.save();
@@ -2201,6 +2898,60 @@ img { -webkit-user-drag: none; pointer-events: none; }
       armRot: throwing ? -2.2 + (0.25 - t.fireT) * 8 : null,
     });
     c.restore();
+  }
+
+  // Ventilateur sur pied : les pales tournent par crans, plus vite quand il souffle
+  function drawFan(c, t, lv, time) {
+    var face = Math.cos(t.aim || 0) < 0 ? -1 : 1, blow = t.fireT > 0;
+    rr(c, -3, -40, 6, 40, 2); fs(c, '#8a9099', 2);
+    ell(c, 0, -2, 14, 5); fs(c, '#6f7680', 2);
+    c.save(); c.translate(0, -50); c.scale(face, 1);
+    circ(c, 0, 0, 22); fs(c, lv >= 2 ? '#2b5f73' : '#5fb8c9', 2.2);
+    var a = Math.floor(time * (blow ? 18 : 6)) * (Math.PI / 6);
+    for (var i = 0; i < 3; i++) {
+      c.save(); c.rotate(a + i * Math.PI * 2 / 3);
+      ell(c, 0, -10, 6, 10); fs(c, '#f4efe4', 1.6);
+      c.restore();
+    }
+    circ(c, 0, 0, 4.5); fs(c, lv >= 1 ? '#ffd447' : '#8a9099', 1.6);
+    c.strokeStyle = 'rgba(42,28,22,0.55)'; c.lineWidth = 1.1;
+    for (var k = 0; k < 6; k++) { var ka = k * Math.PI / 3; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(ka) * 22, Math.sin(ka) * 22); c.stroke(); }
+    circ(c, 0, 0, 22); fs(c, null, 2.2);
+    c.restore();
+  }
+
+  // Arroseur : une borne rouge avec une buse qui tourne et des jets d'eau
+  function drawSprinkler(c, t, lv, time) {
+    rr(c, -13, -34, 26, 34, 7); fs(c, lv >= 2 ? '#b8283a' : '#d8402f');
+    c.fillStyle = '#f4efe4'; c.fillRect(-13, -26, 26, 4);
+    rr(c, -17, -20, 6, 9, 2); fs(c, '#c9c9c9', 1.6); rr(c, 11, -20, 6, 9, 2); fs(c, '#c9c9c9', 1.6);
+    ell(c, 0, -36, 11, 4); fs(c, '#9a3a2a', 1.8);
+    var spin = Math.floor((t.aim || 0) * 2) * 0.6;
+    c.save(); c.translate(0, -42); c.rotate(spin);
+    rr(c, -14, -2.5, 28, 5, 2.5); fs(c, '#c9c9c9', 1.6);
+    c.restore();
+    if (t.fireT > 0) {
+      c.strokeStyle = 'rgba(90,170,255,0.85)'; c.lineWidth = 2.4; c.lineCap = 'round'; c.setLineDash([3, 5]);
+      for (var j = 0; j < 4; j++) {
+        var ja = spin + j * Math.PI / 2, dx = Math.cos(ja), dy = Math.sin(ja) * 0.5;
+        c.beginPath(); c.moveTo(dx * 14, -42 + dy * 14); c.quadraticCurveTo(dx * 40, -62 + dy * 30, dx * 62, -10 + dy * 40); c.stroke();
+      }
+      c.setLineDash([]);
+    }
+    if (lv >= 1) { circ(c, 0, -14, 4); fs(c, '#ffd447', 1.4); }
+  }
+
+  // Chef de la Sécurité : il commande au mégaphone
+  function drawChief(c, t, lv, time) {
+    var talk = Math.sin(time * 1.3) > 0.6;
+    c.save();
+    c.translate(0, talk ? -1 : 0);
+    A.person(c, 'chef', { face: t.face || 1, moving: false, t: time, rank: lv + 1 });
+    c.restore();
+    if (talk) {
+      c.font = '12px ' + A.FONT; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = INK; c.fillStyle = '#fff';
+      c.strokeText('!', 30, -70); c.fillText('!', 30, -70);
+    }
   }
 
   function drawGlue(c, t, lv, time) {
@@ -2445,6 +3196,44 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
 
   A.treasureItem = function (c, kind, time) {
+    // Trésors des salles 11 à 50
+    if (kind === 'diamant') {
+      c.beginPath(); c.moveTo(-18, -14); c.lineTo(-10, -24); c.lineTo(10, -24); c.lineTo(18, -14); c.lineTo(0, 8); c.closePath(); fs(c, '#9fe7ff');
+      c.beginPath(); c.moveTo(-18, -14); c.lineTo(18, -14); c.moveTo(-6, -24); c.lineTo(-8, -14); c.lineTo(0, 8); c.lineTo(8, -14); c.lineTo(6, -24); c.lineWidth = 1.4; c.strokeStyle = 'rgba(42,28,22,0.6)'; c.stroke();
+      if (Math.sin(time * 4) > 0.3) { starPath(c, 12, -22, 5, 1.5, 4); c.fillStyle = '#fff'; c.fill(); }
+      return;
+    }
+    if (kind === 'vase') {
+      c.beginPath(); c.moveTo(-6, -34); c.lineTo(6, -34); c.lineTo(5, -28); c.quadraticCurveTo(18, -20, 15, -4); c.quadraticCurveTo(12, 8, 0, 8); c.quadraticCurveTo(-12, 8, -15, -4); c.quadraticCurveTo(-18, -20, -5, -28); c.closePath();
+      fs(c, '#2f6fb0');
+      c.fillStyle = '#f4efe4'; c.fillRect(-14, -16, 28, 5); c.fillStyle = '#f5c518'; circ(c, 0, -2, 4); c.fill();
+      return;
+    }
+    if (kind === 'globe') {
+      rr(c, -3, -2, 6, 10, 2); fs(c, '#c9952e', 1.6); ell(c, 0, 8, 12, 3.5); fs(c, '#c9952e', 1.6);
+      circ(c, 0, -16, 15); fs(c, '#4fa3d8');
+      c.fillStyle = '#6cbf3a'; c.beginPath(); c.moveTo(-9, -24); c.quadraticCurveTo(-2, -28, 0, -20); c.quadraticCurveTo(-4, -12, -10, -14); c.fill();
+      c.beginPath(); c.moveTo(4, -12); c.quadraticCurveTo(12, -16, 10, -6); c.quadraticCurveTo(4, -4, 4, -12); c.fill();
+      circ(c, 0, -16, 15); fs(c, null, 2);
+      c.beginPath(); c.arc(0, -16, 19, -2.4, 0.8); c.lineWidth = 2.4; c.strokeStyle = '#c9952e'; c.stroke();
+      return;
+    }
+    if (kind === 'trophee') {
+      c.beginPath(); c.moveTo(-14, -30); c.lineTo(14, -30); c.quadraticCurveTo(14, -8, 0, -6); c.quadraticCurveTo(-14, -8, -14, -30); c.closePath(); fs(c, '#f2c230');
+      c.beginPath(); c.arc(-14, -22, 6, Math.PI * 0.5, Math.PI * 1.5); c.lineWidth = 3; c.strokeStyle = INK; c.stroke();
+      c.beginPath(); c.arc(14, -22, 6, -Math.PI * 0.5, Math.PI * 0.5); c.stroke();
+      rr(c, -3, -7, 6, 8, 1); fs(c, '#e0a91c', 1.6); rr(c, -10, 1, 20, 7, 2); fs(c, '#7a4b2a', 1.6);
+      starPath(c, 0, -20, 5, 2.2); c.fillStyle = '#fff6b0'; c.fill();
+      return;
+    }
+    if (kind === 'fusee') {
+      c.beginPath(); c.moveTo(0, -38); c.quadraticCurveTo(11, -26, 9, 0); c.lineTo(-9, 0); c.quadraticCurveTo(-11, -26, 0, -38); c.closePath(); fs(c, '#f4efe4');
+      c.beginPath(); c.moveTo(-9, -6); c.lineTo(-16, 6); c.lineTo(-9, 2); c.closePath(); fs(c, '#e2405e', 1.6);
+      c.beginPath(); c.moveTo(9, -6); c.lineTo(16, 6); c.lineTo(9, 2); c.closePath(); fs(c, '#e2405e', 1.6);
+      circ(c, 0, -20, 4.5); fs(c, '#4fa3d8', 1.6);
+      if (Math.floor(time * 8) % 2) { c.beginPath(); c.moveTo(-5, 1); c.lineTo(0, 12); c.lineTo(5, 1); c.closePath(); fs(c, '#ffb347', 1.2); }
+      return;
+    }
     if (kind === 'poule') {
       ell(c, -16, 4, 6, 7.5); fs(c, '#ffe27a', 2); ell(c, 15, 5, 5.5, 7); fs(c, '#ffe27a', 2);
       ell(c, 0, -6, 15, 12); fs(c, '#f2c230');
@@ -3619,8 +4408,12 @@ img { -webkit-user-drag: none; pointer-events: none; }
     // Visée du pouvoir
     if (ui && ui.aim) {
       c.save(); c.setLineDash([8, 8]); c.lineDashOffset = -time * 30;
-      circ(c, ui.aim.x, ui.aim.y, PT.POWERS.buste.radius); c.fillStyle = 'rgba(255,212,71,0.15)'; c.fill();
-      c.lineWidth = 3; c.strokeStyle = '#ffd447'; c.stroke(); c.restore();
+      var br = PT.POWERS.buste.radius * game.mods.bustRadius;
+      (game.mods.bustDouble ? [-br * 0.75, br * 0.75] : [0]).forEach(function (ox) {
+        circ(c, ui.aim.x + ox, ui.aim.y, br); c.fillStyle = 'rgba(255,212,71,0.15)'; c.fill();
+        c.lineWidth = 3; c.strokeStyle = '#ffd447'; c.stroke();
+      });
+      c.restore();
     }
 
     // Écran : flash rouge, alarme, café
@@ -3754,7 +4547,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var k = 1 - d.t / d.max;
     c.save();
     A.shadow(c, d.x, d.y, 30 * k + 8, 10 * k + 3, 0.15 + 0.25 * k);
-    circ(c, d.x, d.y, PT.POWERS.buste.radius); c.setLineDash([6, 6]); c.lineWidth = 2.4; c.strokeStyle = 'rgba(255,80,60,0.8)'; c.stroke();
+    circ(c, d.x, d.y, d.r || PT.POWERS.buste.radius); c.setLineDash([6, 6]); c.lineWidth = 2.4; c.strokeStyle = 'rgba(255,80,60,0.8)'; c.stroke();
     c.translate(d.x, d.y - (1 - k * k) * 420);
     c.rotate((1 - k) * 0.6);
     c.scale(1.4, 1.4);
@@ -3768,6 +4561,9 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (t.builtT < 0.3) { var k = 1 + Math.sin(t.builtT / 0.3 * Math.PI) * 0.18; c.scale(k, 1 / k); }
     if (ui && ui.selectedTower === t) { ell(c, 0, 6, 44, 18); c.fillStyle = 'rgba(255,212,71,0.45)'; c.fill(); }
     A.tower(c, t.type, { level: t.level, aim: t.aim, face: t.face, fireT: t.fireT, lungeT: t.lungeT, lx: t.lx, ly: t.ly, x: t.x, y: t.y, disabled: t.disabledT > 0, time: time + t.id, beamOn: t.beamOn });
+    if (t.type !== 'chef' && game.towerStats(t).chefBuff > 0) {
+      A.starPath(c, 24, -16 - (Math.floor(time * 3 + t.id) % 2) * 2, 6, 2.6); A.fs(c, '#ffd447', 1.6);
+    }
     if (game.cafeT > 0) {
       c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 2.4; c.lineCap = 'round';
       for (var i = 0; i < 2; i++) {
@@ -3781,6 +4577,15 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
 
   R.drawEnemy = function (c, game, e, time) {
+    if (e.burrowT > 0) {
+      // La Taupe creuse : seul un monticule de terre avance sous le tapis
+      c.save(); c.translate(e.x, e.y);
+      var bump = Math.floor(time * 8 + e.id) % 2 ? 2 : 0;
+      A.ell(c, 0, -4 - bump, 17, 9 + bump); A.fs(c, '#7a5232', 2);
+      c.fillStyle = '#5a3a1e'; [[-8, -8], [6, -11], [1, -4]].forEach(function (p) { A.circ(c, p[0], p[1] - bump, 2.2); c.fill(); });
+      c.restore();
+      return;
+    }
     var camo = game.isCamo(e);
     var look = e.type === 'faussaire' && e.disguised ? 'touriste' : e.type;
     var decoy = !!e.def.decoy;
@@ -3826,6 +4631,13 @@ img { -webkit-user-drag: none; pointer-events: none; }
     }
     c.globalAlpha = 1;
     var top = -62 * size - (e.def.boss ? 16 : 0);
+    if (e.wetT > 0) {
+      c.fillStyle = 'rgba(90,170,255,0.9)';
+      for (var wd = 0; wd < 3; wd++) {
+        var wp = (time * 2 + wd * 0.33 + e.id * 0.1) % 1;
+        A.ell(c, (wd - 1) * 10 * size, -30 * size + wp * 26, 1.8, 2.8); c.fill();
+      }
+    }
     if (e.netT > 0) {
       c.save(); circ(c, 0, -28 * size, 26 * size); c.clip();
       c.strokeStyle = '#a9824a'; c.lineWidth = 2;
@@ -3869,6 +4681,17 @@ img { -webkit-user-drag: none; pointer-events: none; }
         if (ev.boss) this.shake = 18;
         break;
       case 'hit': this.burst(x, y, 3, '#fff4b0', 0.6); break;
+      case 'gust':
+        this.addFx({ kind: 'gust', x: x, y: y, tx: ev.tx, ty: ev.ty, life: 0.45 });
+        this.addFx({ kind: 'comic', x: ev.tx, y: ev.ty - 70, text: 'FIOUU !', life: 0.6 });
+        break;
+      case 'heal':
+        for (i = 0; i < 5; i++) this.addFx({ kind: 'text', x: x + (Math.random() - 0.5) * 70, y: y - 30 - Math.random() * 40, text: '+', color: '#5fd35f', size: 18, life: 0.8 });
+        this.addFx({ kind: 'ring', x: x, y: y - 20, r0: 20, r1: 115, color: '#5fd35f', life: 0.5 });
+        break;
+      case 'burrow': this.addFx({ kind: 'poof', x: x, y: y - 6, r: 18, life: 0.4, grey: true }); this.addFx({ kind: 'comic', x: x, y: y - 60, text: 'GRAT GRAT', life: 0.6 }); break;
+      case 'surface': this.addFx({ kind: 'poof', x: x, y: y - 6, r: 22, life: 0.4, grey: true }); break;
+      case 'interest': this.addFx({ kind: 'text', x: W / 2, y: 200, text: 'Intérêts +' + ev.value, color: '#ffd447', size: 22, life: 1.2 }); break;
       case 'bite': this.addFx({ kind: 'text', x: x, y: y - 50, text: 'CRAC', color: '#fff', size: 15, life: 0.5 }); this.burst(x, y - 20, 4, '#fff'); break;
       case 'splat': this.burst(x, y, 7, '#7ed957'); break;
       case 'net': this.decals.push({ x: x, y: y, r: ev.r, t: 1.4 }); this.addFx({ kind: 'ring', x: x, y: y, r0: 10, r1: ev.r, color: '#c8a46a', life: 0.35 }); break;
@@ -3991,6 +4814,14 @@ img { -webkit-user-drag: none; pointer-events: none; }
         c.globalAlpha = 1 - k;
         if (f.star) { A.starPath(c, f.x, f.y, 5, 2.2); c.fillStyle = f.color; c.fill(); }
         else { circ(c, f.x, f.y, 3); c.fillStyle = f.color; c.fill(); }
+      } else if (f.kind === 'gust') {
+        // Rafale : traits de vent du ventilateur vers la cible
+        c.save(); c.globalAlpha = 1 - k; c.strokeStyle = '#e8f6ff'; c.lineWidth = 3; c.lineCap = 'round';
+        for (var gi = -1; gi <= 1; gi++) {
+          var gx = f.x + (f.tx - f.x) * (0.25 + k * 0.6), gy = f.y + (f.ty - 30 - f.y) * (0.25 + k * 0.6) + gi * 12;
+          c.beginPath(); c.moveTo(gx - (f.tx - f.x) * 0.18, gy - (f.ty - f.y) * 0.18); c.quadraticCurveTo(gx, gy - 6, gx + 10, gy + 2); c.stroke();
+        }
+        c.restore();
       } else if (f.kind === 'poof') {
         c.globalAlpha = (1 - k) * 0.9;
         for (var q = 0; q < 5; q++) {
@@ -4169,6 +5000,9 @@ img { -webkit-user-drag: none; pointer-events: none; }
       case 'win': [60, 64, 67, 72, 76, 79, 84].forEach(function (n, i) { tone(midi(n), i === 6 ? 0.6 : 0.16, { type: 'triangle', vol: 0.22, at: t + i * 0.09 }); }); break;
       case 'lose': [67, 66, 65, 64].forEach(function (n, i) { tone(midi(n), i === 3 ? 0.8 : 0.3, { type: 'sawtooth', vol: 0.16, filter: 1100, vib: 5, at: t + i * 0.3 }); }); break;
       case 'unlock': [72, 76, 79, 84, 88].forEach(function (n, i) { tone(midi(n), 0.2, { type: 'sine', vol: 0.2, at: t + i * 0.07 }); }); break;
+      case 'gust': noise(0.4, { freq: 400, slide: 1800, vol: 0.2, q: 0.6 }); break;
+      case 'heal': [880, 1108, 1318].forEach(function (f, i) { tone(f, 0.12, { type: 'sine', vol: 0.12, at: t + i * 0.06 }); }); break;
+      case 'burrow': noise(0.3, { freq: 250, slide: 120, vol: 0.25, ftype: 'lowpass' }); break;
       case 'cannon': tone(70, 0.35, { type: 'sine', vol: 0.5, slide: 35 }); noise(0.3, { freq: 500, slide: 120, vol: 0.35, ftype: 'lowpass' }); break;
       case 'blast': noise(0.28, { freq: 700, slide: 150, vol: 0.3, ftype: 'lowpass' }); tone(90, 0.22, { type: 'sine', vol: 0.3, slide: 45 }); break;
       case 'clang': tone(1850 + Math.random() * 300, 0.16, { type: 'triangle', vol: 0.12 }); tone(2790, 0.1, { type: 'sine', vol: 0.06 }); break;
@@ -4289,6 +5123,20 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var a = App();
     return '<span class="pill star-count"><img alt="" src="' + A.starIcon(true) + '"><span>' + a.starsFree() + '</span></span>';
   }
+  // Vrai si au moins un talent ouvert est achetable : on le signale par une pastille
+  function canBuy() {
+    var a = App(), free = a.starsFree();
+    return PT.UPGRADES.some(function (u) {
+      var r = a.save.upgrades[u.id] || 0;
+      return r < u.costs.length && u.costs[r] <= free && PT.upgradeOpen(u.id, a.save.upgrades);
+    });
+  }
+  function shopBtn(id, back) {
+    var b = el('button', 'btn small ghost shop-btn' + (canBuy() ? ' notify' : ''), '<img alt="" src="' + A.starIcon(true) + '">Atelier');
+    b.id = id;
+    click(b, function () { UI.showAtelier(back); });
+    return b;
+  }
   function backBtn(fn) { var b = el('button', 'btn-round', ICON_BACK); b.setAttribute('aria-label', 'Retour'); click(b, fn); return b; }
 
   /* ---------- Titre ---------- */
@@ -4301,7 +5149,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       '<div class="logo"><span class="l1">PAS TOUCHE <em>!</em></span><span class="l2">Défense du Musée</span></div>' +
       '<div class="title-buttons">' +
       '<button class="btn big" id="t-play">Jouer</button>' +
-      '<div class="row"><button class="btn small ghost" id="t-shop"><img alt="" src="' + A.starIcon(true) + '">Atelier</button>' +
+      '<div class="row"><button class="btn small ghost' + (canBuy() ? ' notify' : '') + '" id="t-shop"><img alt="" src="' + A.starIcon(true) + '">Atelier</button>' +
       '<button class="btn small ghost" id="t-sus">Fichier des suspects</button>' +
       '<button class="btn small ghost" id="t-opt">Options</button></div></div>' +
       '<div class="credit">Le Grand Concours des cambrioleurs a commencé. Défendez la collection !</div>';
@@ -4344,16 +5192,38 @@ img { -webkit-user-drag: none; pointer-events: none; }
   /* ---------- Choix des salles ---------- */
   var thumbs = {};
   function thumb(lv) { if (!thumbs[lv.id]) thumbs[lv.id] = PT.Renderer.thumbnail(lv, 320); return thumbs[lv.id]; }
+  var WINGS = ['Les débuts', 'Les grandes galeries', 'Les trésors du monde', 'Les réserves secrètes', 'Le Grand Final'];
+  UI.wing = null;
   UI.showLevels = function () {
     var a = App();
     var s = UI.screen('scr-levels');
     var head = el('div', 'screen-head');
     head.appendChild(backBtn(UI.showTitle));
     head.appendChild(el('h2', '', 'Choisissez une salle'));
-    head.appendChild(el('div', '', starsBadge()));
+    var right = el('div', 'head-right', starsBadge());
+    right.appendChild(shopBtn('l-shop', UI.showLevels));
+    head.appendChild(right);
     s.appendChild(head);
+    // Les salles sont rangées par ailes de 10 ; on ouvre celle de la dernière salle débloquée
+    var nWings = Math.ceil(PT.LEVELS.length / 10), lastOpen = 0;
+    PT.LEVELS.forEach(function (lv, idx) { if (a.isUnlocked(idx)) lastOpen = idx; });
+    if (UI.wing == null || UI.wing >= nWings || !a.isUnlocked(UI.wing * 10)) UI.wing = Math.floor(lastOpen / 10);
+    var tabs = el('div', 'wings');
+    for (var w = 0; w < nWings; w++) {
+      var got = 0, open = a.isUnlocked(w * 10);
+      PT.LEVELS.slice(w * 10, w * 10 + 10).forEach(function (lv) { got += a.save.stars[lv.id] || 0; });
+      var tb = el('button', 'wing' + (w === UI.wing ? ' on' : '') + (open ? '' : ' locked'),
+        '<small>Aile ' + (w + 1) + '</small>' + esc(WINGS[w] || '') + '<span>' + got + '/' + Math.min(10, PT.LEVELS.length - w * 10) * 3 + ' ★</span>');
+      (function (w, open) {
+        if (open) click(tb, function () { UI.wing = w; UI.showLevels(); });
+        else tb.addEventListener('click', function () { PT.Audio.play('error'); UI.toast('Aile fermée', 'Terminez la salle ' + (w * 10) + ' pour l’ouvrir'); });
+      })(w, open);
+      tabs.appendChild(tb);
+    }
+    s.appendChild(tabs);
     var list = el('div', 'levels');
     PT.LEVELS.forEach(function (lv, idx) {
+      if (Math.floor(idx / 10) !== UI.wing) return;
       var unlocked = a.isUnlocked(idx), stars = a.save.stars[lv.id] || 0;
       var b = el('button', 'lvl' + (unlocked ? '' : ' locked'));
       var st = '';
@@ -4366,7 +5236,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       list.appendChild(b);
     });
     s.appendChild(list);
-    var more = el('p', 'credit', 'Un casse tous les 5 niveaux · D’autres salles arrivent bientôt');
+    var more = el('p', 'credit', 'Un casse tous les 5 niveaux · Le Gentleman vous attend en salle ' + PT.LEVELS.length);
     s.appendChild(more);
     // Faire défiler jusqu'à la dernière salle ouverte
     setTimeout(function () {
@@ -4475,7 +5345,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       (info.gained > 0 ? '<p><b>+' + info.gained + ' étoile' + (info.gained > 1 ? 's' : '') + '</b> à dépenser à l’Atelier.</p>' : '') +
       (unl ? '<div class="eyebrow">Débloqué</div><div class="unlocks">' + unl + '</div>' : '') +
       '<div class="quote"><img alt="" src="' + A.portrait('gentleman') + '"><p>« ' + esc(lv.outro) + ' »</p></div>' +
-      '<div class="actions"><button class="btn ghost small" id="w-menu">Salles</button><button class="btn ghost small" id="w-shop">Atelier</button><button class="btn ghost small" id="w-retry">Rejouer</button>' +
+      '<div class="actions"><button class="btn ghost small" id="w-menu">Salles</button><button class="btn ghost small' + (canBuy() ? ' notify' : '') + '" id="w-shop">Atelier</button><button class="btn ghost small" id="w-retry">Rejouer</button>' +
       (next ? '<button class="btn green" id="w-next">Salle suivante</button>' : '') + '</div></div>';
     for (var j = 0; j < info.stars; j++) setTimeout(function () { PT.Audio.play('star'); }, 300 + j * 300);
     click($('w-menu'), function () { a.quitToLevels(); });
@@ -4514,7 +5384,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     click($('l-retry'), function () { a.startLevel(a.levelIdx); });
   };
 
-  /* ---------- Atelier ---------- */
+  /* ---------- Atelier : arbre de talents ---------- */
   UI.showAtelier = function (back, confirmReset) {
     var a = App();
     var s = UI.screen('scr-atelier');
@@ -4525,14 +5395,23 @@ img { -webkit-user-drag: none; pointer-events: none; }
     s.appendChild(head);
     var f = el('div', 'frame shop');
     f.style.marginTop = 'calc(var(--u) * 56)';
-    var html = '<p>Gagnez des étoiles en protégeant les salles (jusqu’à 3 par salle), puis investissez-les ici. Les améliorations sont permanentes.</p><div class="cards">';
-    PT.UPGRADES.forEach(function (u) {
-      var r = a.save.upgrades[u.id] || 0, max = u.costs.length, cost = u.costs[r];
-      var pips = '';
-      for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
-      html += '<div class="upg"><b>' + esc(u.name) + '</b><small>' + esc(u.desc(Math.max(1, r < max ? r + 1 : r))) + (r > 0 && r < max ? ' (actuel : ' + esc(u.desc(r)) + ')' : '') + '</small>' +
-        '<div class="pips">' + pips + '</div>' +
-        (r < max ? '<button class="btn small" data-up="' + u.id + '"' + (a.starsFree() < cost ? ' disabled' : '') + '><img alt="" src="' + A.starIcon(true) + '">' + cost + '</button>' : '<span class="eyebrow">Maximum</span>') + '</div>';
+    var html = '<p>Gagnez jusqu’à 3 étoiles par salle et investissez-les dans vos talents. Dans chaque branche, un talent s’ouvre dès que celui du dessus a au moins un rang.</p><div class="tree">';
+    PT.BRANCHES.forEach(function (br) {
+      html += '<div class="branch" style="--bc:' + br.color + '"><h3>' + esc(br.name) + '</h3>';
+      PT.UPGRADES.filter(function (u) { return u.branch === br.id; }).forEach(function (u, i, list) {
+        var r = a.save.upgrades[u.id] || 0, max = u.costs.length, cost = u.costs[r];
+        var open = PT.upgradeOpen(u.id, a.save.upgrades);
+        var pips = '';
+        for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
+        var state = r >= max ? 'done' : !open ? 'locked' : a.starsFree() >= cost ? 'buy' : 'poor';
+        html += '<div class="node ' + state + '"><b>' + esc(u.name) + '</b><small>' + esc(u.desc(Math.max(1, r < max ? r + 1 : r))) + '</small>' +
+          (r > 0 && r < max ? '<small class="now">Actuel : ' + esc(u.desc(r)) + '</small>' : '') +
+          '<div class="pips">' + pips + '</div>' +
+          (r >= max ? '<span class="eyebrow">Maximum</span>' :
+            !open ? '<span class="eyebrow">Débloquez « ' + esc(list[i - 1].name) + ' »</span>' :
+            '<button class="btn small" data-up="' + u.id + '"' + (a.starsFree() < cost ? ' disabled' : '') + '><img alt="" src="' + A.starIcon(true) + '">' + cost + '</button>') + '</div>';
+      });
+      html += '</div>';
     });
     html += '</div><div class="actions">' + (confirmReset ? '<span class="confirm-line">Rembourser toutes les étoiles dépensées ?</span><button class="btn small ghost" id="a-no">Non</button><button class="btn small red" id="a-yes">Oui, rembourser</button>' : '<button class="btn small ghost" id="a-reset">Rembourser mes étoiles</button>') + '</div>';
     f.innerHTML = html;
@@ -4548,7 +5427,6 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if ($('a-yes')) click($('a-yes'), function () { a.save.upgrades = {}; a.persist(); UI.showAtelier(back); });
   };
 
-  /* ---------- Fichier des suspects ---------- */
   UI.showSuspects = function (back) {
     var a = App();
     var s = UI.screen('scr-suspects');
@@ -4577,6 +5455,14 @@ img { -webkit-user-drag: none; pointer-events: none; }
       var d = PT.POWERS[p];
       if (d.unlock <= reach) html += card(A.powerIcon(p), d.name, d.desc + ' Recharge : ' + d.cd + ' s.');
       else html += '<div class="card locked"><img alt="" src="' + A.powerIcon(p) + '" style="filter:grayscale(1)"><div><b>' + esc(d.name) + '</b><small>Débloqué à la salle ' + d.unlock + '.</small></div></div>';
+    });
+    html += '</div><h3>Synergies</h3><div class="cards">';
+    // Une synergie s'affiche dès que toutes ses défenses sont débloquées
+    PT.SYNERGIES.forEach(function (sy) {
+      var open = sy.towers.every(function (t) { return PT.TOWERS[t].unlock <= reach; });
+      var icon = A.towerIcon(sy.towers[sy.towers.length - 1], 1);
+      if (open) html += card(icon, sy.name, sy.desc + ' (' + sy.towers.map(function (t) { return PT.TOWERS[t].name; }).join(' + ') + ')');
+      else html += '<div class="card locked"><img alt="" src="' + icon + '" style="filter:grayscale(1)"><div><b>' + esc(sy.name) + '</b><small>Débloquez d’abord : ' + esc(sy.towers.map(function (t) { return PT.TOWERS[t].name; }).join(' + ')) + '.</small></div></div>';
     });
     html += '</div>';
     f.innerHTML = html;
@@ -4716,7 +5602,21 @@ img { -webkit-user-drag: none; pointer-events: none; }
     $('taunt').addEventListener('click', function (ev) { ev.stopPropagation(); $('taunt').hidden = true; });
   });
 
-  UI.showTip = function (html) { var t = $('tip'); t.innerHTML = html; t.hidden = false; };
+  // Quand un menu radial est ouvert, l'infobulle se place du côté opposé pour ne pas le cacher
+  UI.showTip = function (html) {
+    var t = $('tip'); t.innerHTML = html; t.hidden = false;
+    t.style.left = ''; t.style.top = ''; t.style.bottom = '';
+    var cx = UI.radialCx, cy = UI.radialCy;
+    if (cx == null) return;
+    // L'infobulle se place à côté du menu radial s'il y a la place, sinon au-dessus ou en dessous
+    var tw = t.offsetWidth || 300, vw = window.innerWidth, vh = window.innerHeight, rad = (UI.radialR || 90) + 40;
+    var right = cx + rad + tw + 8 <= vw, left = cx - rad - tw - 8 >= 0;
+    if (right || left) {
+      t.style.left = (right && (cx < vw / 2 || !left) ? cx + rad + tw / 2 : cx - rad - tw / 2) + 'px';
+    } else if (cy < vh / 2) {
+      t.style.top = 'auto'; t.style.bottom = 'calc(var(--u) * 100)';
+    }
+  };
   UI.hideTip = function () { $('tip').hidden = true; };
 
   /* ================= Menu radial ================= */
@@ -4733,15 +5633,25 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (st.slow != null) f('Ralentit', st.slow, next && next.slow, ' %', 100);
     if (st.stun != null) f('Immobilise', st.stun, next && next.stun, ' s');
     if (st.mark != null) f('Bonus dégâts', st.mark, next && next.mark, ' %', 100);
+    if (st.push != null) f('Recul', st.push, next && next.push);
+    if (st.wet != null) f('Mouille', st.wet, next && next.wet, ' s');
+    if (st.buff != null && d.commander) f('Renfort', st.buff, next && next.buff, ' %', 100);
+    if (st.chefBuff && !d.commander) out.push('<span class="up">Chef : +' + Math.round(st.chefBuff * 100) + ' %</span>');
+    if (st.patrol) out.push('<span class="up">Patrouille : +' + Math.round(st.patrol * 100) + ' % cadence</span>');
     f('Portée', st.range, next && next.range);
     return '<div class="stats">' + out.join('') + '</div>';
   }
-  function statsFor(g, type, level) { return g.towerStats({ type: type, level: level }); }
+  function statsFor(g, type, level, at) { return g.towerStats({ type: type, level: level, x: at && at.x, y: at && at.y, id: at && at.id }); }
+  function synergiesOf(type) {
+    var list = PT.SYNERGIES.filter(function (s) { return s.towers.indexOf(type) >= 0; });
+    if (!list.length) return '';
+    return '<div class="syn">' + list.map(function (s) { return '<span><b>' + esc(s.name) + '</b> ' + esc(s.desc) + '</span>'; }).join('') + '</div>';
+  }
 
   UI.closeRadial = function () {
     var r = $('radial');
     r.hidden = true; r.innerHTML = '';
-    UI.radialKind = null; UI.radialSel = null;
+    UI.radialKind = null; UI.radialSel = null; UI.radialCx = null;
     UI.selectedSpot = null; UI.selectedTower = null; UI.preview = null;
     UI.hideTip();
     if (hudCache) hudCache.coach = undefined;
@@ -4765,9 +5675,10 @@ img { -webkit-user-drag: none; pointer-events: none; }
     UI.selectedSpot = spot;
     UI.radialKind = 'build';
     var types = g.availableTowers;
-    var u = a.u, radius = (types.length > 6 ? 94 : 82) * u;
+    var u = a.u, radius = (types.length > 8 ? 112 : types.length > 6 ? 94 : 82) * u;
     var sp = a.renderer.toScreen(spot.x, spot.y - 24);
     var L = layoutRadial(sp.x, sp.y, types.length, radius);
+    UI.radialCx = L.cx; UI.radialCy = L.cy; UI.radialR = radius;
     r.innerHTML = '';
     var ring = el('div', 'ring-bg');
     ring.style.cssText = 'left:' + (L.cx - radius) + 'px;top:' + (L.cy - radius) + 'px;width:' + radius * 2 + 'px;height:' + radius * 2 + 'px';
@@ -4789,9 +5700,9 @@ img { -webkit-user-drag: none; pointer-events: none; }
         PT.Audio.play('click');
         UI.radialSel = t;
         r.querySelectorAll('.r-item').forEach(function (x) { x.classList.toggle('sel', x === b); });
-        var st = statsFor(g, t, 0);
+        var st = statsFor(g, t, 0, { x: spot.x, y: spot.y, id: -1 });
         UI.preview = { x: spot.x, y: spot.y - 10, range: st.range, ok: g.coins >= d.cost };
-        UI.showTip('<h4>' + esc(d.name) + ' · ' + d.cost + ' pièces</h4><p>' + esc(d.desc) + '</p>' + statLine(t, st) +
+        UI.showTip('<h4>' + esc(d.name) + ' · ' + d.cost + ' pièces</h4><p>' + esc(d.desc) + '</p>' + statLine(t, st) + synergiesOf(t) +
           '<div class="hint">' + (g.coins >= d.cost ? 'Touchez à nouveau pour construire.' : 'Pas encore assez de pièces.') + '</div>');
       });
       r.appendChild(b);
@@ -4814,6 +5725,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var u = a.u, radius = 70 * u;
     var sp = a.renderer.toScreen(tower.x, tower.y - 30);
     var L = layoutRadial(sp.x, sp.y, 2, radius);
+    UI.radialCx = L.cx; UI.radialCy = L.cy; UI.radialR = radius;
     r.innerHTML = '';
     var up = el('button', 'r-item' + (cost == null ? ' max' : ''));
     if (cost == null) up.innerHTML = '<span class="lbl">MAX</span>';
@@ -4828,7 +5740,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     sl.style.left = L.pos[1].x + 'px'; sl.style.top = L.pos[1].y + 'px';
     r.appendChild(up); r.appendChild(sl);
     r.hidden = false;
-    var info = '<h4>' + esc(d.name) + ' · niveau ' + (tower.level + 1) + '/3</h4>' + statLine(tower.type, st);
+    var info = '<h4>' + esc(d.name) + ' · niveau ' + (tower.level + 1) + '/3</h4>' + statLine(tower.type, st) + synergiesOf(tower.type);
     UI.showTip(info + '<div class="hint">Touchez l’amélioration ou la vente.</div>');
     up.addEventListener('click', function (ev) {
       ev.stopPropagation(); PT.Audio.unlock();
@@ -4840,7 +5752,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       }
       PT.Audio.play('click');
       UI.radialSel = 'up'; up.classList.add('sel'); sl.classList.remove('sel');
-      var nx = statsFor(g, tower.type, tower.level + 1);
+      var nx = statsFor(g, tower.type, tower.level + 1, tower);
       UI.preview = { x: tower.x, y: tower.y - 10, range: nx.range, ok: g.coins >= cost };
       UI.showTip('<h4>Améliorer : niveau ' + (tower.level + 2) + ' · ' + cost + ' pièces</h4>' + statLine(tower.type, st, nx) + '<div class="hint">Touchez à nouveau pour confirmer.</div>');
     });
@@ -4879,7 +5791,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
   };
 
   /* ---------- Sauvegarde ---------- */
-  function freshSave() { return { stars: {}, upgrades: {}, music: true, sfx: true, story: false, seen: {} }; }
+  function freshSave() { return { stars: {}, upgrades: {}, music: true, sfx: true, story: false, seen: {}, talents: 2 }; }
   function loadSave() {
     var s = null;
     try { s = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch (e) { s = null; }
@@ -4893,6 +5805,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var keep = { music: App.save.music, sfx: App.save.sfx };
     App.save = freshSave();
     App.save.music = keep.music; App.save.sfx = keep.sfx;
+    UI.wing = null;
     App.persist();
   };
 
@@ -4906,7 +5819,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
   App.buyUpgrade = function (id) {
     var u = PT.UPGRADES.filter(function (x) { return x.id === id; })[0];
     var r = App.save.upgrades[id] || 0;
-    if (!u || r >= u.costs.length || App.starsFree() < u.costs[r]) return false;
+    if (!u || r >= u.costs.length || App.starsFree() < u.costs[r] || !PT.upgradeOpen(id, App.save.upgrades)) return false;
     App.save.upgrades[id] = r + 1;
     App.persist();
     return true;
@@ -4995,7 +5908,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
   App.resume = function () { App.paused = false; UI.closeScreens(); };
 
   App.toggleSpeed = function () {
-    App.speed = App.speed === 1 ? 2 : 1;
+    App.speed = App.speed >= 3 ? 1 : App.speed + 1;
     UI.updateSpeed(App.speed);
   };
 
@@ -5023,6 +5936,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     build: 'build', upgrade: 'upgrade', sell: 'sell', bite: 'bite', splat: 'splat', net: 'net', hit: 'hit',
     catch: 'catch', escape: 'escape', grab: 'grab', return: 'coin', reveal: 'reveal', emp: 'emp', leap: 'leap',
     smoke: 'smoke', summon: 'summon', waveStart: 'whistle', bustFall: 'bustFall', bustImpact: 'boom',
+    gust: 'gust', heal: 'heal', burrow: 'burrow', interest: 'coin',
     alarm: 'alarm', cafe: 'cafe', ticket: 'ticket', bonus: 'coin', win: 'win', lose: 'lose',
     clang: 'clang', shatter: 'shatter', mirror: 'mirror', blast: 'blast', lock: 'lock', unlock: 'unlock',
   };
@@ -5070,6 +5984,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       case 'win': {
         var old = App.save.stars[lv.id] || 0, stars = g.stars;
         App.save.stars[lv.id] = Math.max(old, stars);
+        if (!old) UI.wing = null; // une nouvelle aile a pu s'ouvrir : on y retournera
         App.persist();
         UI.closeRadial(); UI.stopAim();
         App.resultTimer = setTimeout(function () {
@@ -5189,6 +6104,12 @@ img { -webkit-user-drag: none; pointer-events: none; }
     if (booted) return;
     booted = true;
     App.save = loadSave();
+    // Sauvegarde d’une ancienne version : si les talents coûtent plus que les étoiles gagnées, on rembourse tout
+    if (App.save.talents !== 2 || App.starsSpent() > App.starsTotal()) {
+      var had = Object.keys(App.save.upgrades).length > 0;
+      App.save.upgrades = {}; App.save.talents = 2; App.persist();
+      if (had) setTimeout(function () { UI.toast('Nouvel Atelier !', 'Vos étoiles vous sont rendues'); }, 800);
+    }
     Au.musicOn = App.save.music; Au.sfxOn = App.save.sfx;
     App.renderer = new PT.Renderer(document.getElementById('game'));
     resize();

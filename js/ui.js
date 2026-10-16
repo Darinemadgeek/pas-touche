@@ -41,6 +41,20 @@
     var a = App();
     return '<span class="pill star-count"><img alt="" src="' + A.starIcon(true) + '"><span>' + a.starsFree() + '</span></span>';
   }
+  // Vrai si au moins un talent ouvert est achetable : on le signale par une pastille
+  function canBuy() {
+    var a = App(), free = a.starsFree();
+    return PT.UPGRADES.some(function (u) {
+      var r = a.save.upgrades[u.id] || 0;
+      return r < u.costs.length && u.costs[r] <= free && PT.upgradeOpen(u.id, a.save.upgrades);
+    });
+  }
+  function shopBtn(id, back) {
+    var b = el('button', 'btn small ghost shop-btn' + (canBuy() ? ' notify' : ''), '<img alt="" src="' + A.starIcon(true) + '">Atelier');
+    b.id = id;
+    click(b, function () { UI.showAtelier(back); });
+    return b;
+  }
   function backBtn(fn) { var b = el('button', 'btn-round', ICON_BACK); b.setAttribute('aria-label', 'Retour'); click(b, fn); return b; }
 
   /* ---------- Titre ---------- */
@@ -53,7 +67,7 @@
       '<div class="logo"><span class="l1">PAS TOUCHE <em>!</em></span><span class="l2">Défense du Musée</span></div>' +
       '<div class="title-buttons">' +
       '<button class="btn big" id="t-play">Jouer</button>' +
-      '<div class="row"><button class="btn small ghost" id="t-shop"><img alt="" src="' + A.starIcon(true) + '">Atelier</button>' +
+      '<div class="row"><button class="btn small ghost' + (canBuy() ? ' notify' : '') + '" id="t-shop"><img alt="" src="' + A.starIcon(true) + '">Atelier</button>' +
       '<button class="btn small ghost" id="t-sus">Fichier des suspects</button>' +
       '<button class="btn small ghost" id="t-opt">Options</button></div></div>' +
       '<div class="credit">Le Grand Concours des cambrioleurs a commencé. Défendez la collection !</div>';
@@ -96,16 +110,38 @@
   /* ---------- Choix des salles ---------- */
   var thumbs = {};
   function thumb(lv) { if (!thumbs[lv.id]) thumbs[lv.id] = PT.Renderer.thumbnail(lv, 320); return thumbs[lv.id]; }
+  var WINGS = ['Les débuts', 'Les grandes galeries', 'Les trésors du monde', 'Les réserves secrètes', 'Le Grand Final'];
+  UI.wing = null;
   UI.showLevels = function () {
     var a = App();
     var s = UI.screen('scr-levels');
     var head = el('div', 'screen-head');
     head.appendChild(backBtn(UI.showTitle));
     head.appendChild(el('h2', '', 'Choisissez une salle'));
-    head.appendChild(el('div', '', starsBadge()));
+    var right = el('div', 'head-right', starsBadge());
+    right.appendChild(shopBtn('l-shop', UI.showLevels));
+    head.appendChild(right);
     s.appendChild(head);
+    // Les salles sont rangées par ailes de 10 ; on ouvre celle de la dernière salle débloquée
+    var nWings = Math.ceil(PT.LEVELS.length / 10), lastOpen = 0;
+    PT.LEVELS.forEach(function (lv, idx) { if (a.isUnlocked(idx)) lastOpen = idx; });
+    if (UI.wing == null || UI.wing >= nWings || !a.isUnlocked(UI.wing * 10)) UI.wing = Math.floor(lastOpen / 10);
+    var tabs = el('div', 'wings');
+    for (var w = 0; w < nWings; w++) {
+      var got = 0, open = a.isUnlocked(w * 10);
+      PT.LEVELS.slice(w * 10, w * 10 + 10).forEach(function (lv) { got += a.save.stars[lv.id] || 0; });
+      var tb = el('button', 'wing' + (w === UI.wing ? ' on' : '') + (open ? '' : ' locked'),
+        '<small>Aile ' + (w + 1) + '</small>' + esc(WINGS[w] || '') + '<span>' + got + '/' + Math.min(10, PT.LEVELS.length - w * 10) * 3 + ' ★</span>');
+      (function (w, open) {
+        if (open) click(tb, function () { UI.wing = w; UI.showLevels(); });
+        else tb.addEventListener('click', function () { PT.Audio.play('error'); UI.toast('Aile fermée', 'Terminez la salle ' + (w * 10) + ' pour l’ouvrir'); });
+      })(w, open);
+      tabs.appendChild(tb);
+    }
+    s.appendChild(tabs);
     var list = el('div', 'levels');
     PT.LEVELS.forEach(function (lv, idx) {
+      if (Math.floor(idx / 10) !== UI.wing) return;
       var unlocked = a.isUnlocked(idx), stars = a.save.stars[lv.id] || 0;
       var b = el('button', 'lvl' + (unlocked ? '' : ' locked'));
       var st = '';
@@ -118,7 +154,7 @@
       list.appendChild(b);
     });
     s.appendChild(list);
-    var more = el('p', 'credit', 'Un casse tous les 5 niveaux · D’autres salles arrivent bientôt');
+    var more = el('p', 'credit', 'Un casse tous les 5 niveaux · Le Gentleman vous attend en salle ' + PT.LEVELS.length);
     s.appendChild(more);
     // Faire défiler jusqu'à la dernière salle ouverte
     setTimeout(function () {
@@ -227,7 +263,7 @@
       (info.gained > 0 ? '<p><b>+' + info.gained + ' étoile' + (info.gained > 1 ? 's' : '') + '</b> à dépenser à l’Atelier.</p>' : '') +
       (unl ? '<div class="eyebrow">Débloqué</div><div class="unlocks">' + unl + '</div>' : '') +
       '<div class="quote"><img alt="" src="' + A.portrait('gentleman') + '"><p>« ' + esc(lv.outro) + ' »</p></div>' +
-      '<div class="actions"><button class="btn ghost small" id="w-menu">Salles</button><button class="btn ghost small" id="w-shop">Atelier</button><button class="btn ghost small" id="w-retry">Rejouer</button>' +
+      '<div class="actions"><button class="btn ghost small" id="w-menu">Salles</button><button class="btn ghost small' + (canBuy() ? ' notify' : '') + '" id="w-shop">Atelier</button><button class="btn ghost small" id="w-retry">Rejouer</button>' +
       (next ? '<button class="btn green" id="w-next">Salle suivante</button>' : '') + '</div></div>';
     for (var j = 0; j < info.stars; j++) setTimeout(function () { PT.Audio.play('star'); }, 300 + j * 300);
     click($('w-menu'), function () { a.quitToLevels(); });
@@ -266,7 +302,7 @@
     click($('l-retry'), function () { a.startLevel(a.levelIdx); });
   };
 
-  /* ---------- Atelier ---------- */
+  /* ---------- Atelier : arbre de talents ---------- */
   UI.showAtelier = function (back, confirmReset) {
     var a = App();
     var s = UI.screen('scr-atelier');
@@ -277,14 +313,23 @@
     s.appendChild(head);
     var f = el('div', 'frame shop');
     f.style.marginTop = 'calc(var(--u) * 56)';
-    var html = '<p>Gagnez des étoiles en protégeant les salles (jusqu’à 3 par salle), puis investissez-les ici. Les améliorations sont permanentes.</p><div class="cards">';
-    PT.UPGRADES.forEach(function (u) {
-      var r = a.save.upgrades[u.id] || 0, max = u.costs.length, cost = u.costs[r];
-      var pips = '';
-      for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
-      html += '<div class="upg"><b>' + esc(u.name) + '</b><small>' + esc(u.desc(Math.max(1, r < max ? r + 1 : r))) + (r > 0 && r < max ? ' (actuel : ' + esc(u.desc(r)) + ')' : '') + '</small>' +
-        '<div class="pips">' + pips + '</div>' +
-        (r < max ? '<button class="btn small" data-up="' + u.id + '"' + (a.starsFree() < cost ? ' disabled' : '') + '><img alt="" src="' + A.starIcon(true) + '">' + cost + '</button>' : '<span class="eyebrow">Maximum</span>') + '</div>';
+    var html = '<p>Gagnez jusqu’à 3 étoiles par salle et investissez-les dans vos talents. Dans chaque branche, un talent s’ouvre dès que celui du dessus a au moins un rang.</p><div class="tree">';
+    PT.BRANCHES.forEach(function (br) {
+      html += '<div class="branch" style="--bc:' + br.color + '"><h3>' + esc(br.name) + '</h3>';
+      PT.UPGRADES.filter(function (u) { return u.branch === br.id; }).forEach(function (u, i, list) {
+        var r = a.save.upgrades[u.id] || 0, max = u.costs.length, cost = u.costs[r];
+        var open = PT.upgradeOpen(u.id, a.save.upgrades);
+        var pips = '';
+        for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
+        var state = r >= max ? 'done' : !open ? 'locked' : a.starsFree() >= cost ? 'buy' : 'poor';
+        html += '<div class="node ' + state + '"><b>' + esc(u.name) + '</b><small>' + esc(u.desc(Math.max(1, r < max ? r + 1 : r))) + '</small>' +
+          (r > 0 && r < max ? '<small class="now">Actuel : ' + esc(u.desc(r)) + '</small>' : '') +
+          '<div class="pips">' + pips + '</div>' +
+          (r >= max ? '<span class="eyebrow">Maximum</span>' :
+            !open ? '<span class="eyebrow">Débloquez « ' + esc(list[i - 1].name) + ' »</span>' :
+            '<button class="btn small" data-up="' + u.id + '"' + (a.starsFree() < cost ? ' disabled' : '') + '><img alt="" src="' + A.starIcon(true) + '">' + cost + '</button>') + '</div>';
+      });
+      html += '</div>';
     });
     html += '</div><div class="actions">' + (confirmReset ? '<span class="confirm-line">Rembourser toutes les étoiles dépensées ?</span><button class="btn small ghost" id="a-no">Non</button><button class="btn small red" id="a-yes">Oui, rembourser</button>' : '<button class="btn small ghost" id="a-reset">Rembourser mes étoiles</button>') + '</div>';
     f.innerHTML = html;
@@ -300,7 +345,6 @@
     if ($('a-yes')) click($('a-yes'), function () { a.save.upgrades = {}; a.persist(); UI.showAtelier(back); });
   };
 
-  /* ---------- Fichier des suspects ---------- */
   UI.showSuspects = function (back) {
     var a = App();
     var s = UI.screen('scr-suspects');
@@ -329,6 +373,14 @@
       var d = PT.POWERS[p];
       if (d.unlock <= reach) html += card(A.powerIcon(p), d.name, d.desc + ' Recharge : ' + d.cd + ' s.');
       else html += '<div class="card locked"><img alt="" src="' + A.powerIcon(p) + '" style="filter:grayscale(1)"><div><b>' + esc(d.name) + '</b><small>Débloqué à la salle ' + d.unlock + '.</small></div></div>';
+    });
+    html += '</div><h3>Synergies</h3><div class="cards">';
+    // Une synergie s'affiche dès que toutes ses défenses sont débloquées
+    PT.SYNERGIES.forEach(function (sy) {
+      var open = sy.towers.every(function (t) { return PT.TOWERS[t].unlock <= reach; });
+      var icon = A.towerIcon(sy.towers[sy.towers.length - 1], 1);
+      if (open) html += card(icon, sy.name, sy.desc + ' (' + sy.towers.map(function (t) { return PT.TOWERS[t].name; }).join(' + ') + ')');
+      else html += '<div class="card locked"><img alt="" src="' + icon + '" style="filter:grayscale(1)"><div><b>' + esc(sy.name) + '</b><small>Débloquez d’abord : ' + esc(sy.towers.map(function (t) { return PT.TOWERS[t].name; }).join(' + ')) + '.</small></div></div>';
     });
     html += '</div>';
     f.innerHTML = html;
@@ -468,7 +520,21 @@
     $('taunt').addEventListener('click', function (ev) { ev.stopPropagation(); $('taunt').hidden = true; });
   });
 
-  UI.showTip = function (html) { var t = $('tip'); t.innerHTML = html; t.hidden = false; };
+  // Quand un menu radial est ouvert, l'infobulle se place du côté opposé pour ne pas le cacher
+  UI.showTip = function (html) {
+    var t = $('tip'); t.innerHTML = html; t.hidden = false;
+    t.style.left = ''; t.style.top = ''; t.style.bottom = '';
+    var cx = UI.radialCx, cy = UI.radialCy;
+    if (cx == null) return;
+    // L'infobulle se place à côté du menu radial s'il y a la place, sinon au-dessus ou en dessous
+    var tw = t.offsetWidth || 300, vw = window.innerWidth, vh = window.innerHeight, rad = (UI.radialR || 90) + 40;
+    var right = cx + rad + tw + 8 <= vw, left = cx - rad - tw - 8 >= 0;
+    if (right || left) {
+      t.style.left = (right && (cx < vw / 2 || !left) ? cx + rad + tw / 2 : cx - rad - tw / 2) + 'px';
+    } else if (cy < vh / 2) {
+      t.style.top = 'auto'; t.style.bottom = 'calc(var(--u) * 100)';
+    }
+  };
   UI.hideTip = function () { $('tip').hidden = true; };
 
   /* ================= Menu radial ================= */
@@ -485,15 +551,25 @@
     if (st.slow != null) f('Ralentit', st.slow, next && next.slow, ' %', 100);
     if (st.stun != null) f('Immobilise', st.stun, next && next.stun, ' s');
     if (st.mark != null) f('Bonus dégâts', st.mark, next && next.mark, ' %', 100);
+    if (st.push != null) f('Recul', st.push, next && next.push);
+    if (st.wet != null) f('Mouille', st.wet, next && next.wet, ' s');
+    if (st.buff != null && d.commander) f('Renfort', st.buff, next && next.buff, ' %', 100);
+    if (st.chefBuff && !d.commander) out.push('<span class="up">Chef : +' + Math.round(st.chefBuff * 100) + ' %</span>');
+    if (st.patrol) out.push('<span class="up">Patrouille : +' + Math.round(st.patrol * 100) + ' % cadence</span>');
     f('Portée', st.range, next && next.range);
     return '<div class="stats">' + out.join('') + '</div>';
   }
-  function statsFor(g, type, level) { return g.towerStats({ type: type, level: level }); }
+  function statsFor(g, type, level, at) { return g.towerStats({ type: type, level: level, x: at && at.x, y: at && at.y, id: at && at.id }); }
+  function synergiesOf(type) {
+    var list = PT.SYNERGIES.filter(function (s) { return s.towers.indexOf(type) >= 0; });
+    if (!list.length) return '';
+    return '<div class="syn">' + list.map(function (s) { return '<span><b>' + esc(s.name) + '</b> ' + esc(s.desc) + '</span>'; }).join('') + '</div>';
+  }
 
   UI.closeRadial = function () {
     var r = $('radial');
     r.hidden = true; r.innerHTML = '';
-    UI.radialKind = null; UI.radialSel = null;
+    UI.radialKind = null; UI.radialSel = null; UI.radialCx = null;
     UI.selectedSpot = null; UI.selectedTower = null; UI.preview = null;
     UI.hideTip();
     if (hudCache) hudCache.coach = undefined;
@@ -517,9 +593,10 @@
     UI.selectedSpot = spot;
     UI.radialKind = 'build';
     var types = g.availableTowers;
-    var u = a.u, radius = (types.length > 6 ? 94 : 82) * u;
+    var u = a.u, radius = (types.length > 8 ? 112 : types.length > 6 ? 94 : 82) * u;
     var sp = a.renderer.toScreen(spot.x, spot.y - 24);
     var L = layoutRadial(sp.x, sp.y, types.length, radius);
+    UI.radialCx = L.cx; UI.radialCy = L.cy; UI.radialR = radius;
     r.innerHTML = '';
     var ring = el('div', 'ring-bg');
     ring.style.cssText = 'left:' + (L.cx - radius) + 'px;top:' + (L.cy - radius) + 'px;width:' + radius * 2 + 'px;height:' + radius * 2 + 'px';
@@ -541,9 +618,9 @@
         PT.Audio.play('click');
         UI.radialSel = t;
         r.querySelectorAll('.r-item').forEach(function (x) { x.classList.toggle('sel', x === b); });
-        var st = statsFor(g, t, 0);
+        var st = statsFor(g, t, 0, { x: spot.x, y: spot.y, id: -1 });
         UI.preview = { x: spot.x, y: spot.y - 10, range: st.range, ok: g.coins >= d.cost };
-        UI.showTip('<h4>' + esc(d.name) + ' · ' + d.cost + ' pièces</h4><p>' + esc(d.desc) + '</p>' + statLine(t, st) +
+        UI.showTip('<h4>' + esc(d.name) + ' · ' + d.cost + ' pièces</h4><p>' + esc(d.desc) + '</p>' + statLine(t, st) + synergiesOf(t) +
           '<div class="hint">' + (g.coins >= d.cost ? 'Touchez à nouveau pour construire.' : 'Pas encore assez de pièces.') + '</div>');
       });
       r.appendChild(b);
@@ -566,6 +643,7 @@
     var u = a.u, radius = 70 * u;
     var sp = a.renderer.toScreen(tower.x, tower.y - 30);
     var L = layoutRadial(sp.x, sp.y, 2, radius);
+    UI.radialCx = L.cx; UI.radialCy = L.cy; UI.radialR = radius;
     r.innerHTML = '';
     var up = el('button', 'r-item' + (cost == null ? ' max' : ''));
     if (cost == null) up.innerHTML = '<span class="lbl">MAX</span>';
@@ -580,7 +658,7 @@
     sl.style.left = L.pos[1].x + 'px'; sl.style.top = L.pos[1].y + 'px';
     r.appendChild(up); r.appendChild(sl);
     r.hidden = false;
-    var info = '<h4>' + esc(d.name) + ' · niveau ' + (tower.level + 1) + '/3</h4>' + statLine(tower.type, st);
+    var info = '<h4>' + esc(d.name) + ' · niveau ' + (tower.level + 1) + '/3</h4>' + statLine(tower.type, st) + synergiesOf(tower.type);
     UI.showTip(info + '<div class="hint">Touchez l’amélioration ou la vente.</div>');
     up.addEventListener('click', function (ev) {
       ev.stopPropagation(); PT.Audio.unlock();
@@ -592,7 +670,7 @@
       }
       PT.Audio.play('click');
       UI.radialSel = 'up'; up.classList.add('sel'); sl.classList.remove('sel');
-      var nx = statsFor(g, tower.type, tower.level + 1);
+      var nx = statsFor(g, tower.type, tower.level + 1, tower);
       UI.preview = { x: tower.x, y: tower.y - 10, range: nx.range, ok: g.coins >= cost };
       UI.showTip('<h4>Améliorer : niveau ' + (tower.level + 2) + ' · ' + cost + ' pièces</h4>' + statLine(tower.type, st, nx) + '<div class="hint">Touchez à nouveau pour confirmer.</div>');
     });

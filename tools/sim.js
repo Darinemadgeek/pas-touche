@@ -3,6 +3,7 @@
 'use strict';
 require('../js/data.js');
 require('../js/levels.js');
+require('../js/levels-gen.js');
 require('../js/game.js');
 var PT = globalThis.PT;
 
