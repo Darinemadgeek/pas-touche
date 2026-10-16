@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#4f0e1c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Pas Touche ! — un tower defense cartoon : protégez le musée contre les cambrioleurs du Grand Concours.">
+<title>Pas Touche !</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800;900&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <div id="hud" hidden>
+    <div class="hud-top">
+      <div class="hud-left">
+        <div class="pill" id="hud-lives" title="Objets de la collection"><img alt="" data-icon="vase"><span>20</span></div>
+        <div class="pill" id="hud-coins" title="Pièces"><img alt="" data-icon="coin"><span>0</span></div>
+        <div class="pill pill-wave" id="hud-wave">Vague <b>0</b>/0</div>
+      </div>
+      <div class="hud-right">
+        <button class="btn-round" id="btn-speed" aria-label="Vitesse">x1</button>
+        <button class="btn-round" id="btn-pause" aria-label="Pause">
+          <svg viewBox="0 0 20 20"><rect x="4" y="3" width="4.5" height="14" rx="1.5" fill="#2a1c16"/><rect x="11.5" y="3" width="4.5" height="14" rx="1.5" fill="#2a1c16"/></svg>
+        </button>
+      </div>
+    </div>
+    <button id="btn-wave" class="wave-btn" aria-label="Lancer la vague suivante"></button>
+    <div id="powers"></div>
+    <div id="boss-bar" hidden><span>Le Gentleman</span><div class="bar"><i></i></div></div>
+    <div id="taunt" hidden><img alt=""><p></p></div>
+    <div id="toast"></div>
+  </div>
+  <div id="radial" hidden></div>
+  <div id="tip" hidden></div>
+  <div id="screens"></div>
+
+  <div id="rotate"><div class="phone"></div>Tournez votre téléphone<br>pour protéger le musée</div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/game.js"></script>
+<script src="js/art.js"></script>
+<script src="js/render.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

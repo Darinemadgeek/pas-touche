@@ -1,0 +1,63 @@
+# Pas Touche ! — Défense du Musée
+
+Tower defense cartoon en HTML5 / Canvas 2D, sans dépendance. Pensé pour le mobile à l'horizontale, jouable aussi sur PC.
+
+Le Gentleman a lancé le **Grand Concours** des cambrioleurs. Les voleurs traversent le musée jusqu'au trésor, prennent un objet, puis repartent par la porte d'entrée. Il faut les attraper avant qu'ils ressortent, à l'aller comme au retour.
+
+## Lancer le jeu
+
+- **Le plus simple** : ouvrir `dist/pas-touche.html` (un seul fichier, tout est dedans).
+- **Pendant le développement** : `node tools/serve.js`, puis ouvrir http://localhost:8765.
+- `index.html` s'ouvre aussi directement par double-clic.
+
+## Contenu
+
+- **10 salles**, de plus en plus difficiles :
+  1. Musée de Trouville-sur-Bof : tutoriel, hordes simples.
+  2. Galerie d'Égypte : les Ombres invisibles et la Caméra.
+  3. Aile des Dinosaures : deux entrées, Costauds et Acrobates.
+  4. Nocturne d'Art Moderne : la variante « portes ouvertes », avec de vrais touristes et des Faux Touristes cachés parmi eux.
+  5. Les Joyaux de la Couronne : **niveau casse**. Chaque vague est une équipe de voleurs avec son plan, annoncée par un briefing, et le Gentleman vient en personne pour la dernière.
+  6. Salle des Armures : une porte de chaque côté et les Chevaliers, dont l'armure fait rebondir les petits coups.
+  7. Musée de la Marine : une porte et une verrière, et le Canon de Marine en renfort.
+  8. Galerie des Glaces : un très long couloir, et l'Illusionniste qui sème des reflets pour gaspiller vos tirs.
+  9. Réserve souterraine : la variante « panne de courant ». Les défenses ne voient que sous les lampes de secours ou grâce aux Caméras. Le Verrouillage arrive.
+  10. Coffre-fort de la Banque de France : **2e niveau casse**, trois entrées (porte, verrière, égouts), neuf équipes et le Gentleman en finale.
+- **7 défenses** à 3 niveaux : Gardien, Pot de Glu, Caméra, Bouledogue, Lance-Filet, Laser, Canon de Marine.
+- **4 pouvoirs** : Buste en marbre (zone ciblée), Alarme générale, Pause café, Verrouillage des portes.
+- **11 types de personnages** : 9 voleurs, le touriste innocent et le boss.
+- **Progression** : jusqu'à 3 étoiles par salle. Les étoiles se dépensent à l'**Atelier** (7 améliorations permanentes). Les défenses et pouvoirs se débloquent au fil des salles, et le **Fichier des suspects** se remplit à chaque nouvelle rencontre.
+- Musique et bruitages synthétisés en direct (Web Audio), sauvegarde locale, menus, pause, vitesse x2.
+
+## Commandes
+
+- **Tactile / souris** :
+  - Touchez un socle **+**, choisissez une défense, puis touchez-la une deuxième fois pour confirmer.
+  - Touchez une défense pour l'améliorer ou la vendre.
+- **Clavier** : `Espace` lance la vague suivante, `1` à `4` les pouvoirs, `V` la vitesse, `Échap` la pause.
+
+## Structure
+
+| Fichier | Rôle |
+|---|---|
+| `js/data.js` | Défenses, voleurs, pouvoirs, améliorations de l'Atelier |
+| `js/levels.js` | Les salles : décor, chemins, socles, vagues, répliques du Gentleman |
+| `js/game.js` | Moteur de jeu pur (aucun DOM), testable sous Node |
+| `js/art.js` | Tous les dessins cartoon (personnages, défenses, décor, icônes) |
+| `js/render.js` | Rendu : décor en cache, tri en profondeur, effets visuels |
+| `js/audio.js` | Synthé sonore et musiques |
+| `js/ui.js` | Écrans, HUD, menu radial |
+| `js/main.js` | Démarrage, sauvegarde, boucle de jeu, entrées |
+| `tools/sim.js` | Vérifie les niveaux et fait jouer un bot : `node tools/sim.js [parties] [niveau]` |
+| `tools/build.js` | Assemble `dist/pas-touche.html` : `node tools/build.js` |
+
+## Ajouter une salle
+
+1. Dans `js/levels.js`, copier un bloc de niveau et changer `id`, `name`, `theme`, `paths`, `spots`, `deco` et `waves`.
+   - Le premier point d'un chemin est hors de la salle (porte, verrière ou égouts), le dernier est le trésor.
+   - Placez les socles à environ 100 px du tapis, près des virages : plus loin, le Gardien et le Bouledogue n'atteignent plus les voleurs.
+   - Pour un niveau casse (prévu tous les 5 niveaux), mettre `type: 'casse'` et ajouter un `crew: { name, plan }` à chaque vague.
+   - Variantes : `variant: 'visiteurs'` (portes ouvertes) ou `variant: 'panne'` (panne de courant : les décors `lampe` deviennent les seules zones éclairées, rayon `r` réglable, 150 par défaut).
+2. Pour qu'une nouvelle défense ou un nouveau pouvoir arrive avec cette salle, mettre son `unlock` à l'id de la salle dans `js/data.js`. L'écran de briefing affiche automatiquement les nouveautés.
+3. Lancer `node tools/sim.js 5 <id>` : la commande signale les socles ou décors mal placés et donne une idée de la difficulté.
+4. Lancer `node tools/build.js` pour régénérer la version en un seul fichier.
