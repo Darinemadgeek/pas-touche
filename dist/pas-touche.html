@@ -3141,6 +3141,12 @@ img { -webkit-user-drag: none; pointer-events: none; }
   var personCache = new Map();
   A.personCached = function (c, type, o, halo) {
     if (typeof document === 'undefined') return A.person(c, type, o);
+    // Voleurs à animation continue (baguette, écran, bandeau) : dessinés en direct pour rester fluides
+    var Lc = LOOKS[type] || LOOKS.voleur;
+    if (Lc.wand || Lc.laptop || Lc.hat === 'ninja') {
+      if (halo) { A.HALO = true; A.person(c, type, o); A.HALO = false; }
+      return A.person(c, type, o);
+    }
     var tr = c.getTransform(), sc = Math.hypot(tr.a, tr.b) || 1, size = o.size || 1;
     var step = o.moving !== false ? Math.floor((o.phase || 0) / (Math.PI / 2)) & 3 : 0;
     var tq = Math.floor((o.t || 0) * 2) % 2;
