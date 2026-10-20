@@ -227,7 +227,7 @@
       desc: 'Innocent ! Il paie 2 pièces en admirant le trésor. Vos défenses ne le visent jamais.',
     },
     gentleman: {
-      name: 'Le Gentleman', hp: 2200, speed: 34, reward: 250, loot: 5, size: 1.6, boss: true,
+      name: 'Le Gentleman', hp: 2200, speed: 34, reward: 250, loot: 5, size: 2, boss: true,
       stunImmune: true, smoke: true, summon: true,
       desc: 'L’organisateur du Grand Concours. Fumigènes, complices… et il ne vole que le meilleur.',
     },

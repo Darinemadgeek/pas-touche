@@ -238,7 +238,7 @@
     var hp = def.hp * this.level.hpMul * (1 + 0.06 * Math.max(0, this.waveIndex)) * (s.hp || 1) * (this.relax ? PT.RELAX.hp : 1);
     var e = {
       id: this.nextId++, type: s.type, def: def, path: s.path, d: s.d || 0, dir: s.dir || 1,
-      hp: hp, maxHp: hp, speed: def.speed * (0.94 + rand() * 0.12), lat: def.boss ? 0 : (rand() - 0.5) * 28,
+      hp: hp, maxHp: hp, speed: def.speed * (0.94 + rand() * 0.12), lat: def.boss ? 0 : (rand() - 0.5) * 44,
       alive: true, stunT: 0, netT: 0, slowT: 0, slowF: 0, flashT: 0, pauseT: 0, grabbing: false, carrying: 0,
       leapT: 0, leapCD: 2 + rand() * 2, empCD: 2, burrowT: 0, burrowCD: 2.5 + rand() * 2, healCD: 1.5, wetT: 0, gluT: 0, healedT: 0, pushN: 0, smokeCD: 5, smokeT: 0, summonCD: 9, mirrorCD: 2.5, clangCD: 0, lit: false, blocked: false, fake: 0,
       disguised: !!def.disguise, seen: false, mark: 0, phase: rand() * 6, x: 0, y: 0, face: 1, curSpeed: 0, age: 0,

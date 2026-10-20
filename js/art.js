@@ -45,7 +45,7 @@
   function circ(c, x, y, r) { c.beginPath(); c.arc(x, y, Math.abs(r), 0, TAU); }
   // Passe « liseré » : quand A.HALO est vrai, chaque forme est tracée plus large en crème,
   // juste avant le vrai dessin. On obtient le bord blanc d'une découpe aux ciseaux.
-  var HALO_COL = '#fff4dc', HALO_W = 5;
+  var HALO_COL = '#fff4dc', HALO_W = 10;
   function fs(c, fill, lw) {
     if (A.HALO) {
       if (fill) { c.fillStyle = HALO_COL; c.fill(); }
@@ -161,6 +161,13 @@
     shadow(c, 0, 0, W * 0.62, 4.5);
     if (moving) c.rotate(L.lean ? 0.14 + (step & 2 ? 0.03 : 0) : step & 2 ? 0.045 : -0.045);
 
+    if (L.shovel) {
+      // Pelle portée à l'épaule, derrière le corps : la lame dépasse à côté de la tête
+      line(c, -W * 0.25, top + 18, -R - 6, hy - R * 0.55, col('#8a5a32'), 3.4);
+      c.save(); c.translate(-R - 7, hy - R * 0.6); c.rotate(-0.35);
+      c.beginPath(); c.moveTo(-6, 0); c.lineTo(6, 0); c.lineTo(5, -11); c.quadraticCurveTo(0, -16, -5, -11); c.closePath(); fs(c, col('#9aa3ad'), lw);
+      c.restore();
+    }
     // Cape du Gentleman (derrière)
     if (L.cape) {
       c.beginPath();
@@ -296,12 +303,7 @@
       rr(c, -W * 0.72, top + 10, 15, 12, 3); fs(c, col('#ffffff'), lw);
       c.fillStyle = col('#e2342e'); c.fillRect(-W * 0.72 + 6, top + 12, 3, 8); c.fillRect(-W * 0.72 + 3.5, top + 14.5, 8, 3);
     }
-    if (L.shovel) {
-      line(c, W * 0.42, top + 12, -W * 0.15, hy - R * 0.95, col('#8a5a32'), 3);
-      c.save(); c.translate(-W * 0.18, hy - R * 0.98); c.rotate(-0.9);
-      c.beginPath(); c.moveTo(-5, 0); c.lineTo(5, 0); c.lineTo(4, -9); c.quadraticCurveTo(0, -13, -4, -9); c.closePath(); fs(c, col('#9aa3ad'), lw);
-      c.restore();
-    }
+
     if ((type === 'garde' || type === 'chef') && (o.rank || 0) >= 1) {
       rr(c, -W * 0.56, top - 1, 9, 4.5, 2); fs(c, col('#ffd447'), 1.4); rr(c, W * 0.56 - 9, top - 1, 9, 4.5, 2); fs(c, col('#ffd447'), 1.4);
     }
@@ -448,9 +450,13 @@
     shadow(c, 0, 8, 37, 12, 0.45);
     // Niveau 3 : socle doré, repérable d'un coup d'œil
     var gold = level >= 2 && !disabled;
-    rr(c, -29, -16, 58, 24, 5); fs(c, disabled ? '#8d8d96' : gold ? '#f0c95a' : '#e9e2d3');
-    ell(c, 0, -16, 29, 9); fs(c, disabled ? '#a6a6ae' : gold ? '#ffe29a' : '#f7f2e6');
+    rr(c, -29, -16, 58, 24, 5); fs(c, disabled ? '#8d8d96' : '#e9e2d3');
+    ell(c, 0, -16, 29, 9); fs(c, disabled ? '#a6a6ae' : '#f7f2e6');
     c.fillStyle = accent; c.fillRect(-27, -3, 54, 7);
+    if (gold) {
+      ell(c, 0, -16, 29, 9); c.lineWidth = 3; c.strokeStyle = '#e2b13e'; c.stroke();
+      c.beginPath(); c.moveTo(-12, 6); c.lineTo(-12, -6); c.lineTo(-6, -1); c.lineTo(0, -9); c.lineTo(6, -1); c.lineTo(12, -6); c.lineTo(12, 6); c.closePath(); fs(c, '#f2c230', 1.8);
+    }
     rr(c, -29, -16, 58, 24, 5); fs(c, null, 2.4);
     for (var i = 0; i <= level; i++) {
       starPath(c, (i - level / 2) * 13, 3, 5.2, 2.3);
@@ -1225,7 +1231,12 @@
   };
 
   A.lockIcon = function () {
-    return A.icon('lock', 48, 48, function (c) { c.translate(24, 26); c.scale(0.62, 0.62); A.drawPower(c, 'verrou'); });
+    return A.icon('lock2', 48, 48, function (c) {
+      c.translate(24, 26);
+      c.beginPath(); c.arc(0, -4, 9, Math.PI, 0); c.lineWidth = 7; c.strokeStyle = INK; c.stroke(); c.lineWidth = 3.5; c.strokeStyle = '#b9b2a6'; c.stroke();
+      rr(c, -13, -5, 26, 21, 5); fs(c, '#8a8378', 3);
+      circ(c, 0, 4, 3); c.fillStyle = INK; c.fill(); rr(c, -1.4, 5, 2.8, 6, 1.2); c.fill();
+    });
   };
   // Victoire : le gardien salue à côté du trésor ; défaite : cloche vide et voleur qui file
   A.endArt = function (win, kind) {

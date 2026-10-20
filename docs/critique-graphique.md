@@ -135,3 +135,22 @@ Les 12 priorités ont été traitées :
 12. **Calme et finitions** : flash de touche adouci, Ombres et reflets qui clignotent lentement, tremblement réduit, étoile du Chef fixe, pastille « ! » limitée à 3 pulsations, pouvoirs qui ne pulsent plus en boucle, cadenas dessinés, badge « Casse » rouge même verrouillé, carrousel en fondu, en-têtes non coupés, défilement aux couleurs du jeu, illustrations de victoire et de défaite, étoile centrale mise en avant.
 
 Non traités : image clé de l'écran titre, refonte en deux colonnes du briefing, jauges de résistance et de vitesse dans le Fichier des suspects, écran « tournez votre téléphone » dans un navigateur de bureau étroit.
+
+## Deuxième passage (captures au format téléphone, 586×396)
+
+Constat principal du testeur : sur un vrai téléphone, l'unité d'interface tombe à 0,6 px, et les textes secondaires faisaient 6 à 8 px. Corrections faites :
+
+1. **Textes lisibles** : plancher de 10,5 à 13 px sur toutes les petites tailles de police ; textes flottants du jeu jamais sous 12 px à l'écran.
+2. **Atelier sur téléphone** : le détail et le bouton Acheter restent à droite et visibles ; sur petit écran, noms sur 2 lignes au plus et noms des choix « l'un OU l'autre » affichés dans le détail.
+3. **Pouvoirs** : seul le bouton au-dessus d'un voleur devient transparent ; zone protégée du générateur élargie aux 4 boutons.
+4. **Panne** : plus de cercle pointillé autour des lampes ; nuit sans tache de lumière sur chaque socle ; alarme qui pulse lentement.
+5. **Cadenas** : cadenas gris dédié, distinct du pouvoir Verrouillage.
+6. **Liseré papier** deux fois plus large.
+7. **Niveau 3** : socle crème avec couronne et liseré dorés (plus de confusion avec un socle libre) ; médaillons de spécialisation agrandis.
+8. **Menu radial** : infobulle alignée sur le menu, léger voile derrière, pastilles « + » des autres socles masquées pendant le choix.
+9. **Fichier des suspects** : vraies silhouettes noires, cartes opaques, 2 colonnes.
+10. **Foules et décor** : voleurs plus étalés sur le tapis, poteaux deux fois plus espacés.
+
+En plus : Gentleman plus imposant, illustrations et étoiles de fin agrandies, pelle de la Taupe derrière l'épaule, « Un casse toutes les 5 salles », pastille « ! » qui ne mord plus le texte.
+
+Restent à faire : image clé de l'écran titre, briefing en deux colonnes, jauges de résistance et de vitesse dans le Fichier, silhouettes encore plus différentes (gabarits), mise en cache des personnages pour alléger le double dessin du liseré.

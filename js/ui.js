@@ -155,7 +155,7 @@
       list.appendChild(b);
     });
     s.appendChild(list);
-    var more = el('p', 'credit', 'Un casse tous les 5 niveaux · Le Gentleman vous attend en salle ' + PT.LEVELS.length);
+    var more = el('p', 'credit', 'Un casse toutes les 5 salles · Le Gentleman vous attend en salle ' + PT.LEVELS.length);
     s.appendChild(more);
     // Faire défiler jusqu'à la dernière salle ouverte
     setTimeout(function () {
@@ -438,7 +438,7 @@
     PT.ENEMY_ORDER.forEach(function (t) {
       var d = PT.ENEMIES[t];
       if (a.save.seen[t]) html += card(A.enemyIcon(t), d.name, d.desc + (d.innocent ? '' : ' Résistance ' + d.hp + ', vitesse ' + d.speed + '.'));
-      else html += '<div class="card locked"><img alt="" src="' + A.enemyIcon(t) + '" style="filter:brightness(0)"><div><b>???</b><small>Pas encore croisé.</small></div></div>';
+      else html += '<div class="card locked"><img alt="" src="' + A.enemyIcon(t) + '" style="filter:brightness(0) opacity(0.8)"><div><b>???</b><small>Pas encore croisé.</small></div></div>';
     });
     html += '</div><h3>Vos défenses</h3><div class="cards">';
     var reach = a.maxUnlockedId();
@@ -564,13 +564,14 @@
       b.classList.toggle('active', UI.aiming === id);
     });
 
-    // Les boutons de pouvoir deviennent transparents quand un voleur passe dessous
-    var pw = $('powers'), pr = pw.getBoundingClientRect(), under = false, rd = App().renderer;
-    for (var e2 = 0; e2 < g.enemies.length && !under; e2++) {
-      var en = g.enemies[e2], sp2 = rd.toScreen(en.x, en.y - 25);
-      if (sp2.x > pr.left - 20 && sp2.x < pr.right + 20 && sp2.y > pr.top - 30 && sp2.y < pr.bottom + 10) under = true;
-    }
-    if (c.under !== under) { c.under = under; pw.classList.toggle('see-through', under); }
+    // Un bouton de pouvoir devient transparent quand un voleur passe juste dessous (pas toute la barre)
+    var rd = App().renderer, pts = [];
+    for (var e2 = 0; e2 < g.enemies.length; e2++) { var en = g.enemies[e2]; if (en.alive) pts.push(rd.toScreen(en.x, en.y - 25)); }
+    $('powers').querySelectorAll('.power').forEach(function (b) {
+      var pr = b.getBoundingClientRect(), under = false;
+      for (var q = 0; q < pts.length && !under; q++) if (pts[q].x > pr.left - 10 && pts[q].x < pr.right + 10 && pts[q].y > pr.top - 20 && pts[q].y < pr.bottom + 6) under = true;
+      if (b._under !== under) { b._under = under; b.classList.toggle('see-through', under); }
+    });
 
     // Boss
     var boss = null;
@@ -619,6 +620,8 @@
     var right = cx + rad + tw + 8 <= vw, left = cx - rad - tw - 8 >= 0;
     if (right || left) {
       t.style.left = (right && (cx < vw / 2 || !left) ? cx + rad + tw / 2 : cx - rad - tw / 2) + 'px';
+      var th = t.offsetHeight || 120, u0 = App().u;
+      t.style.top = Math.max(50 * u0, Math.min(vh - th - 8, cy - th / 2)) + 'px';
     } else if (cy < vh / 2) {
       t.style.top = 'auto'; t.style.bottom = 'calc(var(--u) * 100)';
     }
