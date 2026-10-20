@@ -65,6 +65,7 @@
     s.innerHTML =
       '<div class="title-corner"><button class="btn-round" id="t-full" aria-label="Plein écran">' + ICON_FULL + '</button>' +
       '<button class="btn-round" id="t-sound" aria-label="Son">' + (a.save.music || a.save.sfx ? ICON_SOUND : ICON_MUTE) + '</button></div>' +
+      '<img class="hero hero-l" alt="" src="' + A.heroArt('garde') + '"><img class="hero hero-r" alt="" src="' + A.heroArt('gentleman') + '">' +
       '<div class="logo"><span class="l1">PAS TOUCHE <em>!</em></span><span class="l2">Défense du Musée</span></div>' +
       '<div class="title-buttons">' +
       '<button class="btn big" id="t-play">Jouer</button>' +
@@ -182,8 +183,14 @@
   function chip(img, name, kind, wide) {
     return '<div class="chip' + (wide ? ' wide' : '') + '"><img alt="" src="' + img + '"><span><small>' + esc(kind) + '</small>' + esc(name) + '</span></div>';
   }
-  function card(img, name, desc, tag, tagCls) {
-    return '<div class="card"><img alt="" src="' + img + '"><div><b>' + esc(name) + (tag ? '<span class="tag ' + (tagCls || '') + '">' + tag + '</span>' : '') + '</b><small>' + esc(desc) + '</small></div></div>';
+  function card(img, name, desc, tag, tagCls, extra) {
+    return '<div class="card"><img alt="" src="' + img + '"><div><b>' + esc(name) + (tag ? '<span class="tag ' + (tagCls || '') + '">' + tag + '</span>' : '') + '</b><small>' + esc(desc) + '</small>' + (extra || '') + '</div></div>';
+  }
+  // Jauge en 5 segments (au lieu d'un nombre brut)
+  function gauge(label, steps, v) {
+    var n = 1; for (var i = 1; i < steps.length; i++) if (v >= steps[i]) n = i + 1;
+    var seg = ''; for (var k = 0; k < 5; k++) seg += '<i class="' + (k < n ? 'on' : '') + '"></i>';
+    return '<span class="gauge"><em>' + label + '</em>' + seg + '</span>';
   }
   UI.showBrief = function (idx) {
     var a = App(), lv = PT.LEVELS[idx];
@@ -193,13 +200,13 @@
     nw.towers.forEach(function (t) { cards += card(A.towerIcon(t), PT.TOWERS[t].name, PT.TOWERS[t].desc, 'DÉFENSE', 'def'); });
     nw.powers.forEach(function (p) { cards += card(A.powerIcon(p), PT.POWERS[p].name, PT.POWERS[p].desc, 'POUVOIR', 'pow'); });
     nw.enemies.forEach(function (t) { cards += card(A.enemyIcon(t), PT.ENEMIES[t].name, PT.ENEMIES[t].desc, 'SUSPECT'); });
-    var foes = enemiesOf(lv).map(function (t) { return '<img alt="' + esc(PT.ENEMIES[t].name) + '" title="' + esc(PT.ENEMIES[t].name) + '" src="' + A.enemyIcon(t) + '">'; }).join('');
+    var foes = enemiesOf(lv).map(function (t) { return '<figure><img alt="" src="' + A.enemyIcon(t) + '"><figcaption>' + esc(PT.ENEMIES[t].name.replace(/^(Le |La |L’)/, '')) + '</figcaption></figure>'; }).join('');
     var kind = lv.type === 'casse' ? 'Niveau casse' : lv.variant ? 'Variante ' + VARIANTS[lv.variant].toLowerCase() : 'Horde';
-    s.innerHTML = '<div class="frame brief"><div class="top"><img alt="" src="' + thumb(lv) + '"><div>' +
-      '<div class="eyebrow">Salle ' + lv.id + ' · ' + kind + ' · ' + lv.waves.length + ' vagues</div>' +
-      '<h2>' + esc(lv.name) + '</h2><p><b>Trésor :</b> ' + esc(lv.treasure.name) + '</p><p>' + esc(lv.blurb) + '</p></div></div>' +
-      (cards ? '<h3>Nouveautés</h3><div class="cards">' + cards + '</div>' : '') +
-      '<h3>Suspects attendus</h3><div class="foes">' + foes + '</div>' +
+    s.innerHTML = '<div class="frame brief"><div class="cols"><div class="col-l"><img class="map" alt="" src="' + thumb(lv) + '">' +
+      (cards ? '<h3>Nouveautés</h3><div class="cards one">' + cards + '</div>' : '') + '</div>' +
+      '<div class="col-r"><div class="eyebrow">Salle ' + lv.id + ' · ' + kind + ' · ' + lv.waves.length + ' vagues</div>' +
+      '<h2>' + esc(lv.name) + '</h2><p><b>Trésor :</b> ' + esc(lv.treasure.name) + '</p><p>' + esc(lv.blurb) + '</p>' +
+      '<h3>Suspects attendus</h3><div class="foes">' + foes + '</div></div></div>' +
       '<div class="actions"><button class="btn ghost" id="b-back">Retour</button><button class="btn big" id="b-go">C’est parti !</button></div></div>';
     click($('b-back'), UI.showLevels);
     click($('b-go'), function () { a.startLevel(idx); });
@@ -437,7 +444,7 @@
     var html = '<h3>Les voleurs</h3><div class="cards">';
     PT.ENEMY_ORDER.forEach(function (t) {
       var d = PT.ENEMIES[t];
-      if (a.save.seen[t]) html += card(A.enemyIcon(t), d.name, d.desc + (d.innocent ? '' : ' Résistance ' + d.hp + ', vitesse ' + d.speed + '.'));
+      if (a.save.seen[t]) html += card(A.enemyIcon(t), d.name, d.desc, null, null, d.innocent ? '' : gauge('Résistance', [30, 60, 100, 200, 500], d.hp) + gauge('Vitesse', [40, 55, 70, 95, 120], d.speed));
       else html += '<div class="card locked"><img alt="" src="' + A.enemyIcon(t) + '" style="filter:brightness(0) opacity(0.8)"><div><b>???</b><small>Pas encore croisé.</small></div></div>';
     });
     html += '</div><h3>Vos défenses</h3><div class="cards">';

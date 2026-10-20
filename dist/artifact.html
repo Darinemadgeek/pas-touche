@@ -528,6 +528,30 @@ img { -webkit-user-drag: none; pointer-events: none; }
 .btn.notify { padding-right: calc(var(--u) * 26); }
 .btn.notify::after { top: calc(var(--u) * -12) !important; right: calc(var(--u) * -10) !important; }
 
+/* Écran titre : personnages de part et d'autre du logo */
+#scr-title .hero { position: absolute; bottom: calc(var(--u) * 40); height: calc(var(--u) * 260); width: auto; pointer-events: none; filter: drop-shadow(2px 0 0 #fff4dc) drop-shadow(-2px 0 0 #fff4dc) drop-shadow(0 2px 0 #fff4dc) drop-shadow(0 -2px 0 #fff4dc) drop-shadow(0 calc(var(--u) * 6) 0 rgba(20,5,12,0.45)); }
+#scr-title .hero-l { left: max(calc(var(--u) * 20), 4%); transform: rotate(-4deg); }
+#scr-title .hero-r { right: max(calc(var(--u) * 20), 4%); transform: rotate(4deg); }
+@media (max-aspect-ratio: 5/4) { #scr-title .hero { display: none; } }
+@media (max-aspect-ratio: 3/2) { #scr-title .hero { height: calc(var(--u) * 190); } }
+
+/* Briefing en deux colonnes */
+.brief .cols { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: calc(var(--u) * 18); align-items: start; }
+.brief .map { width: 100%; border: calc(var(--u) * 3) solid var(--ink); border-radius: calc(var(--u) * 6); display: block; }
+.brief .cards.one { grid-template-columns: 1fr; }
+.brief .col-r h2 { margin-top: calc(var(--u) * 2); }
+.foes { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 8); }
+.foes figure { margin: 0; display: flex; flex-direction: column; align-items: center; width: calc(var(--u) * 66); }
+.foes figure img { width: calc(var(--u) * 60); height: calc(var(--u) * 66); background: #fff; border: calc(var(--u) * 2) solid var(--ink); border-radius: calc(var(--u) * 8); }
+.foes figcaption { font-size: max(calc(var(--u) * 12), 10.5px); font-weight: 800; text-align: center; line-height: 1.05; margin-top: 2px; }
+@media (max-width: 560px) { .brief .cols { grid-template-columns: 1fr; } }
+
+/* Jauges du Fichier des suspects */
+.gauge { display: flex; align-items: center; gap: 2px; margin-top: 3px; }
+.gauge em { font-style: normal; font-size: max(calc(var(--u) * 12), 10.5px); font-weight: 800; color: #6b5440; width: calc(var(--u) * 80); min-width: 64px; }
+.gauge i { width: calc(var(--u) * 14); min-width: 9px; height: calc(var(--u) * 7); min-height: 5px; border-radius: 2px; background: #e5dccb; }
+.gauge i.on { background: var(--red); }
+
 </style>
 
 <div id="app">
@@ -2772,7 +2796,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
 
   var LOOKS = {
     voleur: { shirt: '#f4efe4', stripe: '#1f2a5a', pants: '#2b2b3a', hat: 'beanie', hatColor: '#3a3a48', pom: '#f5c518', mask: true, lids: true },
-    pickpocket: { shirt: '#4f9a46', pants: '#5a4632', hat: 'cap', hatColor: '#80603e', mask: true, scarf: '#d8402f', longScarf: '#d8402f', lids: true, small: true },
+    pickpocket: { headK: 1.18, shirt: '#4f9a46', pants: '#5a4632', hat: 'cap', hatColor: '#80603e', mask: true, scarf: '#d8402f', longScarf: '#d8402f', lids: true, small: true },
     costaud: { shirt: '#c0392b', tank: true, pants: '#3a3550', hat: 'bald', mask: true, mustache: '#3a2418', stubble: true, brows: true, big: true },
     ombre: { shirt: '#24212f', pants: '#24212f', shoes: '#24212f', mitten: '#24212f', hat: 'ninja', band: '#d0313c', skin: '#24212f', lids: true },
     acrobate: { shirt: '#8e44ad', harlequin: '#f4c430', pants: '#8e44ad', hat: 'hair', hair: '#e2583e', mask: true, small: true },
@@ -2808,7 +2832,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var step = moving ? Math.floor((o.phase || 0) / (Math.PI / 2)) & 3 : 0;
     var hop = moving && (step & 1) ? 2.5 : 0;
     var big = !!L.big, k = big ? 1.12 : 1;
-    var W = big ? 38 : L.small ? 24 : 27, R = 17 * k;
+    var W = big ? 38 : L.small ? 24 : 27, R = 17 * k * (L.headK || 1);
     var top = -27 - hop, bot = -5 - hop;
     var hx = 1, hy = top - R * 0.68;
     var revealed = o.revealed, masked = L.mask || revealed;
@@ -2818,7 +2842,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     c.save();
     c.scale((o.face || 1) * (o.size || 1), o.size || 1);
     shadow(c, 0, 0, W * 0.62, 4.5);
-    if (moving) c.rotate(L.lean ? 0.14 + (step & 2 ? 0.03 : 0) : step & 2 ? 0.045 : -0.045);
+    if (moving) c.rotate(L.lean ? 0.26 + (step & 2 ? 0.03 : 0) : step & 2 ? 0.045 : -0.045);
 
     if (L.shovel) {
       // Pelle portée à l'épaule, derrière le corps : la lame dépasse à côté de la tête
@@ -3093,8 +3117,9 @@ img { -webkit-user-drag: none; pointer-events: none; }
       rr(c, hx + R * 0.35, crown + 2, 8, 7, 2); fs(c, col('#7a7a7a'), 1.2);
       circ(c, hx + R * 0.35 + 6, crown + 5.5, 3); fs(c, col('#fff6b0'), 1.2);
     } else if (L.hat === 'nurse') {
-      rr(c, hx - 9, crown - 6, 18, 9, 2); fs(c, col('#ffffff'), lw);
-      c.fillStyle = col('#e2342e'); c.fillRect(hx - 1.5, crown - 5, 3, 7); c.fillRect(hx - 3.5, crown - 3, 7, 3);
+      // Coiffe haute d'infirmière : la silhouette se reconnaît de loin
+      c.beginPath(); c.moveTo(hx - 11, crown + 3); c.lineTo(hx - 8, crown - 16); c.quadraticCurveTo(hx, crown - 21, hx + 8, crown - 16); c.lineTo(hx + 11, crown + 3); c.closePath(); fs(c, col('#ffffff'), lw);
+      c.fillStyle = col('#e2342e'); c.fillRect(hx - 2, crown - 13, 4, 11); c.fillRect(hx - 5.5, crown - 9.5, 11, 4);
     } else if (L.hat === 'kepi') {
       rr(c, hx - 12, crown - 5, 24, 11, 3); fs(c, col(L.hatColor), lw);
       c.fillStyle = col((o.rank || 0) >= 2 ? '#ffd447' : '#d9dde6'); c.fillRect(hx - 12, crown + 2, 24, 2.4);
@@ -3102,6 +3127,32 @@ img { -webkit-user-drag: none; pointer-events: none; }
       circ(c, hx + 1, crown - 0.5, 2.6); fs(c, col('#ffd447'), 1.1);
     }
     c.restore();
+  };
+
+  // Version mise en cache : chaque pose (type, couleurs, pas, sens, sac, liseré…) est dessinée
+  // une seule fois dans une petite image, puis réutilisée. Le liseré papier ne coûte plus rien.
+  var personCache = new Map();
+  A.personCached = function (c, type, o, halo) {
+    if (typeof document === 'undefined') return A.person(c, type, o);
+    var tr = c.getTransform(), sc = Math.hypot(tr.a, tr.b) || 1, size = o.size || 1;
+    var step = o.moving !== false ? Math.floor((o.phase || 0) / (Math.PI / 2)) & 3 : 0;
+    var tq = Math.floor((o.t || 0) * 2) % 2;
+    var key = [type, (o.id || 0) % 6, step, (o.face || 1) > 0 ? 1 : 0, Math.min(o.carrying || 0, 3), o.grab ? 1 : 0, o.flash ? 1 : 0,
+      o.revealed ? 1 : 0, o.moving === false ? 0 : 1, size, tq, halo ? 1 : 0, Math.round(sc * 20)].join('|');
+    var e = personCache.get(key);
+    if (!e) {
+      var bw = 130 * size, bh = 160 * size, ox = 65 * size, oy = 125 * size;
+      var cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.ceil(bw * sc)); cv.height = Math.max(1, Math.ceil(bh * sc));
+      var g = cv.getContext('2d'); g.scale(sc, sc); g.translate(ox, oy);
+      var o2 = {}; for (var k in o) o2[k] = o[k]; o2.t = tq * 0.5;
+      if (halo) { A.HALO = true; A.person(g, type, o2); A.HALO = false; }
+      A.person(g, type, o2);
+      e = { cv: cv, ox: ox, oy: oy, w: bw, h: bh };
+      if (personCache.size > 900) personCache.clear();
+      personCache.set(key, e);
+    }
+    c.drawImage(e.cv, -e.ox, -e.oy, e.w, e.h);
   };
 
   /* ---------- Socle des défenses ---------- */
@@ -3909,6 +3960,14 @@ img { -webkit-user-drag: none; pointer-events: none; }
         c.save(); c.translate(150, 112); c.scale(1.4, 1.4); A.person(c, 'voleur', { face: 1, moving: true, phase: 1, t: 0.3, carrying: 1, id: 2 }); c.restore();
         [[100, 70], [94, 86], [104, 98]].forEach(function (p) { line(c, p[0], p[1], p[0] - 18, p[1], 'rgba(42,28,22,0.5)', 2.4); });
       }
+    });
+  };
+
+  // Personnages en pied pour l'écran titre (gardien d'un côté, Gentleman de l'autre)
+  A.heroArt = function (type) {
+    return A.icon('hero-' + type, 150, 210, function (c) {
+      c.translate(75, 200); c.scale(type === 'gentleman' ? 2.2 : 2.6, type === 'gentleman' ? 2.2 : 2.6);
+      A.person(c, type, { face: type === 'gentleman' ? -1 : 1, moving: false, t: 0.3, rank: 2, id: 2 });
     });
   };
 
@@ -5060,8 +5119,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
       phase: e.phase, face: e.face, size: size, flash: e.flashT > 0, carrying: e.carrying || e.fake, grab: e.grabbing,
       id: e.id, t: time + e.id, moving: e.curSpeed > 0, revealed: e.type === 'faussaire' && !e.disguised,
     };
-    if (!camo) { A.HALO = true; A.person(c, look, po); A.HALO = false; }
-    A.person(c, look, po);
+    A.personCached(c, look, po, !camo);
     if (camo && game.dark && !e.def.camo && e.smokeT <= 0) {
       // dans le noir, seuls les yeux brillent
       c.save(); c.globalAlpha = 0.9; c.scale(e.face * size, size);
@@ -5597,6 +5655,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     s.innerHTML =
       '<div class="title-corner"><button class="btn-round" id="t-full" aria-label="Plein écran">' + ICON_FULL + '</button>' +
       '<button class="btn-round" id="t-sound" aria-label="Son">' + (a.save.music || a.save.sfx ? ICON_SOUND : ICON_MUTE) + '</button></div>' +
+      '<img class="hero hero-l" alt="" src="' + A.heroArt('garde') + '"><img class="hero hero-r" alt="" src="' + A.heroArt('gentleman') + '">' +
       '<div class="logo"><span class="l1">PAS TOUCHE <em>!</em></span><span class="l2">Défense du Musée</span></div>' +
       '<div class="title-buttons">' +
       '<button class="btn big" id="t-play">Jouer</button>' +
@@ -5714,8 +5773,14 @@ img { -webkit-user-drag: none; pointer-events: none; }
   function chip(img, name, kind, wide) {
     return '<div class="chip' + (wide ? ' wide' : '') + '"><img alt="" src="' + img + '"><span><small>' + esc(kind) + '</small>' + esc(name) + '</span></div>';
   }
-  function card(img, name, desc, tag, tagCls) {
-    return '<div class="card"><img alt="" src="' + img + '"><div><b>' + esc(name) + (tag ? '<span class="tag ' + (tagCls || '') + '">' + tag + '</span>' : '') + '</b><small>' + esc(desc) + '</small></div></div>';
+  function card(img, name, desc, tag, tagCls, extra) {
+    return '<div class="card"><img alt="" src="' + img + '"><div><b>' + esc(name) + (tag ? '<span class="tag ' + (tagCls || '') + '">' + tag + '</span>' : '') + '</b><small>' + esc(desc) + '</small>' + (extra || '') + '</div></div>';
+  }
+  // Jauge en 5 segments (au lieu d'un nombre brut)
+  function gauge(label, steps, v) {
+    var n = 1; for (var i = 1; i < steps.length; i++) if (v >= steps[i]) n = i + 1;
+    var seg = ''; for (var k = 0; k < 5; k++) seg += '<i class="' + (k < n ? 'on' : '') + '"></i>';
+    return '<span class="gauge"><em>' + label + '</em>' + seg + '</span>';
   }
   UI.showBrief = function (idx) {
     var a = App(), lv = PT.LEVELS[idx];
@@ -5725,13 +5790,13 @@ img { -webkit-user-drag: none; pointer-events: none; }
     nw.towers.forEach(function (t) { cards += card(A.towerIcon(t), PT.TOWERS[t].name, PT.TOWERS[t].desc, 'DÉFENSE', 'def'); });
     nw.powers.forEach(function (p) { cards += card(A.powerIcon(p), PT.POWERS[p].name, PT.POWERS[p].desc, 'POUVOIR', 'pow'); });
     nw.enemies.forEach(function (t) { cards += card(A.enemyIcon(t), PT.ENEMIES[t].name, PT.ENEMIES[t].desc, 'SUSPECT'); });
-    var foes = enemiesOf(lv).map(function (t) { return '<img alt="' + esc(PT.ENEMIES[t].name) + '" title="' + esc(PT.ENEMIES[t].name) + '" src="' + A.enemyIcon(t) + '">'; }).join('');
+    var foes = enemiesOf(lv).map(function (t) { return '<figure><img alt="" src="' + A.enemyIcon(t) + '"><figcaption>' + esc(PT.ENEMIES[t].name.replace(/^(Le |La |L’)/, '')) + '</figcaption></figure>'; }).join('');
     var kind = lv.type === 'casse' ? 'Niveau casse' : lv.variant ? 'Variante ' + VARIANTS[lv.variant].toLowerCase() : 'Horde';
-    s.innerHTML = '<div class="frame brief"><div class="top"><img alt="" src="' + thumb(lv) + '"><div>' +
-      '<div class="eyebrow">Salle ' + lv.id + ' · ' + kind + ' · ' + lv.waves.length + ' vagues</div>' +
-      '<h2>' + esc(lv.name) + '</h2><p><b>Trésor :</b> ' + esc(lv.treasure.name) + '</p><p>' + esc(lv.blurb) + '</p></div></div>' +
-      (cards ? '<h3>Nouveautés</h3><div class="cards">' + cards + '</div>' : '') +
-      '<h3>Suspects attendus</h3><div class="foes">' + foes + '</div>' +
+    s.innerHTML = '<div class="frame brief"><div class="cols"><div class="col-l"><img class="map" alt="" src="' + thumb(lv) + '">' +
+      (cards ? '<h3>Nouveautés</h3><div class="cards one">' + cards + '</div>' : '') + '</div>' +
+      '<div class="col-r"><div class="eyebrow">Salle ' + lv.id + ' · ' + kind + ' · ' + lv.waves.length + ' vagues</div>' +
+      '<h2>' + esc(lv.name) + '</h2><p><b>Trésor :</b> ' + esc(lv.treasure.name) + '</p><p>' + esc(lv.blurb) + '</p>' +
+      '<h3>Suspects attendus</h3><div class="foes">' + foes + '</div></div></div>' +
       '<div class="actions"><button class="btn ghost" id="b-back">Retour</button><button class="btn big" id="b-go">C’est parti !</button></div></div>';
     click($('b-back'), UI.showLevels);
     click($('b-go'), function () { a.startLevel(idx); });
@@ -5969,7 +6034,7 @@ img { -webkit-user-drag: none; pointer-events: none; }
     var html = '<h3>Les voleurs</h3><div class="cards">';
     PT.ENEMY_ORDER.forEach(function (t) {
       var d = PT.ENEMIES[t];
-      if (a.save.seen[t]) html += card(A.enemyIcon(t), d.name, d.desc + (d.innocent ? '' : ' Résistance ' + d.hp + ', vitesse ' + d.speed + '.'));
+      if (a.save.seen[t]) html += card(A.enemyIcon(t), d.name, d.desc, null, null, d.innocent ? '' : gauge('Résistance', [30, 60, 100, 200, 500], d.hp) + gauge('Vitesse', [40, 55, 70, 95, 120], d.speed));
       else html += '<div class="card locked"><img alt="" src="' + A.enemyIcon(t) + '" style="filter:brightness(0) opacity(0.8)"><div><b>???</b><small>Pas encore croisé.</small></div></div>';
     });
     html += '</div><h3>Vos défenses</h3><div class="cards">';

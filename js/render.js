@@ -970,8 +970,7 @@
       phase: e.phase, face: e.face, size: size, flash: e.flashT > 0, carrying: e.carrying || e.fake, grab: e.grabbing,
       id: e.id, t: time + e.id, moving: e.curSpeed > 0, revealed: e.type === 'faussaire' && !e.disguised,
     };
-    if (!camo) { A.HALO = true; A.person(c, look, po); A.HALO = false; }
-    A.person(c, look, po);
+    A.personCached(c, look, po, !camo);
     if (camo && game.dark && !e.def.camo && e.smokeT <= 0) {
       // dans le noir, seuls les yeux brillent
       c.save(); c.globalAlpha = 0.9; c.scale(e.face * size, size);

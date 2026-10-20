@@ -153,4 +153,9 @@ Constat principal du testeur : sur un vrai téléphone, l'unité d'interface tom
 
 En plus : Gentleman plus imposant, illustrations et étoiles de fin agrandies, pelle de la Taupe derrière l'épaule, « Un casse toutes les 5 salles », pastille « ! » qui ne mord plus le texte.
 
-Restent à faire : image clé de l'écran titre, briefing en deux colonnes, jauges de résistance et de vitesse dans le Fichier, silhouettes encore plus différentes (gabarits), mise en cache des personnages pour alléger le double dessin du liseré.
+Points restants, traités ensuite (21 octobre 2026) :
+- **Écran titre** : le gardien et le Gentleman encadrent le logo (masqués sur les écrans presque carrés).
+- **Briefing** en deux colonnes : plan et nouveautés à gauche, texte et suspects nommés à droite.
+- **Fichier des suspects** : jauges en 5 segments pour la résistance et la vitesse.
+- **Silhouettes** : Patineur nettement penché, Pickpocket à grosse tête sur petit corps, Soigneuse à coiffe haute.
+- **Performances** : chaque pose de personnage est dessinée une fois dans une petite image puis réutilisée ; le liseré ne coûte plus rien en cours de partie.

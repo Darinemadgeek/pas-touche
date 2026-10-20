@@ -113,7 +113,7 @@
 
   var LOOKS = {
     voleur: { shirt: '#f4efe4', stripe: '#1f2a5a', pants: '#2b2b3a', hat: 'beanie', hatColor: '#3a3a48', pom: '#f5c518', mask: true, lids: true },
-    pickpocket: { shirt: '#4f9a46', pants: '#5a4632', hat: 'cap', hatColor: '#80603e', mask: true, scarf: '#d8402f', longScarf: '#d8402f', lids: true, small: true },
+    pickpocket: { headK: 1.18, shirt: '#4f9a46', pants: '#5a4632', hat: 'cap', hatColor: '#80603e', mask: true, scarf: '#d8402f', longScarf: '#d8402f', lids: true, small: true },
     costaud: { shirt: '#c0392b', tank: true, pants: '#3a3550', hat: 'bald', mask: true, mustache: '#3a2418', stubble: true, brows: true, big: true },
     ombre: { shirt: '#24212f', pants: '#24212f', shoes: '#24212f', mitten: '#24212f', hat: 'ninja', band: '#d0313c', skin: '#24212f', lids: true },
     acrobate: { shirt: '#8e44ad', harlequin: '#f4c430', pants: '#8e44ad', hat: 'hair', hair: '#e2583e', mask: true, small: true },
@@ -149,7 +149,7 @@
     var step = moving ? Math.floor((o.phase || 0) / (Math.PI / 2)) & 3 : 0;
     var hop = moving && (step & 1) ? 2.5 : 0;
     var big = !!L.big, k = big ? 1.12 : 1;
-    var W = big ? 38 : L.small ? 24 : 27, R = 17 * k;
+    var W = big ? 38 : L.small ? 24 : 27, R = 17 * k * (L.headK || 1);
     var top = -27 - hop, bot = -5 - hop;
     var hx = 1, hy = top - R * 0.68;
     var revealed = o.revealed, masked = L.mask || revealed;
@@ -159,7 +159,7 @@
     c.save();
     c.scale((o.face || 1) * (o.size || 1), o.size || 1);
     shadow(c, 0, 0, W * 0.62, 4.5);
-    if (moving) c.rotate(L.lean ? 0.14 + (step & 2 ? 0.03 : 0) : step & 2 ? 0.045 : -0.045);
+    if (moving) c.rotate(L.lean ? 0.26 + (step & 2 ? 0.03 : 0) : step & 2 ? 0.045 : -0.045);
 
     if (L.shovel) {
       // Pelle portée à l'épaule, derrière le corps : la lame dépasse à côté de la tête
@@ -434,8 +434,9 @@
       rr(c, hx + R * 0.35, crown + 2, 8, 7, 2); fs(c, col('#7a7a7a'), 1.2);
       circ(c, hx + R * 0.35 + 6, crown + 5.5, 3); fs(c, col('#fff6b0'), 1.2);
     } else if (L.hat === 'nurse') {
-      rr(c, hx - 9, crown - 6, 18, 9, 2); fs(c, col('#ffffff'), lw);
-      c.fillStyle = col('#e2342e'); c.fillRect(hx - 1.5, crown - 5, 3, 7); c.fillRect(hx - 3.5, crown - 3, 7, 3);
+      // Coiffe haute d'infirmière : la silhouette se reconnaît de loin
+      c.beginPath(); c.moveTo(hx - 11, crown + 3); c.lineTo(hx - 8, crown - 16); c.quadraticCurveTo(hx, crown - 21, hx + 8, crown - 16); c.lineTo(hx + 11, crown + 3); c.closePath(); fs(c, col('#ffffff'), lw);
+      c.fillStyle = col('#e2342e'); c.fillRect(hx - 2, crown - 13, 4, 11); c.fillRect(hx - 5.5, crown - 9.5, 11, 4);
     } else if (L.hat === 'kepi') {
       rr(c, hx - 12, crown - 5, 24, 11, 3); fs(c, col(L.hatColor), lw);
       c.fillStyle = col((o.rank || 0) >= 2 ? '#ffd447' : '#d9dde6'); c.fillRect(hx - 12, crown + 2, 24, 2.4);
@@ -443,6 +444,32 @@
       circ(c, hx + 1, crown - 0.5, 2.6); fs(c, col('#ffd447'), 1.1);
     }
     c.restore();
+  };
+
+  // Version mise en cache : chaque pose (type, couleurs, pas, sens, sac, liseré…) est dessinée
+  // une seule fois dans une petite image, puis réutilisée. Le liseré papier ne coûte plus rien.
+  var personCache = new Map();
+  A.personCached = function (c, type, o, halo) {
+    if (typeof document === 'undefined') return A.person(c, type, o);
+    var tr = c.getTransform(), sc = Math.hypot(tr.a, tr.b) || 1, size = o.size || 1;
+    var step = o.moving !== false ? Math.floor((o.phase || 0) / (Math.PI / 2)) & 3 : 0;
+    var tq = Math.floor((o.t || 0) * 2) % 2;
+    var key = [type, (o.id || 0) % 6, step, (o.face || 1) > 0 ? 1 : 0, Math.min(o.carrying || 0, 3), o.grab ? 1 : 0, o.flash ? 1 : 0,
+      o.revealed ? 1 : 0, o.moving === false ? 0 : 1, size, tq, halo ? 1 : 0, Math.round(sc * 20)].join('|');
+    var e = personCache.get(key);
+    if (!e) {
+      var bw = 130 * size, bh = 160 * size, ox = 65 * size, oy = 125 * size;
+      var cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.ceil(bw * sc)); cv.height = Math.max(1, Math.ceil(bh * sc));
+      var g = cv.getContext('2d'); g.scale(sc, sc); g.translate(ox, oy);
+      var o2 = {}; for (var k in o) o2[k] = o[k]; o2.t = tq * 0.5;
+      if (halo) { A.HALO = true; A.person(g, type, o2); A.HALO = false; }
+      A.person(g, type, o2);
+      e = { cv: cv, ox: ox, oy: oy, w: bw, h: bh };
+      if (personCache.size > 900) personCache.clear();
+      personCache.set(key, e);
+    }
+    c.drawImage(e.cv, -e.ox, -e.oy, e.w, e.h);
   };
 
   /* ---------- Socle des défenses ---------- */
@@ -1250,6 +1277,14 @@
         c.save(); c.translate(150, 112); c.scale(1.4, 1.4); A.person(c, 'voleur', { face: 1, moving: true, phase: 1, t: 0.3, carrying: 1, id: 2 }); c.restore();
         [[100, 70], [94, 86], [104, 98]].forEach(function (p) { line(c, p[0], p[1], p[0] - 18, p[1], 'rgba(42,28,22,0.5)', 2.4); });
       }
+    });
+  };
+
+  // Personnages en pied pour l'écran titre (gardien d'un côté, Gentleman de l'autre)
+  A.heroArt = function (type) {
+    return A.icon('hero-' + type, 150, 210, function (c) {
+      c.translate(75, 200); c.scale(type === 'gentleman' ? 2.2 : 2.6, type === 'gentleman' ? 2.2 : 2.6);
+      A.person(c, type, { face: type === 'gentleman' ? -1 : 1, moving: false, t: 0.3, rank: 2, id: 2 });
     });
   };
 

@@ -522,3 +522,27 @@ img { -webkit-user-drag: none; pointer-events: none; }
 }
 .btn.notify { padding-right: calc(var(--u) * 26); }
 .btn.notify::after { top: calc(var(--u) * -12) !important; right: calc(var(--u) * -10) !important; }
+
+/* Écran titre : personnages de part et d'autre du logo */
+#scr-title .hero { position: absolute; bottom: calc(var(--u) * 40); height: calc(var(--u) * 260); width: auto; pointer-events: none; filter: drop-shadow(2px 0 0 #fff4dc) drop-shadow(-2px 0 0 #fff4dc) drop-shadow(0 2px 0 #fff4dc) drop-shadow(0 -2px 0 #fff4dc) drop-shadow(0 calc(var(--u) * 6) 0 rgba(20,5,12,0.45)); }
+#scr-title .hero-l { left: max(calc(var(--u) * 20), 4%); transform: rotate(-4deg); }
+#scr-title .hero-r { right: max(calc(var(--u) * 20), 4%); transform: rotate(4deg); }
+@media (max-aspect-ratio: 5/4) { #scr-title .hero { display: none; } }
+@media (max-aspect-ratio: 3/2) { #scr-title .hero { height: calc(var(--u) * 190); } }
+
+/* Briefing en deux colonnes */
+.brief .cols { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: calc(var(--u) * 18); align-items: start; }
+.brief .map { width: 100%; border: calc(var(--u) * 3) solid var(--ink); border-radius: calc(var(--u) * 6); display: block; }
+.brief .cards.one { grid-template-columns: 1fr; }
+.brief .col-r h2 { margin-top: calc(var(--u) * 2); }
+.foes { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 8); }
+.foes figure { margin: 0; display: flex; flex-direction: column; align-items: center; width: calc(var(--u) * 66); }
+.foes figure img { width: calc(var(--u) * 60); height: calc(var(--u) * 66); background: #fff; border: calc(var(--u) * 2) solid var(--ink); border-radius: calc(var(--u) * 8); }
+.foes figcaption { font-size: max(calc(var(--u) * 12), 10.5px); font-weight: 800; text-align: center; line-height: 1.05; margin-top: 2px; }
+@media (max-width: 560px) { .brief .cols { grid-template-columns: 1fr; } }
+
+/* Jauges du Fichier des suspects */
+.gauge { display: flex; align-items: center; gap: 2px; margin-top: 3px; }
+.gauge em { font-style: normal; font-size: max(calc(var(--u) * 12), 10.5px); font-weight: 800; color: #6b5440; width: calc(var(--u) * 80); min-width: 64px; }
+.gauge i { width: calc(var(--u) * 14); min-width: 9px; height: calc(var(--u) * 7); min-height: 5px; border-radius: 2px; background: #e5dccb; }
+.gauge i.on { background: var(--red); }
