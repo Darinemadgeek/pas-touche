@@ -148,7 +148,7 @@
       var st = '';
       for (var k = 0; k < PT.MAX_STARS; k++) st += '<img alt="" src="' + A.starIcon(k < stars) + '">';
       var badge = lv.type === 'casse' ? '<span class="badge casse">CASSE</span>' : lv.variant ? '<span class="badge variante">' + VARIANTS[lv.variant] + '</span>' : '';
-      b.innerHTML = badge + '<img class="thumb" alt="" src="' + thumb(lv) + '"><div class="body"><span class="num">SALLE ' + lv.id + '</span>' +
+      b.innerHTML = badge + (unlocked ? '' : '<img class="lock-ic" alt="Verrouillée" src="' + A.lockIcon() + '">') + '<img class="thumb" alt="" src="' + thumb(lv) + '"><div class="body"><span class="num">SALLE ' + lv.id + '</span>' +
         '<span class="name">' + esc(lv.name) + '</span><span class="sub">' + esc(lv.subtitle) + '</span><span class="stars">' + st + '</span></div>';
       if (unlocked) click(b, function () { UI.showBrief(idx); });
       else b.addEventListener('click', function () { PT.Audio.play('error'); UI.toast('Salle verrouillée', 'Terminez la salle ' + (idx) + ' pour l’ouvrir'); });
@@ -200,7 +200,7 @@
       '<h2>' + esc(lv.name) + '</h2><p><b>Trésor :</b> ' + esc(lv.treasure.name) + '</p><p>' + esc(lv.blurb) + '</p></div></div>' +
       (cards ? '<h3>Nouveautés</h3><div class="cards">' + cards + '</div>' : '') +
       '<h3>Suspects attendus</h3><div class="foes">' + foes + '</div>' +
-      '<div class="actions"><button class="btn ghost" id="b-back">Retour</button><button class="btn big red" id="b-go">C’est parti !</button></div></div>';
+      '<div class="actions"><button class="btn ghost" id="b-back">Retour</button><button class="btn big" id="b-go">C’est parti !</button></div></div>';
     click($('b-back'), UI.showLevels);
     click($('b-go'), function () { a.startLevel(idx); });
   };
@@ -258,9 +258,9 @@
       unl += chip(thumb(next), next.name, 'Salle ' + next.id, true);
     }
     var g = info.game;
-    s.innerHTML = '<div class="frame result"><div class="eyebrow">Salle ' + lv.id + ' · ' + esc(lv.name) + '</div><h2>Musée protégé !</h2>' +
+    s.innerHTML = '<div class="frame result"><img class="end-art" alt="" src="' + A.endArt(true, lv.treasure.kind) + '"><div class="eyebrow">Salle ' + lv.id + ' · ' + esc(lv.name) + '</div><h2>Musée protégé !</h2>' +
       '<div class="big-stars">' + stars + '</div>' +
-      '<div class="stats-row"><div><b>' + g.stats.caught + '</b>voleurs attrapés</div><div><b>' + g.lives + '/' + g.maxLives + '</b>objets sauvés</div><div><b>' + g.stats.returned + '</b>objets récupérés</div></div>' +
+      '<div class="stats-row"><div><b>' + g.stats.caught + '</b>voleurs attrapés</div><div><b>' + g.lives + '/' + g.maxLives + '</b>objets sauvés</div><div><b>' + g.stats.returned + '</b>repris aux voleurs</div></div>' +
       (info.gained > 0 ? '<p><b>+' + info.gained + ' étoile' + (info.gained > 1 ? 's' : '') + '</b> à dépenser à l’Atelier.</p>' : '') +
       (unl ? '<div class="eyebrow">Débloqué</div><div class="unlocks">' + unl + '</div>' : '') +
       '<div class="quote"><img alt="" src="' + A.portrait('gentleman') + '"><p>« ' + esc(lv.outro) + ' »</p></div>' +
@@ -295,12 +295,12 @@
     tips.push('Dépensez vos étoiles à l’Atelier pour des bonus permanents.');
     var canRelax = !a.relax && ((a.save.fails || {})[lv.id] || 0) >= PT.RELAX.after;
     var s = UI.screen('scr-lose');
-    s.innerHTML = '<div class="frame result"><div class="eyebrow">Salle ' + lv.id + ' · vague ' + (info.game.waveIndex + 1) + '/' + lv.waves.length + '</div><h2>Cambriolé !</h2>' +
+    s.innerHTML = '<div class="frame result"><img class="end-art" alt="" src="' + A.endArt(false, lv.treasure.kind) + '"><div class="eyebrow">Salle ' + lv.id + ' · vague ' + Math.max(1, info.game.waveIndex + 1) + '/' + lv.waves.length + '</div><h2>Cambriolé !</h2>' +
       '<div class="quote"><img alt="" src="' + A.portrait('gentleman') + '"><p>« ' + LOSE_QUOTES[(Math.random() * LOSE_QUOTES.length) | 0] + ' »</p></div>' +
       '<p><b>Astuce :</b> ' + tips[(Math.random() * Math.min(4, tips.length)) | 0] + '</p>' +
       (canRelax ? '<div class="relax"><b>Cette salle vous résiste ?</b> Rejouez-la en <b>mode détente</b> : les voleurs sont 25 % moins résistants, mais vous gagnerez ' + PT.RELAX.maxStars + ' étoiles au plus.</div>' : '') +
       '<div class="actions"><button class="btn ghost small" id="l-menu">Salles</button><button class="btn ghost small" id="l-shop">Atelier</button>' +
-      (canRelax ? '<button class="btn green" id="l-relax">Mode détente</button>' : '') + '<button class="btn big red" id="l-retry">Réessayer</button></div></div>';
+      (canRelax ? '<button class="btn small ghost" id="l-relax">Mode détente</button>' : '') + '<button class="btn big" id="l-retry">Réessayer</button></div></div>';
     if (canRelax) click($('l-relax'), function () { a.startLevel(a.levelIdx, true); });
     click($('l-menu'), function () { a.quitToLevels(); });
     click($('l-shop'), function () { a.quitToLevels(); UI.showAtelier(UI.showLevels); });
@@ -321,7 +321,7 @@
   // Talent = un rond avec son dessin, ses rangs en petits points, et son nom dessous.
   function pillHtml(u, a) {
     var r = a.save.upgrades[u.id] || 0, max = u.costs.length, st = talentState(u, a);
-    var badge = st === 'locked' ? '<span class="badge">🔒</span>' : st === 'banned' ? '<span class="badge no">✕</span>' : st === 'done' ? '<span class="badge ok">✓</span>' : '';
+    var badge = st === 'locked' ? '<span class="badge"><img alt="" src="' + A.lockIcon() + '"></span>' : st === 'banned' ? '<span class="badge no">✕</span>' : st === 'done' ? '<span class="badge ok">✓</span>' : '';
     var pips = '';
     for (var k = 0; k < max; k++) pips += '<i class="' + (k < r ? 'on' : '') + '"></i>';
     return '<button class="pill-node ' + st + (r > 0 ? ' owned' : '') + (UI.atelierSel === u.id ? ' sel' : '') + '" data-id="' + u.id + '"' + (u.req ? ' data-req="' + u.req + '"' : '') + '>' +
@@ -392,7 +392,7 @@
     var r = a.save.upgrades[sel.id] || 0, max = sel.costs.length, st = talentState(sel, a);
     var why = st === 'banned' ? 'Vous avez choisi l’autre option : remboursez vos étoiles pour changer d’avis.' :
       st === 'locked' ? 'Achetez d’abord « ' + esc(PT.upgradeById(sel.req).name) + ' ».' : '';
-    html += '<div class="talent-detail"><small class="hint">Touchez un talent pour le voir ici</small><div class="td-head"><img alt="" src="' + A.talentIcon(sel.id) + '"><h3>' + esc(sel.name) + '</h3></div>' +
+    html += '<div class="talent-detail"><div class="td-head"><img alt="" src="' + A.talentIcon(sel.id) + '"><h3>' + esc(sel.name) + '</h3></div>' +
       (sel.excl ? '<span class="excl-tag">Au choix avec « ' + esc(PT.upgradeById(sel.excl).name) + ' »</span>' : '') +
       '<p class="rank">' + (sel.path === 't' ? 'Tronc commun' : 'Voie : ' + esc(br.paths[sel.path])) + ' · rang ' + r + ' / ' + max + '</p>' +
       (r > 0 ? '<p class="now">Actuel : ' + esc(sel.desc(r)) + '</p>' : '') +
@@ -564,6 +564,14 @@
       b.classList.toggle('active', UI.aiming === id);
     });
 
+    // Les boutons de pouvoir deviennent transparents quand un voleur passe dessous
+    var pw = $('powers'), pr = pw.getBoundingClientRect(), under = false, rd = App().renderer;
+    for (var e2 = 0; e2 < g.enemies.length && !under; e2++) {
+      var en = g.enemies[e2], sp2 = rd.toScreen(en.x, en.y - 25);
+      if (sp2.x > pr.left - 20 && sp2.x < pr.right + 20 && sp2.y > pr.top - 30 && sp2.y < pr.bottom + 10) under = true;
+    }
+    if (c.under !== under) { c.under = under; pw.classList.toggle('see-through', under); }
+
     // Boss
     var boss = null;
     for (var i = 0; i < g.enemies.length; i++) if (g.enemies[i].def.boss) { boss = g.enemies[i]; break; }
@@ -623,7 +631,8 @@
     function f(label, a, b, unit, mul) {
       mul = mul || 1; unit = unit || '';
       var va = Math.round(a * mul * 10) / 10, vb = b != null ? Math.round(b * mul * 10) / 10 : null;
-      out.push('<span>' + label + ' ' + va + unit + (vb != null && vb !== va ? ' <b class="up">→ ' + vb + unit + '</b>' : '') + '</span>');
+      var fr = function (v) { return String(v).replace('.', ','); };
+      out.push('<span>' + label + ' ' + fr(va) + unit + (vb != null && vb !== va ? ' <b class="up">→ ' + fr(vb) + unit + '</b>' : '') + '</span>');
     }
     if (st.dmg != null) f(d.splash || st.splash ? 'Dégâts zone' : 'Dégâts', st.dmg, next && next.dmg);
     if (st.dps != null) f('Dégâts/s', st.dps, next && next.dps);
@@ -673,7 +682,7 @@
     UI.selectedSpot = spot;
     UI.radialKind = 'build';
     var types = g.availableTowers;
-    var u = a.u, radius = (types.length > 8 ? 112 : types.length > 6 ? 94 : 82) * u;
+    var u = a.u, radius = Math.max(82, 13.5 * types.length) * u; // le cercle grandit avec le nombre de défenses
     var sp = a.renderer.toScreen(spot.x, spot.y - 24);
     var L = layoutRadial(sp.x, sp.y, types.length, radius);
     UI.radialCx = L.cx; UI.radialCy = L.cy; UI.radialR = radius;
@@ -683,7 +692,7 @@
     r.appendChild(ring);
     types.forEach(function (t, i) {
       var d = PT.TOWERS[t], cost = g.towerCost(t);
-      var b = el('button', 'r-item', '<img alt="" src="' + A.towerIcon(t) + '"><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">' + cost + '</span>');
+      var b = el('button', 'r-item', '<img alt="" src="' + A.towerIcon(t, 0, true) + '"><span class="price"><img alt="" src="' + A.coinIcon() + '" style="width:1em;height:1em;margin:0">' + cost + '</span>');
       b.dataset.type = t; b.dataset.cost = cost;
       b.setAttribute('aria-label', d.name + ', ' + cost + ' pièces');
       b.style.left = L.pos[i].x + 'px'; b.style.top = L.pos[i].y + 'px';
@@ -733,7 +742,7 @@
       var b = el('button', 'r-item' + (cost == null ? ' max' : '') + (spec ? ' spec' : ''));
       if (cost == null) b.innerHTML = '<span class="lbl">MAX</span>';
       else {
-        b.innerHTML = '<img alt="" src="' + A.towerIcon(tower.type, tower.level + 1) + '">' + (spec ? '<span class="spec-name" style="background:' + specs[spec].color + '">' + esc(specs[spec].name) + '</span>' : '') +
+        b.innerHTML = '<img alt="" src="' + A.towerIcon(tower.type, tower.level + 1, true) + '">' + (spec ? '<span class="spec-name" style="background:' + specs[spec].color + '">' + esc(specs[spec].name) + '</span>' : '') +
           '<span class="price">' + coin + cost + '</span>';
         b.dataset.cost = cost;
       }

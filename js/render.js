@@ -27,7 +27,7 @@
     cv.width = w; cv.height = Math.round(w * H / W);
     var c = cv.getContext('2d'), k = r.bgRes;
     c.drawImage(r.bg, MX * k, MY * k, W * k, H * k, 0, 0, cv.width, cv.height);
-    if (r.night) c.drawImage(r.night, MX * 0.5, MY * 0.5, W * 0.5, H * 0.5, 0, 0, cv.width, cv.height);
+    if (r.night) { c.globalCompositeOperation = 'multiply'; c.drawImage(r.night, MX * 0.5, MY * 0.5, W * 0.5, H * 0.5, 0, 0, cv.width, cv.height); c.globalCompositeOperation = 'source-over'; }
     var tr = level.paths[0][level.paths[0].length - 1];
     c.save(); c.scale(k, k); c.translate(tr[0], tr[1]); A.treasure(c, level.treasure.kind, true, 0.5, 0); c.restore();
     return cv.toDataURL('image/jpeg', 0.86);
@@ -95,7 +95,9 @@
       var n = nv.getContext('2d');
       n.scale(nr, nr); n.translate(MX, MY);
       var panne = level.variant === 'panne';
-      n.fillStyle = panne ? 'rgba(6,8,26,0.72)' : 'rgba(8,10,38,0.6)'; n.fillRect(-MX, -MY, W + 2 * MX, H + 2 * MY);
+      // Voile bleu nuit appliqué en « multiplication » : il assombrit les couleurs sans les griser,
+      // et les zones éclairées retrouvent leurs vraies couleurs.
+      n.fillStyle = panne ? '#2a3068' : '#4d5598'; n.fillRect(-MX, -MY, W + 2 * MX, H + 2 * MY);
       n.globalCompositeOperation = 'destination-out';
       var lights;
       if (panne) {
@@ -107,18 +109,19 @@
       } else {
         var ls = level.lights || [];
         lights = ls.map(function (l) { return { x: l[0], y: l[1], r: 150 }; })
-          .concat(level.spots.map(function (sp) { return { x: sp[0], y: sp[1], r: 105 }; }))
-          .concat([{ x: tr[0], y: tr[1] - 40, r: 105 }]);
+          .concat(level.spots.map(function (sp) { return { x: sp[0], y: sp[1] - 20, r: 78 }; }))
+          .concat([{ x: tr[0], y: tr[1] - 40, r: 110 }]);
       }
       lights.forEach(function (l) {
         var g = n.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
-        if (l.hard) { g.addColorStop(0, 'rgba(0,0,0,0.97)'); g.addColorStop(0.82, 'rgba(0,0,0,0.88)'); g.addColorStop(1, 'rgba(0,0,0,0)'); }
-        else { g.addColorStop(0, 'rgba(0,0,0,0.95)'); g.addColorStop(0.6, 'rgba(0,0,0,0.5)'); g.addColorStop(1, 'rgba(0,0,0,0)'); }
+        // Bords très doux : la lumière ne doit pas ressembler à un cercle de portée
+        if (l.hard) { g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.72, 'rgba(0,0,0,0.9)'); g.addColorStop(1, 'rgba(0,0,0,0)'); }
+        else { g.addColorStop(0, 'rgba(0,0,0,0.9)'); g.addColorStop(0.45, 'rgba(0,0,0,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); }
         n.fillStyle = g; n.beginPath(); n.arc(l.x, l.y, l.r, 0, TAU); n.fill();
       });
       if (panne) {
         n.globalCompositeOperation = 'source-over';
-        n.setLineDash([10, 9]); n.lineWidth = 3; n.strokeStyle = 'rgba(255,226,120,0.4)';
+        n.setLineDash([6, 10]); n.lineWidth = 2; n.strokeStyle = 'rgba(255,226,120,0.5)';
         lights.forEach(function (l) { if (l.hard) { n.beginPath(); n.arc(l.x, l.y, l.r - 4, 0, TAU); n.stroke(); } });
         n.setLineDash([]);
       }
@@ -156,8 +159,8 @@
     c.lineJoin = 'round'; c.lineCap = 'butt';
     var layers = [
       { w: 80, col: 'rgba(20,10,5,0.22)', dy: 6 },
-      { w: 78, col: INK },
-      { w: 75, col: th.trim },
+      { w: 80, col: INK },
+      { w: 77, col: th.trim },
       { w: 63, col: INK },
       { w: 61.6, col: th.carpet },
       { w: 54, col: A.shade(th.carpet, 0.35), dash: [7, 6] },
@@ -349,7 +352,7 @@
         var ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
         [-1, 1].forEach(function (side) {
           var prev = null;
-          for (var d = 50; d < len - 40; d += 64) {
+          for (var d = 60; d < len - 40; d += 160) {
             var x = a[0] + ux * d + nx * 47 * side, y = a[1] + uy * d + ny * 47 * side;
             var key = Math.round(x / 12) + ',' + Math.round(y / 12);
             var ok = x > 14 && x < W - 14 && y > WALL + 16 && y < H - 8 && minPathDist(level, x, y) > 44 &&
@@ -713,7 +716,7 @@
     // Champ de vision des caméras
     for (i = 0; i < game.towers.length; i++) if (game.towers[i].type === 'camera') drawCameraRange(c, game, game.towers[i], time);
 
-    if (this.night) c.drawImage(this.night, -MX, -MY, W + 2 * MX, H + 2 * MY);
+    if (this.night) { c.globalCompositeOperation = 'multiply'; c.drawImage(this.night, -MX, -MY, W + 2 * MX, H + 2 * MY); c.globalCompositeOperation = 'source-over'; }
 
     // Socles libres
     var minCost = Infinity;
@@ -907,14 +910,19 @@
     c.translate(t.x, t.y);
     if (t.builtT < 0.3) { var k = 1 + Math.sin(t.builtT / 0.3 * Math.PI) * 0.18; c.scale(k, 1 / k); }
     if (ui && ui.selectedTower === t) { ell(c, 0, 6, 44, 18); c.fillStyle = 'rgba(255,212,71,0.45)'; c.fill(); }
-    A.tower(c, t.type, { level: t.level, aim: t.aim, face: t.face, fireT: t.fireT, lungeT: t.lungeT, lx: t.lx, ly: t.ly, x: t.x, y: t.y, disabled: t.disabledT > 0, time: time + t.id, beamOn: t.beamOn });
+    var to = { level: t.level, aim: t.aim, face: t.face, fireT: t.fireT, lungeT: t.lungeT, lx: t.lx, ly: t.ly, x: t.x, y: t.y, disabled: t.disabledT > 0, time: time + t.id, beamOn: t.beamOn };
+    A.HALO = true; A.tower(c, t.type, to); A.HALO = false;
+    A.tower(c, t.type, to);
     if (t.spec && PT.SPECS[t.type]) {
       var spc = PT.SPECS[t.type][t.spec];
-      A.line(c, -30, 4, -30, -26, A.INK, 2);
-      c.beginPath(); c.moveTo(-30, -26); c.lineTo(-16, -21); c.lineTo(-30, -16); c.closePath(); A.fs(c, spc.color, 1.6);
+      // Médaillon de spécialisation : pastille de couleur avec l'initiale
+      A.circ(c, -30, -4, 10); A.fs(c, spc.color, 2.2);
+      c.font = '13px ' + A.FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff';
+      c.fillText(spc.mark || spc.name.replace(/^(Caméra|Rayon|Filet|Glu|Boulet de|Souffle|Lance d’) ?/, '').charAt(0).toUpperCase(), -30, -3);
+      c.textBaseline = 'alphabetic';
     }
     if (t.type !== 'chef' && game.towerStats(t).chefBuff > 0) {
-      A.starPath(c, 24, -16 - (Math.floor(time * 3 + t.id) % 2) * 2, 6, 2.6); A.fs(c, '#ffd447', 1.6);
+      A.starPath(c, 24, -16, 6, 2.6); A.fs(c, '#ffd447', 1.6);
     }
     if (game.cafeT > 0) {
       c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 2.4; c.lineCap = 'round';
@@ -954,19 +962,21 @@
       c.translate(0, -Math.sin(lp * Math.PI) * 50);
       c.translate(0, -24 * size); c.rotate(lp * TAU * e.face); c.translate(0, 24 * size);
     }
-    if (camo) c.globalAlpha = 0.18 + 0.1 * Math.sin(time * 7 + e.id);
-    else if (decoy) c.globalAlpha = 0.72 + 0.12 * Math.sin(time * 9 + e.id);
+    if (camo) c.globalAlpha = 0.18 + 0.08 * Math.sin(time * 2 + e.id);
+    else if (decoy) c.globalAlpha = 0.72 + 0.1 * Math.sin(time * 2 + e.id);
     if (e.smokeT > 0) {
       c.save(); c.globalAlpha = 0.6;
       for (var s = 0; s < 5; s++) { circ(c, Math.cos(time * 2 + s * 1.3) * 26, -40 - Math.sin(time * 3 + s) * 16, 16 + s * 2); c.fillStyle = 'rgba(160,160,175,0.6)'; c.fill(); }
       c.restore();
     }
-    var shake = (e.stunT > 0 || game.freezeT > 0 || e.blocked) ? Math.sin(time * 50) * 1.2 : 0;
+    var shake = (e.stunT > 0 || game.freezeT > 0 || e.blocked) ? Math.sin(time * 22) * 0.8 : 0;
     c.translate(shake, 0);
-    A.person(c, look, {
+    var po = {
       phase: e.phase, face: e.face, size: size, flash: e.flashT > 0, carrying: e.carrying || e.fake, grab: e.grabbing,
       id: e.id, t: time + e.id, moving: e.curSpeed > 0, revealed: e.type === 'faussaire' && !e.disguised,
-    });
+    };
+    if (!camo) { A.HALO = true; A.person(c, look, po); A.HALO = false; }
+    A.person(c, look, po);
     if (camo && game.dark && !e.def.camo && e.smokeT <= 0) {
       // dans le noir, seuls les yeux brillent
       c.save(); c.globalAlpha = 0.9; c.scale(e.face * size, size);
@@ -1028,7 +1038,7 @@
       case 'catch':
         this.addFx({ kind: 'caught', x: x, y: y, enemy: ev.enemy, face: ev.face, life: 0.55 });
         this.addFx({ kind: 'comic', x: x + 10, y: y - 70, text: CATCH_WORDS[(Math.random() * CATCH_WORDS.length) | 0], life: 0.8, big: ev.boss });
-        if (ev.reward) this.addFx({ kind: 'text', x: x, y: y - 40, text: '+' + ev.reward, color: '#ffd447', size: 22, life: 1 });
+        if (ev.reward) this.addFx({ kind: 'text', x: x - 44, y: y - 20, text: '+' + ev.reward, color: '#ffd447', size: 20, life: 0.9 });
         this.burst(x, y - 26, 8, '#ffd447');
         if (ev.boss) this.shake = 18;
         break;

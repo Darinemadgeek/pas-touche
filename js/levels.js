@@ -67,7 +67,7 @@
         { wave: 2, text: 'Hop, mes Ombres sont là. Sans caméra, vous ne les attraperez jamais !' },
         { wave: 7, text: 'Le masque sera du plus bel effet dans mon salon.' },
       ],
-      outro: 'Grr… Mes Ombres démasquées ! Allez donc voir l’Aile des Dinosaures : mes Costauds y ont rendez-vous.',
+      outro: 'Grr… Mes Ombres démasquées ! Allez donc voir la Galerie des Dinosaures : mes Costauds y ont rendez-vous.',
       waves: [
         { groups: [{ t: 'voleur', n: 8, gap: 1.2 }] },
         { groups: [{ t: 'pickpocket', n: 10, gap: 0.7 }, { t: 'voleur', n: 6, gap: 1, at: 5 }] },
@@ -83,7 +83,7 @@
     /* ------------------------------------------------------------------ 3 */
     {
       id: 3, type: 'horde',
-      name: 'Aile des Dinosaures',
+      name: 'Galerie des Dinosaures',
       subtitle: 'L’Œuf de Diplodocus',
       blurb: 'Deux entrées ! Les Costauds encaissent tout et les Acrobates sautent par-dessus la glu. Le Lance-Filet arrive en renfort.',
       theme: { floor: 'marble', floorA: '#e9e4d6', floorB: '#cfc8b4', wall: '#3f6b4a', wallDark: '#223d2a', trim: '#e0a33a', carpet: '#7c3a8f', night: false },
@@ -124,7 +124,7 @@
       name: 'Nocturne d’Art Moderne',
       subtitle: 'Le Carré Pas Très Blanc',
       blurb: 'Variante « portes ouvertes » : de vrais touristes visitent le musée (et paient !). Des Faux Touristes se cachent parmi eux, et les Hackeuses coupent le courant.',
-      theme: { floor: 'gallery', floorA: '#5b6378', floorB: '#525a6e', wall: '#262b45', wallDark: '#14172a', trim: '#f04f8a', carpet: '#232733', night: true },
+      theme: { floor: 'gallery', floorA: '#5b6378', floorB: '#525a6e', wall: '#262b45', wallDark: '#14172a', trim: '#f04f8a', carpet: '#3a3550', night: true },
       treasure: { kind: 'tableau', name: 'Le Carré Pas Très Blanc' },
       startCoins: 320, lives: 20, hpMul: 4.0,
       paths: [
@@ -162,7 +162,7 @@
       name: 'Les Joyaux de la Couronne',
       subtitle: 'La Couronne du Roi Dagobert',
       blurb: 'NIVEAU CASSE : pas de hordes ce soir, mais des équipes de professionnels. Chaque équipe a son plan, lisez les briefings ! Le Gentleman viendra en personne.',
-      theme: { floor: 'royal', floorA: '#8e2b3d', floorB: '#7a2233', wall: '#2c1a4a', wallDark: '#170c2b', trim: '#f2c14e', carpet: '#1f3f8f', night: false },
+      theme: { floor: 'royal', floorA: '#7a4048', floorB: '#6e3940', wall: '#2c1a4a', wallDark: '#170c2b', trim: '#f2c14e', carpet: '#1f3f8f', night: false },
       treasure: { kind: 'couronne', name: 'La Couronne du Roi Dagobert' },
       startCoins: 450, lives: 20, hpMul: 1.75,
       paths: [

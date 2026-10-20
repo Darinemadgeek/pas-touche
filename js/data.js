@@ -79,7 +79,7 @@
     },
     ventilo: {
       name: 'Ventilateur', unlock: 12, cost: 110, color: '#5fb8c9', electric: true, gust: true,
-      desc: 'Une rafale qui repousse les voleurs en arrière sur le tapis. Les Costauds, les Déménageurs et les boss tiennent bon.',
+      desc: 'Une rafale qui repousse les voleurs en arrière sur le tapis. Les plus lourds et les boss tiennent bon.',
       levels: [
         { dmg: 6, rate: 0.5, range: 130, push: 70, splash: 60 },
         { dmg: 10, rate: 0.55, range: 140, push: 90, splash: 66, cost: 95 },
@@ -112,7 +112,7 @@
   PT.SPECS = {
     gardien: {
       a: { name: 'Sergent', color: '#d8402f', desc: 'Matraque plus lourde : +50 % de dégâts, et elle assomme un instant.', mul: { dmg: 1.5 }, stunHit: 0.35 },
-      b: { name: 'Sifflet', color: '#3d6fd6', desc: '+60 % de cadence et +10 % de portée.', mul: { rate: 1.6, range: 1.1 } },
+      b: { name: 'Sifflet', mark: '♪', color: '#3d6fd6', desc: '+60 % de cadence et +10 % de portée.', mul: { rate: 1.6, range: 1.1 } },
     },
     glu: {
       a: { name: 'Glu géante', color: '#5cc23a', desc: 'Flaques 40 % plus larges qui durent bien plus longtemps.', mul: { splash: 1.4, puddle: 1.6 } },
@@ -124,7 +124,7 @@
     },
     chien: {
       a: { name: 'Molosse', color: '#7a4b2a', desc: '+70 % de dégâts par morsure.', mul: { dmg: 1.7 } },
-      b: { name: 'Meute', color: '#d8a066', desc: 'Mord deux voleurs à la fois, et un peu plus vite.', mul: { rate: 1.2 }, multi: 2 },
+      b: { name: 'Meute', mark: '2', color: '#d8a066', desc: 'Mord deux voleurs à la fois, et un peu plus vite.', mul: { rate: 1.2 }, multi: 2 },
     },
     filet: {
       a: { name: 'Filet lesté', color: '#8a5a34', desc: 'Immobilise 60 % plus longtemps, et retient même les Costauds (moins longtemps).', mul: { stun: 1.6 }, heavyNet: true },
@@ -262,7 +262,7 @@
   PT.BRANCHES = [
     { id: 'def', name: 'Défenses', color: '#3d6fd6', paths: { a: 'Gardiens et chiens', b: 'Technologie' } },
     { id: 'pow', name: 'Pouvoirs', color: '#d8402f', paths: { a: 'Buste', b: 'Alarme et café' } },
-    { id: 'eco', name: 'Économie', color: '#c9952e', paths: { a: 'Commerce', b: 'Primes' } },
+    { id: 'eco', name: 'Économie', color: '#a8741a', paths: { a: 'Commerce', b: 'Primes' } },
   ];
   PT.UPGRADES = [
     // Défenses

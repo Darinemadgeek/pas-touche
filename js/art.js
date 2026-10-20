@@ -7,6 +7,7 @@
   var OUTLINE = 0.6; // épaisseur des contours noirs (1 = trait d'origine)
   var TAU = Math.PI * 2;
   var A = PT.Art = {};
+  A.HALO = false;
   A.INK = INK;
   A.FONT = '"Lilita One", "Arial Black", Impact, sans-serif';
 
@@ -42,13 +43,22 @@
   }
   function ell(c, x, y, rx, ry, rot) { c.beginPath(); c.ellipse(x, y, Math.abs(rx), Math.abs(ry), rot || 0, 0, TAU); }
   function circ(c, x, y, r) { c.beginPath(); c.arc(x, y, Math.abs(r), 0, TAU); }
+  // Passe « liseré » : quand A.HALO est vrai, chaque forme est tracée plus large en crème,
+  // juste avant le vrai dessin. On obtient le bord blanc d'une découpe aux ciseaux.
+  var HALO_COL = '#fff4dc', HALO_W = 5;
   function fs(c, fill, lw) {
+    if (A.HALO) {
+      if (fill) { c.fillStyle = HALO_COL; c.fill(); }
+      if (lw !== 0) { c.lineWidth = (lw || 2.6) * OUTLINE + HALO_W; c.strokeStyle = HALO_COL; c.lineJoin = 'round'; c.lineCap = 'round'; c.stroke(); }
+      return;
+    }
     if (fill) { c.fillStyle = fill; c.fill(); }
     if (lw !== 0) { c.lineWidth = (lw || 2.6) * OUTLINE; c.strokeStyle = INK; c.lineJoin = 'round'; c.lineCap = 'round'; c.stroke(); }
   }
-  function shadow(c, x, y, rx, ry, a) { c.fillStyle = 'rgba(25,12,6,' + (a || 0.25) + ')'; ell(c, x, y, rx, ry); c.fill(); }
+  function shadow(c, x, y, rx, ry, a) { if (A.HALO) return; c.fillStyle = 'rgba(25,12,6,' + (a || 0.25) + ')'; ell(c, x, y, rx, ry); c.fill(); }
   function line(c, x1, y1, x2, y2, col, lw) {
     c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2);
+    if (A.HALO) { c.strokeStyle = HALO_COL; c.lineWidth = (lw || 2.6) + HALO_W; c.lineCap = 'round'; c.stroke(); return; }
     c.strokeStyle = col || INK; c.lineWidth = lw || 2.6; c.lineCap = 'round'; c.stroke();
   }
   function starPath(c, x, y, r, ri, n) {
@@ -103,11 +113,11 @@
 
   var LOOKS = {
     voleur: { shirt: '#f4efe4', stripe: '#1f2a5a', pants: '#2b2b3a', hat: 'beanie', hatColor: '#3a3a48', pom: '#f5c518', mask: true, lids: true },
-    pickpocket: { shirt: '#4f9a46', pants: '#5a4632', hat: 'cap', hatColor: '#80603e', mask: true, scarf: '#d8402f', lids: true, small: true },
-    costaud: { shirt: '#e7e0d0', stripe: '#b8343d', pants: '#3a3550', hat: 'bald', mask: true, mustache: '#3a2418', stubble: true, brows: true, big: true },
+    pickpocket: { shirt: '#4f9a46', pants: '#5a4632', hat: 'cap', hatColor: '#80603e', mask: true, scarf: '#d8402f', longScarf: '#d8402f', lids: true, small: true },
+    costaud: { shirt: '#c0392b', tank: true, pants: '#3a3550', hat: 'bald', mask: true, mustache: '#3a2418', stubble: true, brows: true, big: true },
     ombre: { shirt: '#24212f', pants: '#24212f', shoes: '#24212f', mitten: '#24212f', hat: 'ninja', band: '#d0313c', skin: '#24212f', lids: true },
     acrobate: { shirt: '#8e44ad', harlequin: '#f4c430', pants: '#8e44ad', hat: 'hair', hair: '#e2583e', mask: true, small: true },
-    hackeuse: { shirt: '#2f8f5b', pants: '#30344a', hat: 'hood', hatColor: '#2f8f5b', glasses: true, laptop: true, lids: true },
+    hackeuse: { shirt: '#4a4f63', pants: '#2b2e3a', hat: 'hood', hatColor: '#4a4f63', glasses: true, laptop: true, lids: true },
     touriste: { flowers: true, pants: '#dcc79e', shorts: true, hat: 'straw', hatColor: '#e9c46a', sunglasses: true, cameraNeck: true, smile: true },
     faussaire: { flowers: true, pants: '#dcc79e', shorts: true, hat: 'straw', hatColor: '#e9c46a', sunglasses: true, cameraNeck: true, smile: true },
     gentleman: { shirt: '#22222c', vest: '#f5f1e8', pants: '#22222c', hat: 'top', hatColor: '#1b1b22', cape: '#6b2d8f', monocle: true, mustache: '#2a1a12', cane: true, mitten: '#ffffff', skin: '#f2cfae', lids: true },
@@ -115,9 +125,9 @@
     illusionniste: { shirt: '#3b2a7a', stars: '#f4d03f', pants: '#2a1d5a', hat: 'wizard', hatColor: '#5b3fa8', wand: true, mustache: '#efeff5', mitten: '#ffffff', lids: true },
     garde: { shirt: '#2f4fa8', pants: '#22346e', hat: 'kepi', hatColor: '#22346e', mustache: '#6b4226', baton: true, belt: true, skin: '#f1c39c', mitten: '#ffffff', brows: true },
   };
-  LOOKS.patineur = { shirt: '#ff7a1a', stripe: '#ffd23f', pants: '#2b5fb3', shorts: true, hat: 'cap', hatColor: '#e2405e', mask: true, skates: true, lids: true, small: true };
-  LOOKS.taupe = { shirt: '#8a5a32', pants: '#8a5a32', hat: 'miner', hatColor: '#f5c518', straps: '#5a3a1e', mitten: '#5a3a1e', glasses: true, dirt: true };
-  LOOKS.soigneuse = { shirt: '#f6f6f2', pants: '#e9e9e2', hat: 'nurse', hatColor: '#ffffff', cross: true, mask: true, mitten: '#9fd3ff', lids: true };
+  LOOKS.patineur = { shirt: '#ff7a1a', stripe: '#ffd23f', pants: '#2b5fb3', shorts: true, hat: 'cap', hatColor: '#e2405e', mask: true, skates: true, lean: true, longScarf: '#ffd23f', lids: true, small: true };
+  LOOKS.taupe = { shirt: '#8a5a32', pants: '#8a5a32', hat: 'miner', hatColor: '#f5c518', straps: '#5a3a1e', mitten: '#5a3a1e', glasses: true, dirt: true, shovel: true };
+  LOOKS.soigneuse = { shirt: '#f6f6f2', pants: '#e9e9e2', hat: 'nurse', hatColor: '#ffffff', cross: true, mask: true, mitten: '#9fd3ff', lids: true, medbag: true };
   LOOKS.demenageur = { shirt: '#f4efe4', pants: '#2f6fb0', straps: '#2f6fb0', hat: 'cap', hatColor: '#e8b84a', mustache: '#3a2418', stubble: true, brows: true, big: true, mitten: '#c9a46a' };
   LOOKS.chef = { shirt: '#1f2a5a', pants: '#161d40', hat: 'kepi', hatColor: '#161d40', mustache: '#9a9a9a', mitten: '#ffffff', sunglasses: true, megaphone: true, belt: true, skin: '#f1c39c' };
   LOOKS.reflet = LOOKS.illusionniste;
@@ -133,7 +143,7 @@
     var skin = L.skin || SKINS[id % SKINS.length];
     var shirt = L.shirt || SHIRTS[(id * 7) % SHIRTS.length];
     var flash = o.flash;
-    var col = function (x) { return flash ? '#ffffff' : x; };
+    var col = function (x) { return flash && typeof x === 'string' && x.length === 7 && x[0] === '#' ? shade(x, 0.5) : x; };
     var t = o.t || 0, moving = o.moving !== false;
     // Quatre poses par cycle de pas, sans interpolation : c'est ce qui donne l'effet découpé.
     var step = moving ? Math.floor((o.phase || 0) / (Math.PI / 2)) & 3 : 0;
@@ -149,7 +159,7 @@
     c.save();
     c.scale((o.face || 1) * (o.size || 1), o.size || 1);
     shadow(c, 0, 0, W * 0.62, 4.5);
-    if (moving) c.rotate(step & 2 ? 0.045 : -0.045);
+    if (moving) c.rotate(L.lean ? 0.14 + (step & 2 ? 0.03 : 0) : step & 2 ? 0.045 : -0.045);
 
     // Cape du Gentleman (derrière)
     if (L.cape) {
@@ -167,6 +177,12 @@
         c.beginPath(); c.moveTo(sx - 3, sy - sr + 1); c.lineTo(sx, sy - sr - 5); c.lineTo(sx + 3, sy - sr + 1); fs(c, col('#9a6b3c'), lw);
         starPath(c, sx + 1, sy + 2, 4.5, 2); fs(c, col('#ffd447'), 1.2);
       }
+    }
+    if (L.longScarf) {
+      var wv = moving ? (step & 1 ? 3 : -2) : 0;
+      c.beginPath(); c.moveTo(-W * 0.2, top + 1); c.quadraticCurveTo(-W * 0.7, top - 2 + wv, -W * 1.05, top + 6 - wv);
+      c.lineTo(-W * 1.0, top + 12 - wv); c.quadraticCurveTo(-W * 0.65, top + 6 + wv, -W * 0.18, top + 6); c.closePath();
+      fs(c, col(L.longScarf), lw);
     }
     // Plumet du chevalier (derrière le heaume)
     if (L.plume) {
@@ -239,7 +255,7 @@
       c.restore();
     }
     torso(); fs(c, null, lw);
-    if (!L.plates && !L.flowers && !L.vest && !L.harlequin && !L.cross && !L.straps) line(c, 0.5, top + 2, 0.5, bot - 1, 'rgba(0,0,0,0.3)', 1.2);
+    if (!L.plates && !L.flowers && !L.vest && !L.harlequin && !L.cross && !L.straps && !L.tank) line(c, 0.5, top + 2, 0.5, bot - 1, 'rgba(0,0,0,0.3)', 1.2);
     if (type === 'garde' || type === 'chef') {
       var rank = o.rank || 0;
       starPath(c, -5, top + 7, 3.8, 1.7); fs(c, col(rank >= 2 ? '#ffd447' : '#d9dde6'), 1.2);
@@ -268,12 +284,24 @@
       if (side > 0 && o.armRot != null) rot = o.armRot;
       c.rotate(rot);
       if (side > 0 && L.baton && !o.throwing) { rr(c, -1.6, 9, 3.4, 15, 1.5); fs(c, col('#1d1b26'), 1.4); }
-      rr(c, -3.6 * k, -1, 7.2 * k, 11 * k, 3.5 * k); fs(c, col(L.sleeve || shirt), lw);
+      rr(c, -3.6 * k, -1, 7.2 * k, 11 * k, 3.5 * k); fs(c, col(L.tank ? skin : (L.sleeve || shirt)), lw);
       circ(c, side * 3.2 * k, 9 * k, 1.9 * k); fs(c, col(mit), 1.4);
       circ(c, 0, 11 * k, 4 * k); fs(c, col(mit), lw);
       c.restore();
     });
     if (L.plates) { ell(c, -W * 0.44, top + 3, 7, 5); fs(c, col(L.hatColor), lw); ell(c, W * 0.44, top + 3, 7, 5); fs(c, col(L.hatColor), lw); }
+    if (L.tank) { c.fillStyle = col('#8e2a20'); c.fillRect(-W * 0.36, top, 4, 5); c.fillRect(W * 0.36 - 4, top, 4, 5); }
+    if (L.medbag) {
+      line(c, W * 0.3, top + 1, -W * 0.45, top + 13, col('#7a4b2a'), 2.2);
+      rr(c, -W * 0.72, top + 10, 15, 12, 3); fs(c, col('#ffffff'), lw);
+      c.fillStyle = col('#e2342e'); c.fillRect(-W * 0.72 + 6, top + 12, 3, 8); c.fillRect(-W * 0.72 + 3.5, top + 14.5, 8, 3);
+    }
+    if (L.shovel) {
+      line(c, W * 0.42, top + 12, -W * 0.15, hy - R * 0.95, col('#8a5a32'), 3);
+      c.save(); c.translate(-W * 0.18, hy - R * 0.98); c.rotate(-0.9);
+      c.beginPath(); c.moveTo(-5, 0); c.lineTo(5, 0); c.lineTo(4, -9); c.quadraticCurveTo(0, -13, -4, -9); c.closePath(); fs(c, col('#9aa3ad'), lw);
+      c.restore();
+    }
     if ((type === 'garde' || type === 'chef') && (o.rank || 0) >= 1) {
       rr(c, -W * 0.56, top - 1, 9, 4.5, 2); fs(c, col('#ffd447'), 1.4); rr(c, W * 0.56 - 9, top - 1, 9, 4.5, 2); fs(c, col('#ffd447'), 1.4);
     }
@@ -417,10 +445,12 @@
 
   /* ---------- Socle des défenses ---------- */
   A.pedestal = function (c, level, accent, disabled) {
-    shadow(c, 0, 8, 36, 12, 0.3);
-    rr(c, -29, -16, 58, 24, 5); fs(c, disabled ? '#8d8d96' : '#e9e2d3');
-    ell(c, 0, -16, 29, 9); fs(c, disabled ? '#a6a6ae' : '#f7f2e6');
-    c.fillStyle = accent; c.fillRect(-27, -2, 54, 4);
+    shadow(c, 0, 8, 37, 12, 0.45);
+    // Niveau 3 : socle doré, repérable d'un coup d'œil
+    var gold = level >= 2 && !disabled;
+    rr(c, -29, -16, 58, 24, 5); fs(c, disabled ? '#8d8d96' : gold ? '#f0c95a' : '#e9e2d3');
+    ell(c, 0, -16, 29, 9); fs(c, disabled ? '#a6a6ae' : gold ? '#ffe29a' : '#f7f2e6');
+    c.fillStyle = accent; c.fillRect(-27, -3, 54, 7);
     rr(c, -29, -16, 58, 24, 5); fs(c, null, 2.4);
     for (var i = 0; i <= level; i++) {
       starPath(c, (i - level / 2) * 13, 3, 5.2, 2.3);
@@ -432,7 +462,7 @@
   // t : { level, aim, face, fireT, lungeT, lx, ly, disabled, time, x, y, beamOn }
   A.tower = function (c, type, t) {
     var lv = t.level || 0, time = t.time || 0, def = PT.TOWERS[type];
-    A.pedestal(c, lv, def.color, t.disabled);
+    if (!t.bare) A.pedestal(c, lv, def.color, t.disabled);
     c.save();
     c.translate(0, -18);
     if (type === 'gardien') drawGuard(c, t, lv, time);
@@ -1152,11 +1182,12 @@
     return iconCache[key];
   };
 
-  A.towerIcon = function (type, level) {
+  // bare : sans le socle (menu de construction), la défense occupe toute l'icône
+  A.towerIcon = function (type, level, bare) {
     level = level || 0;
-    return A.icon('t-' + type + level, 80, 96, function (c) {
-      c.translate(40, 78);
-      A.tower(c, type, { level: level, aim: -0.25, face: 1, time: 0.3 });
+    return A.icon('t-' + type + level + (bare ? 'b' : ''), 80, 96, function (c) {
+      if (bare) { c.translate(40, 104); c.scale(1.12, 1.12); } else c.translate(40, 78);
+      A.tower(c, type, { level: level, aim: -0.25, face: 1, time: 0.3, bare: bare });
     });
   };
   A.enemyIcon = function (type) {
@@ -1191,6 +1222,24 @@
         ell(c, -3, 18, 20, 4); fs(c, '#e2dccf', 2);
       }
     }
+  };
+
+  A.lockIcon = function () {
+    return A.icon('lock', 48, 48, function (c) { c.translate(24, 26); c.scale(0.62, 0.62); A.drawPower(c, 'verrou'); });
+  };
+  // Victoire : le gardien salue à côté du trésor ; défaite : cloche vide et voleur qui file
+  A.endArt = function (win, kind) {
+    return A.icon('end-' + (win ? 'w' : 'l') + kind, 220, 120, function (c) {
+      if (win) {
+        c.save(); c.translate(150, 112); c.scale(0.55, 0.55); A.treasure(c, kind, true, 0.5, 0); c.restore();
+        c.save(); c.translate(70, 114); c.scale(1.45, 1.45); A.person(c, 'garde', { face: 1, moving: false, t: 0.3, rank: 2, grab: true }); c.restore();
+        [[24, 20], [110, 12], [200, 28]].forEach(function (p) { starPath(c, p[0], p[1], 7, 3); fs(c, '#ffd447', 1.4); });
+      } else {
+        c.save(); c.translate(60, 112); c.scale(0.55, 0.55); A.treasure(c, kind, false, 0.5, 0); c.restore();
+        c.save(); c.translate(150, 112); c.scale(1.4, 1.4); A.person(c, 'voleur', { face: 1, moving: true, phase: 1, t: 0.3, carrying: 1, id: 2 }); c.restore();
+        [[100, 70], [94, 86], [104, 98]].forEach(function (p) { line(c, p[0], p[1], p[0] - 18, p[1], 'rgba(42,28,22,0.5)', 2.4); });
+      }
+    });
   };
 
   /* ---------- Icônes des talents de l'Atelier ---------- */

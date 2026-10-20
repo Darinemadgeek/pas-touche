@@ -146,16 +146,16 @@
     parquetVert: { floor: 'parquet', floorA: '#c49a62', floorB: '#b48852', wall: '#2f5a46', wallDark: '#1a3328', trim: '#e8b84a', carpet: '#8f1d2c' },
     chocolat: { floor: 'parquet', floorA: '#8a5a3a', floorB: '#7a4d30', wall: '#5a2e1e', wallDark: '#2e160d', trim: '#f2c14e', carpet: '#d9a35a' },
     jouets: { floor: 'gallery', floorA: '#e8c890', floorB: '#dcbc84', wall: '#3fa7a0', wallDark: '#1f5a56', trim: '#f5c518', carpet: '#e2405e' },
-    galerieNuit: { floor: 'gallery', floorA: '#5b6378', floorB: '#525a6e', wall: '#262b45', wallDark: '#14172a', trim: '#f04f8a', carpet: '#232733', night: true },
+    galerieNuit: { floor: 'gallery', floorA: '#5b6378', floorB: '#525a6e', wall: '#262b45', wallDark: '#14172a', trim: '#f04f8a', carpet: '#3a3550', night: true },
     cinema: { floor: 'gallery', floorA: '#4a3f52', floorB: '#42384a', wall: '#7a1f2b', wallDark: '#3a0d14', trim: '#f5c518', carpet: '#b8283a', night: true },
-    royal: { floor: 'royal', floorA: '#8e2b3d', floorB: '#7a2233', wall: '#2c1a4a', wallDark: '#170c2b', trim: '#f2c14e', carpet: '#1f3f8f' },
+    royal: { floor: 'royal', floorA: '#7a4048', floorB: '#6e3940', wall: '#2c1a4a', wallDark: '#170c2b', trim: '#f2c14e', carpet: '#1f3f8f' },
     versailles: { floor: 'versailles', floorA: '#c98f52', floorB: '#b77f45', wall: '#b89a5e', wallDark: '#3e2f1c', trim: '#f2c14e', carpet: '#2c4a9a' },
     musique: { floor: 'versailles', floorA: '#b98048', floorB: '#a8713e', wall: '#3b1f5a', wallDark: '#1d0f2e', trim: '#f2c14e', carpet: '#8f1d2c' },
     marine: { floor: 'pont', floorA: '#9c7b55', floorB: '#8f6f4b', wall: '#2a4d72', wallDark: '#14273d', trim: '#e3c06a', carpet: '#1d5f8a' },
     egypte: { floor: 'stone', floorA: '#e2c48a', floorB: '#d3b273', wall: '#a8742f', wallDark: '#5e3f1a', trim: '#3fa7a0', carpet: '#2f6f8f' },
     antique: { floor: 'stone', floorA: '#e6dcc4', floorB: '#d8cbb0', wall: '#c9b28a', wallDark: '#6a5a3a', trim: '#3d6fa8', carpet: '#2f4f9a' },
     marbre: { floor: 'marble', floorA: '#e9e4d6', floorB: '#cfc8b4', wall: '#3f6b4a', wallDark: '#223d2a', trim: '#e0a33a', carpet: '#7c3a8f' },
-    ocean: { floor: 'marble', floorA: '#d6ecf0', floorB: '#bcdbe2', wall: '#1d5f8a', wallDark: '#0e2f45', trim: '#f2c14e', carpet: '#2f4f9a' },
+    ocean: { floor: 'marble', floorA: '#a9cfd8', floorB: '#98c2cc', wall: '#1d5f8a', wallDark: '#0e2f45', trim: '#f2c14e', carpet: '#2f4f9a' },
     chateau: { floor: 'dalles', floorA: '#a3a7ad', floorB: '#92979e', wall: '#3d4f6b', wallDark: '#1f2a3b', trim: '#d9a440', carpet: '#8f1d2c' },
     mines: { floor: 'beton', floorA: '#7c7166', floorB: '#71665b', wall: '#4a3a2e', wallDark: '#231a12', trim: '#e8b923', carpet: '#8f1d2c', night: true },
     sciences: { floor: 'acier', floorA: '#b9c2cc', floorB: '#adb6c0', wall: '#2f6f5a', wallDark: '#173a2f', trim: '#f5c518', carpet: '#2b5fb3' },
@@ -229,7 +229,7 @@
   var HPMUL = {
     11: 5.54, 12: 3.84, 13: 5.61, 14: 5.65, 15: 3.84, 16: 4.63, 17: 5.76, 18: 4.07, 19: 2.38, 20: 3.73,
     21: 3.47, 22: 3.91, 23: 3.99, 24: 2.46, 25: 5.71, 26: 4.44, 27: 4.97, 28: 4.18, 29: 6.23, 30: 4.13,
-    31: 5.13, 32: 2.2, 33: 3.62, 34: 6.43, 35: 5.05, 36: 5.5, 37: 6.56, 38: 6.6, 39: 4.68, 40: 5.13,
+    31: 5.13, 32: 1.95, 33: 3.62, 34: 6.43, 35: 5.05, 36: 5.5, 37: 6.56, 38: 6.6, 39: 4.68, 40: 5.13,
     41: 5.23, 42: 6.5, 43: 6.82, 44: 4.97, 45: 2.82, 46: 5.34, 47: 7, 48: 6.02, 49: 3.91, 50: 5.36,
   };
   // Coefficient par aile, réglé sur la campagne complète du joueur moyen (tools/campagne.js) :
@@ -343,7 +343,8 @@
         var parts = groups.filter(function (g) { return g.t !== 'touriste'; }).map(function (g) { return g.n + ' ' + NAMES[g.t]; });
         wave.crew = {
           name: pick(r, CREW_NAMES[main]),
-          plan: 'Au programme : ' + parts.join(', ') + '. ' + PLAN_TIPS[main] + (types[1] ? ' ' + PLAN_TIPS[types[1]] : ''),
+          plan: 'Au programme : ' + parts.join(', ') + '. ' + NAMES[main] + ' : ' + PLAN_TIPS[main].charAt(0).toLowerCase() + PLAN_TIPS[main].slice(1) +
+            (types[1] && types[1] !== 'touriste' ? ' ' + NAMES[types[1]] + ' : ' + PLAN_TIPS[types[1]].charAt(0).toLowerCase() + PLAN_TIPS[types[1]].slice(1) : ''),
         };
       }
       waves.push(wave);
@@ -382,7 +383,24 @@
     var n = 11 + i, r = rng(n * 7919 + 77);
     var plan = PLANS[room[5]];
     var my = !hasSkylight(plan) && !plan.some(function (p) { return p[0][1] > H; }) && r() < 0.5;
-    var paths = transform(plan, r() < 0.5, my);
+    var mx = r() < 0.5;
+    // Parmi les symétries possibles, on évite le trésor sous l'interface du haut
+    // et le tapis derrière les boutons de pouvoir (en bas à gauche).
+    var canMy = !hasSkylight(plan) && !plan.some(function (p) { return p[0][1] > H; });
+    var best = null;
+    [[mx, my], [!mx, my], [mx, canMy ? !my : my], [!mx, canMy ? !my : my]].forEach(function (o) {
+      var ps = transform(plan, o[0], o[1]), pen = 0, t0 = ps[0][ps[0].length - 1];
+      if (t0[1] < 230 && (t0[0] > 1010 || t0[0] < 300)) pen += 1000;
+      if (t0[1] > 540 && t0[0] < 360) pen += 1000;
+      ps.forEach(function (p) {
+        for (var q = 0; q < p.length - 1; q++) for (var k = 0; k <= 10; k++) {
+          var x = p[q][0] + (p[q + 1][0] - p[q][0]) * k / 10, y = p[q][1] + (p[q + 1][1] - p[q][1]) * k / 10;
+          if (x >= 0 && x < 320 && y > 610 && y <= H) pen += 1;
+        }
+      });
+      if (!best || pen < best.pen) best = { pen: pen, ps: ps };
+    });
+    var paths = best.ps;
     var casse = room[6] === 'casse', variant = room[7] || null;
     var theme = {};
     var src = THEMES[room[3]];
