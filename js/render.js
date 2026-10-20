@@ -65,8 +65,11 @@
   var ANTIQUE = { stone: 1, marble: 1, dalles: 1, beton: 1, acier: 1 };
   function family(th) { return ANTIQUE[th.floor] ? 'antique' : 'galerie'; }
   // Objets du décor qui bougent : ils sont redessinés à chaque image au lieu d'être figés dans le fond.
-  var LIVE_DECO = { plante: 1, oranger: 1, mobile: 1, gouvernail: 1 };
+  // (vide : pour un écran plus calme, plantes et mobiles restent immobiles)
+  var LIVE_DECO = {};
   var BOIL_FPS = 6;
+  // Une seule variante du fond : le décor reste fixe (le trait qui vibre fatiguait les yeux)
+  var BOIL_VARIANTS = 1;
 
   // variants : nombre de versions du fond dont le trait tremble (1 pour les miniatures)
   R.buildBackground = function (level, variants) {
@@ -74,7 +77,7 @@
     var th = level.theme, self = this;
     this.wallAnims = [];
     this.bgs = [];
-    for (var v = 0; v < (variants || 3); v++) {
+    for (var v = 0; v < (variants || BOIL_VARIANTS); v++) {
       A.BOIL = v;
       this.bgs.push(this.paintRoom(level, v === 0));
     }
@@ -607,13 +610,13 @@
     (this.wallAnims || []).forEach(function (a) {
       if (a.t === 'light') {
         // Faisceau de la lampe de tableau ; l'une d'elles grésille
-        var on = !(lights++ === self.flicker && (st % 11 === 3 || st % 11 === 5));
+        var on = true; // plus de grésillement
         if (!on) return;
         c.fillStyle = 'rgba(255,240,170,0.2)';
         c.beginPath(); c.moveTo(a.x - 8, a.y + 2); c.lineTo(a.x + 8, a.y + 2); c.lineTo(a.x + a.w * 0.6, a.y + a.h); c.lineTo(a.x - a.w * 0.6, a.y + a.h); c.closePath(); c.fill();
       } else if (a.t === 'torch') {
         // Torche : support de bronze et flamme en trois poses
-        var tf = Math.floor(time * 6 + a.x) % 3, f = [[0, -14], [2, -16], [-2, -12]][tf];
+        var tf = Math.floor(time * 1.5 + a.x) % 2, f = [[0, -14], [1, -15]][tf];
         c.fillStyle = 'rgba(255,190,90,0.18)'; circ(c, a.x, a.y - 6, 20); c.fill();
         A.wobble(c, [[a.x - 5, a.y], [a.x + 5, a.y], [a.x + 3, a.y + 10], [a.x - 3, a.y + 10]], 0.6, a.x); A.paper(c, '#8a6a3a', 1.4);
         A.wobble(c, [[a.x - 6, a.y], [a.x + f[0] - 2, a.y - 7], [a.x + f[0], a.y + f[1]], [a.x + f[0] + 3, a.y - 6], [a.x + 6, a.y]], 0.8, a.x + tf); A.paper(c, '#ff9f1c', 1.2);
@@ -654,7 +657,7 @@
           circ(c, -2.5 + ls.x * 1.2, -72, 1.2); circ(c, 3.5 + ls.x * 1.2, -72, 1.2); c.fillStyle = INK; c.fill();
         }
       } else {
-        var bp = Math.floor(time * 7 + d.x) % 3, bx = [-6, 5, -1][bp], bh = [14, 18, 12][bp];
+        var bp = Math.floor(time * 1.5 + d.x) % 2, bx = [-3, 2][bp], bh = [14, 16][bp];
         A.wobble(c, [[bx - 4, -40], [bx, -40 - bh], [bx + 4, -40]], 0.8, bp); A.paper(c, '#ffb347', 1);
       }
       c.restore();
@@ -818,7 +821,7 @@
     line(c, -31, 0, -31, 5, INK, 1.6); line(c, 31, 0, 31, 5, INK, 1.6);
     ell(c, 0, 0, 31, 12); fs(c, top, 2.6);
     ell(c, 0, 0, 20, 7.5); c.setLineDash([5, 4]); c.lineWidth = 1.6; c.strokeStyle = side; c.stroke(); c.setLineDash([]);
-    var hop = (Math.floor(time * 2.5 + s.i * 0.7) & 1) ? 4 : 0, by = -30 - hop;
+    var by = -30; // pastille fixe
     c.beginPath(); c.moveTo(-5, by + 9); c.lineTo(0, by + 18); c.lineTo(5, by + 9); c.closePath(); fs(c, badge, 2);
     circ(c, 0, by, 12.5); fs(c, badge, 2.6);
     c.lineWidth = 4.2; c.strokeStyle = '#ffffff'; c.lineCap = 'round';
